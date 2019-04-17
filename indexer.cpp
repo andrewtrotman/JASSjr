@@ -42,7 +42,8 @@ for (int ch = 1; ch <= 0xFF; ch++)
 /*
 	open the file to index
 */
-fp = fopen("/Users/andrew/programming/data/wsj.xml", "rb");
+if ((fp = fopen("wsj.xml", "rb")) == NULL)
+	exit(printf("can't find wsj.xml in the current directory\n"));
 
 bool push_next = false;		// is the next token the primary key?
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -104,13 +105,13 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 /*
 	store the primary keys
 */
-FILE *docid_fp = fopen("/Users/andrew/programming/kat/small/docids.txt", "w+b");
+FILE *docid_fp = fopen("docids.txt", "w+b");
 for (const auto &id : doc_ids)
 	fprintf(docid_fp, "%s\n", id.c_str());
 fclose(docid_fp);
 
-FILE *postings_fp = fopen("/Users/andrew/programming/kat/small/postings.bin", "w+b");
-FILE *vocab_fp = fopen("/Users/andrew/programming/kat/small/vocab.txt", "w+b");
+FILE *postings_fp = fopen("postings.bin", "w+b");
+FILE *vocab_fp = fopen("vocab.txt", "w+b");
 
 /*
 	serialise the in-memory index to disk

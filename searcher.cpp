@@ -91,7 +91,7 @@ return **first < **second ? 1 : **first == **second ? 0 : -1;
 int main(int argc, const char * argv[])
 {
 size_t file_size;
-char *vocab = read_entire_file("/Users/andrew/programming/kat/small/vocab.txt", file_size);
+char *vocab = read_entire_file("vocab.txt", file_size);
 char *current;
 size_t where, size, string_length;
 char seperators[255];
@@ -115,12 +115,12 @@ for (double *pointer = rsv; pointer < rsv + max_docs; pointer++)
 /*
 	Open the postings list file
 */
-FILE *postings_file = fopen("/Users/andrew/programming/kat/small/postings.bin", "rb");
+FILE *postings_file = fopen("postings.bin", "rb");
 
 /*
 	Read the primary_keys
 */
-FILE *fp = fopen("/Users/andrew/programming/kat/small/docids.txt", "rb");
+FILE *fp = fopen("docids.txt", "rb");
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
 	buffer[strlen(buffer) - 1] = '\0';		// strip the '\n' that fgets leaves on the end
