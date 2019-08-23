@@ -40,8 +40,8 @@ JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_
 
 * Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 takes less than 3 second on my Mac.
 
-* [trec_eval](https://github.com/usnistgov/trec_eval) reports:
-`
+[trec_eval](https://github.com/usnistgov/trec_eval) reports:
+
 	runid                 	all	JASSjr
 	num_q                 	all	50
 	num_ret               	all	1297901
@@ -72,7 +72,7 @@ JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_
 	P_200                 	all	0.1816
 	P_500                 	all	0.1125
 	P_1000                	all	0.0703
-`
+
 So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively.
 
 Copyright (c) 2019 Andrew Trotman and Kat Lilly
