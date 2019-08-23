@@ -136,7 +136,7 @@ if (docid == -1)
 /*
 	tell the user we've got to the end of parsing
 */
-std::cout << docid << " documents indexed, serialising...\n";
+std::cout << "Indexed " << docid + 1 << " documents. Serialising...\n";
 
 /*
 	Save the final document length
