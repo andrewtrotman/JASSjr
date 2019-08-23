@@ -4,12 +4,14 @@
 	Copyright (c) 2019 Andrew Trotman and Kat Lilly
 	Example solution to University of Otago COSC431 Search Engine Assignment
 */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -20,7 +22,8 @@
 	---------
 */
 static constexpr size_t max_docs = 200000;		// there are no more than 200,000 documents in the collection
-
+static constexpr double k1 = 0.9;
+static constexpr double b = 0.4;
 /*
 	CLASS VOCAB_ENTRY
 	-----------------
@@ -86,7 +89,7 @@ return **first < **second ? 1 : **first == **second ? 0 : -1;
 /*
 	MAIN()
 	------
-	Simple search engine ranking on sum of TF values.
+	Simple search engine ranking on BM25.
 */
 int main(int argc, const char * argv[])
 {
@@ -96,6 +99,7 @@ char *current;
 size_t where, size, string_length;
 char seperators[255];
 char *into = seperators;
+int *length_vector;
 
 /*
 	Set up the tokenizer seperator characters
@@ -128,6 +132,21 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	}
 
 /*
+	Read the document lengths and compute the average document length
+*/
+size_t length_filesize_in_bytes;
+double average_document_length;
+length_vector = reinterpret_cast<int *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
+double documents_in_collection = length_filesize_in_bytes / sizeof(int);
+std::cout << "Length vector[" << documents_in_collection << "]: ";
+for (int document = 0; document < documents_in_collection; document++)
+	{
+	std::cout << length_vector[document] << ",";
+	average_document_length += length_vector[document];
+	}
+average_document_length /= documents_in_collection;
+std::cout << "\n";
+/*
 	Build the vocabulary in memory
 */
 current = vocab;
@@ -146,6 +165,9 @@ while (current < vocab + file_size)
 */
 while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 	{
+	/*
+		Zero the accumulator array.
+	*/
 	memset(rsv, 0, sizeof(rsv));
 	for (char *token = strtok(buffer, seperators); token != NULL; token = strtok(NULL, seperators))
 		{
@@ -165,10 +187,21 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		std::pair<int, int> *list = (std::pair<int, int> *)(&postings_buffer[0]);
 
 		/*
-			Process the postings list by simply adding the tf into an array
+			Compute the IDF component of BM25 as log(N/n).
+			if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
+		*/
+		if (documents_in_collection == postings)
+			break;
+		double idf = log(documents_in_collection / postings);
+
+		/*
+			Process the postings list by simply adding the BM25 component for this document into the accumulators array
 		*/
 		for (int which = 0; which < postings; which++, list++)
-			rsv[list->first] += list->second;
+			{
+			std::cout << list->first << "->" << length_vector[list->first] << "\n";
+			rsv[list->first] += idf * ((list->second * (k1 + 1)) / (list->second + k1 * (1 - b + b * (length_vector[list->first] / average_document_length))));
+			}
 		}
 
 	/*

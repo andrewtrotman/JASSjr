@@ -8,16 +8,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <iostream>
+
 #include <vector>
-#include <utility>
 #include <string>
+#include <utility>
+#include <iostream>
 #include <unordered_map>
 
 typedef std::vector<std::pair<int, int>> postings_list;				// a postings list is an ordered pair of <docid,tf> integers
 char buffer[1024 * 1024];														// index line at a time where a line fits in this buffer
 std::unordered_map<std::string, postings_list> vocab;					// the in-memory index
 std::vector<std::string>doc_ids;												// the primary keys
+std::vector<int> length_vector;												// hold the length of each document
 
 /*
 	MAIN()
@@ -27,10 +29,16 @@ std::vector<std::string>doc_ids;												// the primary keys
 int main(int argc, const char *argv[])
 {
 int docid = -1;
+int document_length = 0;
 FILE *fp;
 char seperators[255];
 char *into = seperators;
 
+/*
+	Make sure we have one paramter, the filename
+*/
+if (argc != 2)
+	exit(printf("Usage:%s <infile.xml>\n", argv[0]));
 /*
 	Set up the tokenizer seperator characters
 */
@@ -42,8 +50,8 @@ for (int ch = 1; ch <= 0xFF; ch++)
 /*
 	open the file to index
 */
-if ((fp = fopen("wsj.xml", "rb")) == NULL)
-	exit(printf("can't find wsj.xml in the current directory\n"));
+if ((fp = fopen(argv[1], "rb")) == NULL)
+	exit(printf("can't open file %s\n", argv[1]));
 
 bool push_next = false;		// is the next token the primary key?
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -55,11 +63,22 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 		*/
 		if (strcmp(token, "<DOC>") == 0)
 			{
+			/*
+				Save the previous document length
+			*/
+			if (docid != -1)
+				length_vector.push_back(document_length);
+
+			/*
+				Move on to the next document
+			*/
 			docid++;
+			document_length = 0;
 
 			if ((docid % 1000) == 0)
-				std::cout << docid << "\n";
+				std::cout << docid << " documents indexed\n";
 			}
+
 		/*
 			if the last token we saw was a <DOCID> then the next token is the primary key
 		*/
@@ -98,9 +117,31 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 				list.push_back(std::pair<int, int>(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
 			else
 				list[list.size() - 1].second++;												// else create a new <d,tf> pair.
+
+			/*
+				Compute the document length
+			*/
+//			std::cout << "[" << lowercase << "]\n";
+			document_length++;
 			}
 		}
 	}
+
+/*
+	If we didn't index any documents then we're done.
+*/
+if (docid == -1)
+	return 0;
+
+/*
+	tell the user we've got to the end of parsing
+*/
+std::cout << docid << " documents indexed, serialising...\n";
+
+/*
+	Save the final document length
+*/
+length_vector.push_back(document_length);
 
 /*
 	store the primary keys
@@ -136,11 +177,18 @@ for (const auto &term : vocab)
 	}
 
 /*
+	store the document lengths
+*/
+FILE *lengths_fp = fopen("lengths.bin", "w+b");
+fwrite(&length_vector[0], sizeof(length_vector[0]), length_vector.size(), lengths_fp);
+
+/*
 	clean up
 */
 fclose(docid_fp);
 fclose(postings_fp);
 fclose(vocab_fp);
+fclose(lengths_fp);
 
 return 0;
 }
