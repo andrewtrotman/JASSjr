@@ -1,13 +1,13 @@
-all : indexer searcher
+all : JASSjr_index JASSjr_search
 
-indexer : indexer.cpp
-	g++ -std=c++11 -O3 indexer.cpp -o indexer
+JASSjr_index : JASSjr_index.cpp
+	g++ -std=c++11 -O3 JASSjr_index.cpp -o JASSjr_index
 
-searcher : searcher.cpp
-	g++ -std=c++11 -O3 searcher.cpp -o searcher
+JASSjr_search : JASSjr_search.cpp
+	g++ -std=c++11 -O3 JASSjr_search.cpp -o JASSjr_search
 
 clean:
-	rm searcher indexer
+	rm JASSjr_search JASSjr_index
 
 clean_index:
 	rm docids.txt lengths.bin postings.bin vocab.txt

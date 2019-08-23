@@ -1,8 +1,8 @@
 /*
-	INDEXER.CPP
-	-----------
+	JASSJR_INDEX.CPP
+	----------------
 	Copyright (c) 2019 Andrew Trotman and Kat Lilly
-	Example solution to University of Otago COSC431 Search Engine Assignment
+	Minimalistic BM25 search engine.
 */
 #include <ctype.h>
 #include <stdio.h>
