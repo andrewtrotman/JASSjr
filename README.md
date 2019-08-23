@@ -1,4 +1,4 @@
-# README #
+# JASSjr #
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
 Copyright (c) 2019 Andrew Trotman and Kat Lilly
@@ -34,7 +34,7 @@ To search use
 
 	JASSjr_search
 
-queries a sequences of words.  If the first token is a number it is assumed to the a TREC query number and is used in the output (and not searched for).
+Queries a sequences of words.  If the first token is a number it is assumed to the a TREC query number and is used in the output (and not searched for).
 
 JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_eval) compatible results list.
 
