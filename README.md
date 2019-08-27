@@ -17,7 +17,9 @@ As an example ranking function this code implements the ATIRE version of BM25 wi
 ## Gotchas ##
 * The indexer assumes that the `<DOC>` tag and the `<DOCID>` tags each have white space on each side of the `<` and `>`.  As this is the case in this collection, this isn't a problem.  It might not be the case in your data - so beware.
 
-*  If the first word in a query is a number it is assumed to be a TREC query number
+* If the first word in a query is a number it is assumed to be a TREC query number
+
+* There are many variants of BM25, JASSjr uses the ATIRE BM25 function which ignores the k3 query component.  It is assmed that each term is unique and occurs only once (and so the k3 clause is set to 1.0).
 
 # Usage #
 To build simply use
