@@ -17,9 +17,58 @@
 
 typedef std::vector<std::pair<int, int>> postings_list;				// a postings list is an ordered pair of <docid,tf> integers
 char buffer[1024 * 1024];														// index line at a time where a line fits in this buffer
+char *current;																		// where the lexical analyser is in buffer[]
+char next_token[1024 * 1024];													// the token we're currently building
 std::unordered_map<std::string, postings_list> vocab;					// the in-memory index
 std::vector<std::string>doc_ids;												// the primary keys
 std::vector<int> length_vector;												// hold the length of each document
+
+/*
+	LEX_GET_NEXT()
+	--------------
+	One-character lookahead lexical analyser
+*/
+char *lex_get_next()
+{
+/*
+	Skip over whitespace and punctuation (but not XML tags)
+*/
+while (*current != '\0' && !isalnum(*current) && *current != '<')
+	current++;
+
+/*
+	A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
+*/
+char *start = current;
+if (isalnum(*current))
+	while (isalnum(*current) || *current == '-')				// TREC <DOCNO> primary keys have a hyphen in them
+		current++;
+else if (*current == '<')
+	while (*(current - 1) != '>')
+		current++;
+else
+	return NULL;			// must be at end of line
+
+/*
+	Copy and return the token
+*/
+memcpy(next_token, start, current - start);
+next_token[current - start] = '\0';
+
+return next_token;
+}
+
+/*
+	LEX_GET_FIRST()
+	---------------
+	Start the lexical analysis process
+*/
+char *lex_get_first(char *with)
+{
+current = with;
+
+return lex_get_next();
+}
 
 /*
 	MAIN()
@@ -56,7 +105,7 @@ if ((fp = fopen(argv[1], "rb")) == NULL)
 bool push_next = false;		// is the next token the primary key?
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
-	for (char *token = strtok(buffer, seperators); token != NULL; token = strtok(NULL, seperators))
+	for (char *token = lex_get_first(buffer); token != NULL; token = lex_get_next())
 		{
 		/*
 			If we see a <DOC> tag then we're at the start of the next document
@@ -91,39 +140,37 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 			push_next = true;
 
 		/*
-			break the line into tokens and index each one
+			Don't index XML tags
 		*/
-		char *tok_sav = NULL;
-		for (token = strtok_r(token, "<-/>", &tok_sav); token != NULL; token = strtok_r(NULL, "<-/>", &tok_sav))
-			{
-			/*
-				lower case the string
-			*/
-			std::string lowercase(token);
-			for (auto &ch : lowercase)
-				ch = tolower(ch);
+		if (*token == '<')
+			continue;
 
-			/*
-				truncate and long tokens at 255 charactes (so that the length first in a single byte)
-			*/
-			if (lowercase.size() >= 0xFF)
-				lowercase[0xFF] = '\0';
+		/*
+			lower case the string
+		*/
+		std::string lowercase(token);
+		for (auto &ch : lowercase)
+			ch = tolower(ch);
 
-			/*
-				add the posting to the in-memory index
-			*/
-			postings_list &list = vocab[lowercase];
-			if (list.size() == 0 || list[list.size() - 1].first != docid)
-				list.push_back(std::pair<int, int>(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
-			else
-				list[list.size() - 1].second++;												// else create a new <d,tf> pair.
+		/*
+			truncate and long tokens at 255 charactes (so that the length can be stored first and in a single byte)
+		*/
+		if (lowercase.size() >= 0xFF)
+			lowercase[0xFF] = '\0';
 
-			/*
-				Compute the document length
-			*/
-//			std::cout << "[" << lowercase << "]\n";
-			document_length++;
-			}
+		/*
+			add the posting to the in-memory index
+		*/
+		postings_list &list = vocab[lowercase];
+		if (list.size() == 0 || list[list.size() - 1].first != docid)
+			list.push_back(std::pair<int, int>(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
+		else
+			list[list.size() - 1].second++;												// else create a new <d,tf> pair.
+
+		/*
+			Compute the document length
+		*/
+		document_length++;
 		}
 	}
 

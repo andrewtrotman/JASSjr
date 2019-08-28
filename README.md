@@ -41,7 +41,7 @@ Queries a sequences of words.  If the first token is a number it is assumed to t
 JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_eval) compatible results list.
 
 # Evaluation #
-* Indexing the TREC WSJ collection of 173,252 documents takes less than 1 minute on my Mac (3.2 GHz Intel Core i5).
+* Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
 
 * Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 takes less than 3 second on my Mac.
 
@@ -50,36 +50,36 @@ JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_
 ---
 	runid                 	all	JASSjr
 	num_q                 	all	50
-	num_ret               	all	934841
+	num_ret               	all	899595
 	num_rel               	all	6228
-	num_rel_ret           	all	5416
-	map                   	all	0.2231
-	gm_map                	all	0.1124
-	Rprec                 	all	0.2507
-	bpref                 	all	0.3083
-	recip_rank            	all	0.5891
-	iprec_at_recall_0.00  	all	0.6397
-	iprec_at_recall_0.10  	all	0.4276
-	iprec_at_recall_0.20  	all	0.3465
-	iprec_at_recall_0.30  	all	0.3040
-	iprec_at_recall_0.40  	all	0.2450
-	iprec_at_recall_0.50  	all	0.2085
-	iprec_at_recall_0.60  	all	0.1789
-	iprec_at_recall_0.70  	all	0.1344
-	iprec_at_recall_0.80  	all	0.0956
-	iprec_at_recall_0.90  	all	0.0594
-	iprec_at_recall_1.00  	all	0.0150
-	P_5                   	all	0.4200
-	P_10                  	all	0.3920
-	P_15                  	all	0.3733
-	P_20                  	all	0.3580
-	P_30                  	all	0.3360
-	P_100                 	all	0.2540
-	P_200                 	all	0.1916
-	P_500                 	all	0.1182
-	P_1000                	all	0.0738
+	num_rel_ret           	all	5255
+	map                   	all	0.2168
+	gm_map                	all	0.1072
+	Rprec                 	all	0.2563
+	bpref                 	all	0.3090
+	recip_rank            	all	0.5974
+	iprec_at_recall_0.00  	all	0.6456
+	iprec_at_recall_0.10  	all	0.4292
+	iprec_at_recall_0.20  	all	0.3461
+	iprec_at_recall_0.30  	all	0.3024
+	iprec_at_recall_0.40  	all	0.2442
+	iprec_at_recall_0.50  	all	0.1967
+	iprec_at_recall_0.60  	all	0.1651
+	iprec_at_recall_0.70  	all	0.1256
+	iprec_at_recall_0.80  	all	0.0865
+	iprec_at_recall_0.90  	all	0.0503
+	iprec_at_recall_1.00  	all	0.0120
+	P_5                   	all	0.4320
+	P_10                  	all	0.4040
+	P_15                  	all	0.3813
+	P_20                  	all	0.3660
+	P_30                  	all	0.3407
+	P_100                 	all	0.2484
+	P_200                 	all	0.1846
+	P_500                 	all	0.1125
+	P_1000                	all	0.0702
 ---
 
-So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively.
+So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively well.
 
 Copyright (c) 2019 Andrew Trotman and Kat Lilly
