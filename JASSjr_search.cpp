@@ -176,10 +176,15 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 	for (char *token = strtok(buffer, seperators); token != NULL; token = strtok(NULL, seperators))
 		{
 		/*
-			If the first token is a number then assume a TREC query number
+			If the first token is a number then assume a TREC query number, and skip it
 		*/
 		if (first_term && isdigit(*buffer))
+			{
 			query_id = atol(buffer);
+			first_time = false;
+			continue;
+			}
+
 		first_term = false;
 
 		/*
