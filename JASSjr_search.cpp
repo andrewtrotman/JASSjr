@@ -181,7 +181,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		if (first_term && isdigit(*buffer))
 			{
 			query_id = atol(buffer);
-			first_time = false;
+			first_term = false;
 			continue;
 			}
 
