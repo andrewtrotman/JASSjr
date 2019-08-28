@@ -1,15 +1,15 @@
-all : JASSjr_index JASSjr_search
+all : JASSjr_index.exe JASSjr_search.exe
 
-JASSjr_index : JASSjr_index.cpp
-	g++ -std=c++11 -O3 JASSjr_index.cpp -o JASSjr_index
+JASSjr_index.exe : JASSjr_index.cpp
+	cl -Ox -EHsc JASSjr_index.cpp 
 
-JASSjr_search : JASSjr_search.cpp
-	g++ -std=c++11 -O3 JASSjr_search.cpp -o JASSjr_search
+JASSjr_search.exe : JASSjr_search.cpp
+	cl -Ox -EHsc JASSjr_search.cpp 
 
 clean:
-	rm JASSjr_search JASSjr_index
+	del JASSjr_search.exe JASSjr_index.exe JASSjr_search.obj JASSjr_index.obj
 
 clean_index:
-	rm docids.txt lengths.bin postings.bin vocab.txt
+	del docids.txt lengths.bin postings.bin vocab.txt
 
 clean_all : clean clean_index

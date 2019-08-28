@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -102,7 +102,7 @@ for (int ch = 1; ch <= 0xFF; ch++)
 	Read the document lengths
 */
 size_t length_filesize_in_bytes;
-double average_document_length;
+double average_document_length = 0;
 length_vector = reinterpret_cast<int *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
 if (length_filesize_in_bytes == 0)
 	exit(printf("Could not find and index in the current directory\n"));
