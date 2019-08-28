@@ -50,34 +50,34 @@ JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_
 ---
 	runid                 	all	JASSjr
 	num_q                 	all	50
-	num_ret               	all	1297901
+	num_ret               	all	934841
 	num_rel               	all	6228
-	num_rel_ret           	all	5453
-	map                   	all	0.2064
-	gm_map                	all	0.0981
-	Rprec                 	all	0.2400
-	bpref                 	all	0.3043
-	recip_rank            	all	0.5730
-	iprec_at_recall_0.00  	all	0.6185
-	iprec_at_recall_0.10  	all	0.4070
-	iprec_at_recall_0.20  	all	0.3235
-	iprec_at_recall_0.30  	all	0.2796
-	iprec_at_recall_0.40  	all	0.2255
-	iprec_at_recall_0.50  	all	0.1909
-	iprec_at_recall_0.60  	all	0.1631
-	iprec_at_recall_0.70  	all	0.1210
-	iprec_at_recall_0.80  	all	0.0860
-	iprec_at_recall_0.90  	all	0.0562
-	iprec_at_recall_1.00  	all	0.0096
-	P_5                   	all	0.3920
-	P_10                  	all	0.3700
-	P_15                  	all	0.3533
-	P_20                  	all	0.3320
-	P_30                  	all	0.3120
-	P_100                 	all	0.2350
-	P_200                 	all	0.1816
-	P_500                 	all	0.1125
-	P_1000                	all	0.0703
+	num_rel_ret           	all	5416
+	map                   	all	0.2231
+	gm_map                	all	0.1124
+	Rprec                 	all	0.2507
+	bpref                 	all	0.3083
+	recip_rank            	all	0.5891
+	iprec_at_recall_0.00  	all	0.6397
+	iprec_at_recall_0.10  	all	0.4276
+	iprec_at_recall_0.20  	all	0.3465
+	iprec_at_recall_0.30  	all	0.3040
+	iprec_at_recall_0.40  	all	0.2450
+	iprec_at_recall_0.50  	all	0.2085
+	iprec_at_recall_0.60  	all	0.1789
+	iprec_at_recall_0.70  	all	0.1344
+	iprec_at_recall_0.80  	all	0.0956
+	iprec_at_recall_0.90  	all	0.0594
+	iprec_at_recall_1.00  	all	0.0150
+	P_5                   	all	0.4200
+	P_10                  	all	0.3920
+	P_15                  	all	0.3733
+	P_20                  	all	0.3580
+	P_30                  	all	0.3360
+	P_100                 	all	0.2540
+	P_200                 	all	0.1916
+	P_500                 	all	0.1182
+	P_1000                	all	0.0738
 ---
 
 So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively.
