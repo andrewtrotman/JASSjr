@@ -196,7 +196,6 @@ length_vector.push_back(document_length);
 FILE *docid_fp = fopen("docids.txt", "w+b");
 for (const auto &id : doc_ids)
 	fprintf(docid_fp, "%s\n", id.c_str());
-fclose(docid_fp);
 
 FILE *postings_fp = fopen("postings.bin", "w+b");
 FILE *vocab_fp = fopen("vocab.txt", "w+b");
