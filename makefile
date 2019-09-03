@@ -10,6 +10,6 @@ clean:
 	del JASSjr_search.exe JASSjr_index.exe JASSjr_search.obj JASSjr_index.obj
 
 clean_index:
-	del docids.txt lengths.bin postings.bin vocab.txt
+	del docids.bin lengths.bin postings.bin vocab.bin
 
 clean_all : clean clean_index

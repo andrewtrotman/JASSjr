@@ -193,12 +193,12 @@ length_vector.push_back(document_length);
 /*
 	store the primary keys
 */
-FILE *docid_fp = fopen("docids.txt", "w+b");
+FILE *docid_fp = fopen("docids.bin", "w+b");
 for (const auto &id : doc_ids)
 	fprintf(docid_fp, "%s\n", id.c_str());
 
 FILE *postings_fp = fopen("postings.bin", "w+b");
-FILE *vocab_fp = fopen("vocab.txt", "w+b");
+FILE *vocab_fp = fopen("vocab.bin", "w+b");
 
 /*
 	serialise the in-memory index to disk

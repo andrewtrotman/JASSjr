@@ -10,6 +10,6 @@ clean:
 	rm JASSjr_search JASSjr_index
 
 clean_index:
-	rm docids.txt lengths.bin postings.bin vocab.txt
+	rm docids.bin lengths.bin postings.bin vocab.bin
 
 clean_all : clean clean_index

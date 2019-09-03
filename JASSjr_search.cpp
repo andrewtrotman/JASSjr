@@ -82,7 +82,7 @@ return **first < **second ? 1 : **first == **second ? *first < *second ? 1 : *fi
 int main(int argc, const char * argv[])
 {
 size_t file_size;
-char *vocab = read_entire_file("vocab.txt", file_size);
+char *vocab = read_entire_file("vocab.bin", file_size);
 char *current;
 size_t where, size, string_length;
 char seperators[255];
@@ -139,7 +139,7 @@ FILE *postings_file = fopen("postings.bin", "rb");
 */
 char buffer[1024];													// the user's query (and also used to load the vocab)
 std::vector<std::string>primary_key;							// the list of global IDs (i.e. primary keys)
-FILE *fp = fopen("docids.txt", "rb");
+FILE *fp = fopen("docids.bin", "rb");
 while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
 	buffer[strlen(buffer) - 1] = '\0';		// strip the '\n' that fgets leaves on the end
