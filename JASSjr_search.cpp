@@ -222,10 +222,11 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 	qsort(rsv_pointers, max_docs, sizeof(*rsv_pointers), compare_rsv);
 
 	/*
-		Print the results list in TREC eval format which is:
+		Print the (at most) top 1000 documents in the results list in TREC eval format which is:
 		query-id Q0 document-id rank score run-name
 	*/
-	for (int position = 0; *rsv_pointers[position] != 0.0; position++)
+	
+	for (int position = 0; *rsv_pointers[position] != 0.0 && position < 1000; position++)
 		std::cout << query_id << " Q0 " << primary_key[rsv_pointers[position] - rsv] << " " << position + 1 << " " << *rsv_pointers[position] << " JASSjr\n";
 	}
 }
