@@ -80,4 +80,18 @@ JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_
 
 So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively well.
 
+
+# Manifest #
+
+| Filename | Purpose |
+|------------|-----------|
+| README.md | This file |
+| JASSjr_index.cpp | Source code to indexer |
+| JASSjr_search.cpp | Source code to search engine |
+| GNUmakefile | make file for macOS / Linux |
+| makefile | make file for Windows |
+| test_documents.xml | Example of how documents should be layed out for indexing | 
+| 51-100.titles.txt | TREC topics 51-100 titles as queries |
+| 51-100.qrels.txt | TREC topics 51-100 human judgments |
+
 Copyright (c) 2019 Andrew Trotman and Kat Lilly

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <vector>
 #include <string>
@@ -15,13 +16,13 @@
 #include <iostream>
 #include <unordered_map>
 
-typedef std::vector<std::pair<int, int>> postings_list;				// a postings list is an ordered pair of <docid,tf> integers
+typedef std::vector<std::pair<int32_t, int32_t>> postings_list;	// a postings list is an ordered pair of <docid,tf> integers
 char buffer[1024 * 1024];														// index line at a time where a line fits in this buffer
 char *current;																		// where the lexical analyser is in buffer[]
 char next_token[1024 * 1024];													// the token we're currently building
 std::unordered_map<std::string, postings_list> vocab;					// the in-memory index
 std::vector<std::string>doc_ids;												// the primary keys
-std::vector<int> length_vector;												// hold the length of each document
+std::vector<int32_t> length_vector;											// hold the length of each document
 
 /*
 	LEX_GET_NEXT()
@@ -77,8 +78,8 @@ return lex_get_next();
 */
 int main(int argc, const char *argv[])
 {
-int docid = -1;
-int document_length = 0;
+int32_t docid = -1;
+int32_t document_length = 0;
 FILE *fp;
 char seperators[255];
 char *into = seperators;
@@ -91,7 +92,7 @@ if (argc != 2)
 /*
 	Set up the tokenizer seperator characters
 */
-for (int ch = 1; ch <= 0xFF; ch++)
+for (int32_t ch = 1; ch <= 0xFF; ch++)
 	if (!isalnum(ch) && ch != '<' && ch != '>' && ch != '-')
 		*into++ = ch;
 *into++ = '\0';
@@ -163,7 +164,7 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 		*/
 		postings_list &list = vocab[lowercase];
 		if (list.size() == 0 || list[list.size() - 1].first != docid)
-			list.push_back(std::pair<int, int>(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
+			list.push_back(std::pair<int32_t, int32_t>(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
 		else
 			list[list.size() - 1].second++;												// else create a new <d,tf> pair.
 

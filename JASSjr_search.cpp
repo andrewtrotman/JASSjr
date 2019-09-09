@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -87,12 +88,12 @@ char *current;
 size_t where, size, string_length;
 char seperators[255];
 char *into = seperators;
-int *length_vector;
+int32_t *length_vector;
 
 /*
 	Set up the tokenizer seperator characters
 */
-for (int ch = 1; ch <= 0xFF; ch++)
+for (int32_t ch = 1; ch <= 0xFF; ch++)
 	if (!isalnum(ch) && ch != '<' && ch != '>' && ch != '-')
 		*into++ = ch;
 *into++ = '\0';
@@ -102,23 +103,23 @@ for (int ch = 1; ch <= 0xFF; ch++)
 */
 size_t length_filesize_in_bytes;
 double average_document_length = 0;
-length_vector = reinterpret_cast<int *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
+length_vector = reinterpret_cast<int32_t *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
 if (length_filesize_in_bytes == 0)
 	exit(printf("Could not find and index in the current directory\n"));
 
 /*
 	Allocate buffers
 */
-double documents_in_collection = length_filesize_in_bytes / sizeof(int);
+double documents_in_collection = length_filesize_in_bytes / sizeof(int32_t);
 size_t max_docs = static_cast<size_t>(documents_in_collection);
-int *postings_buffer= new int[(max_docs + 1) * 2];						// the postings list once loaded from disk
-double *rsv = new double[max_docs];												// array of rsv values
-double **rsv_pointers = new double *[max_docs];									// pointers to each member of rsv[] so that we can sort
+int32_t *postings_buffer= new int32_t[(max_docs + 1) * 2];			// the postings list once loaded from disk
+double *rsv = new double[max_docs];											// array of rsv values
+double **rsv_pointers = new double *[max_docs];							// pointers to each member of rsv[] so that we can sort
 
 /*
 	Compute the average document length for BM25
 */
-for (int document = 0; document < max_docs; document++)
+for (int32_t document = 0; document < max_docs; document++)
 	average_document_length += length_vector[document];
 average_document_length /= documents_in_collection;
 
@@ -171,7 +172,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 	*/
 	memset(rsv, 0, sizeof(*rsv) * max_docs);
 	bool first_term = true;
-	int query_id = 0;
+	long query_id = 0;
 	for (char *token = strtok(buffer, seperators); token != NULL; token = strtok(NULL, seperators))
 		{
 		/*
@@ -198,8 +199,8 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		*/
 		fseek(postings_file, term_details.where, SEEK_SET);
 		fread(postings_buffer, 1, term_details.size, postings_file);
-		size_t postings = term_details.size / (sizeof(int) * 2);
-		std::pair<int, int> *list = (std::pair<int, int> *)(&postings_buffer[0]);
+		size_t postings = term_details.size / (sizeof(int32_t) * 2);
+		std::pair<int32_t, int32_t> *list = (std::pair<int32_t, int32_t> *)(&postings_buffer[0]);
 
 		/*
 			Compute the IDF component of BM25 as log(N/n).
@@ -212,7 +213,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		/*
 			Process the postings list by simply adding the BM25 component for this document into the accumulators array
 		*/
-		for (int which = 0; which < postings; which++, list++)
+		for (int32_t which = 0; which < postings; which++, list++)
 			rsv[list->first] += idf * ((list->second * (k1 + 1)) / (list->second + k1 * (1 - b + b * (length_vector[list->first] / average_document_length))));
 		}
 
@@ -226,7 +227,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		query-id Q0 document-id rank score run-name
 	*/
 	
-	for (int position = 0; *rsv_pointers[position] != 0.0 && position < 1000; position++)
+	for (int32_t position = 0; *rsv_pointers[position] != 0.0 && position < 1000; position++)
 		std::cout << query_id << " Q0 " << primary_key[rsv_pointers[position] - rsv] << " " << position + 1 << " " << *rsv_pointers[position] << " JASSjr\n";
 	}
 }
