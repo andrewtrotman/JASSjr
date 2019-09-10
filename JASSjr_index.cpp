@@ -45,8 +45,11 @@ if (isalnum(*current))
 	while (isalnum(*current) || *current == '-')				// TREC <DOCNO> primary keys have a hyphen in them
 		current++;
 else if (*current == '<')
+  {
+    current++;
 	while (*(current - 1) != '>')
 		current++;
+  }
 else
 	return NULL;			// must be at end of line
 
@@ -81,21 +84,12 @@ int main(int argc, const char *argv[])
 int32_t docid = -1;
 int32_t document_length = 0;
 FILE *fp;
-char seperators[255];
-char *into = seperators;
 
 /*
 	Make sure we have one paramter, the filename
 */
 if (argc != 2)
 	exit(printf("Usage:%s <infile.xml>\n", argv[0]));
-/*
-	Set up the tokenizer seperator characters
-*/
-for (int32_t ch = 1; ch <= 0xFF; ch++)
-	if (!isalnum(ch) && ch != '<' && ch != '>' && ch != '-')
-		*into++ = ch;
-*into++ = '\0';
 
 /*
 	open the file to index

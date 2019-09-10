@@ -1,36 +1,40 @@
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 import java.nio.file.Files;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.lang.Thread;
-
+import java.io.FileOutputStream;
+import java.io.DataOutputStream;
 
 class JASSjr_index
 { 
-    public class Posting
+    public class Posting 
     {
         public int d, tf;
 	
 	Posting(int d, int tf)
 	{
 	    this.d = d;
-	    this.tf =tf;
+	    this.tf = tf;
 	}
     }
 
-    public class PostingsList extends Vector<Posting>{};
-	
-    
     String buffer;
     int current;
     String next_token;
     
-    HashMap<String, PostingsList> vocab = new  HashMap<String, PostingsList>();
-    Vector<String> doc_ids = new Vector<String>() ;
-    Vector<Integer> length_vector = new Vector<Integer>();
+    HashMap<String, ArrayList<Posting>> vocab = new HashMap<String, ArrayList<Posting>>();
+    ArrayList<String> doc_ids = new ArrayList<String>() ;
+    ArrayList<Integer> length_vector = new ArrayList<Integer>();
 
+
+    public int to_little(int value)
+    {
+	return ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 14) & 0xFF) << 0);
+    }
+    
     /*
       LEX_GET_NEXT()
       --------------
@@ -102,7 +106,7 @@ class JASSjr_index
 			Boolean push_next = false;
 			for (token = lex_get_first(line); token != null; token = lex_get_next())
 			    {
-				System.out.println(token);
+				//				System.out.println(token);
 			    
 				if (token.equals("<DOC>"))
 				    {
@@ -154,10 +158,10 @@ class JASSjr_index
 				/*
 				  add the posting to the in-memory index
 				*/
-				PostingsList list = vocab.get(token);
+				ArrayList<Posting> list = vocab.get(token);
 			 	if (list == null)
 				    {
-					PostingsList new_list = new PostingsList();
+					ArrayList<Posting> new_list = new ArrayList<Posting>();
 					new_list.add(new Posting(docid, 1));
 					vocab.put(token, new_list);     // if the term isn't in the vocab yet 
 				    }
@@ -180,6 +184,42 @@ class JASSjr_index
 	catch (IOException e)
 	    {
 		e.printStackTrace();
+	    }
+
+
+	try
+	    {
+		FileOutputStream baos = new FileOutputStream("a.out");
+		DataOutputStream oos = new DataOutputStream(baos);
+
+		for (HashMap.Entry<String, ArrayList<Posting>> entry : vocab.entrySet())
+		    {
+	      
+			String term = entry.getKey();
+			ArrayList<Posting> list = entry.getValue();
+
+			System.out.print(baos.getChannel().position() + "::" + term + ":");
+	  
+			for (Posting pair : list)
+			    {
+				oos.writeInt(to_little(pair.d));
+				oos.writeInt(to_little(pair.tf));
+				System.out.print("<" + pair.d + "," + pair.tf + ">");
+			    }
+ 
+
+			System.out.print(" ->" + baos.getChannel().position());
+			System.out.println();
+
+	  
+		    }
+		//		oos.close();
+	    }
+	catch (Exception e)
+	    {
+		System.out.println(e);
+		e.printStackTrace();
+
 	    }
     }
 		  
