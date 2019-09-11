@@ -158,6 +158,8 @@ while (current < vocab + file_size)
 	where = *((int32_t *)(current + string_length + 2));			// +1 for the length and + 1 for the '\0'
 	size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));			// +1 for the length and + 1 for the '\0'
 
+std::cout << std::string(current + 1) << " w:" << where << " l:" << size << "\n";
+
 	dictionary[std::string(current + 1)] = vocab_entry(where, size);
 	current += string_length + 2 + 2 * sizeof(int32_t);
 	}
@@ -214,7 +216,11 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 			Process the postings list by simply adding the BM25 component for this document into the accumulators array
 		*/
 		for (int32_t which = 0; which < postings; which++, list++)
+			{
+std::cout << "<" << list->first << "," << list->second << ">"  << std::endl;
 			rsv[list->first] += idf * ((list->second * (k1 + 1)) / (list->second + k1 * (1 - b + b * (length_vector[list->first] / average_document_length))));
+			}
+std::cout << "\n";
 		}
 
 	/*

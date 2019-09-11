@@ -13,10 +13,20 @@ import java.nio.file.Paths;
 import java.lang.Thread;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.ByteOrder;
 
-
+/*
+  CLASS JASSJR_INDEX
+  ------------------
+*/
 class JASSjr_index
-{ 
+{
+    /*
+      CLASS POSTING
+      -------------
+    */
     public class Posting 
     {
         public int d, tf;
@@ -27,30 +37,33 @@ class JASSjr_index
 	    this.tf = tf;
 	}
     }
+
+    public class PostingsList extends ArrayList<Posting> {} 
+
     
     String buffer;
     int current;
-    String next_token;
-    HashMap<String, ArrayList<Posting>> vocab = new HashMap<String, ArrayList<Posting>>();
-    ArrayList<String> doc_ids = new ArrayList<String>();
-    ArrayList<Integer> length_vector = new ArrayList<Integer>();
+    String nextToken;
+    HashMap<String, PostingsList> vocab = new HashMap<String, PostingsList>();
+    ArrayList<String> docIds = new ArrayList<String>();
+    ArrayList<Integer> lengthVector = new ArrayList<Integer>();
 
     /* 
-      TO_LITTLE()
-      -----------
+      toLittleEndian()
+      ----------------
       Rearrange byte order so index matches that of CPP indexer
     */
-    public int to_little(int value)
+    public int toLittleEndian(int value)
     {
 	return ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 14) & 0xFF) << 0);
     }
     
     /*
-      LEX_GET_NEXT()
-      --------------
+      lexGetNext()
+      ------------
       One-character lookahead lexical analyser
     */
-    public String lex_get_next()
+    public String lexGetNext()
     {
 	/*
 	  Skip over whitespace and punctuation (but not XML tags)
@@ -69,10 +82,10 @@ class JASSjr_index
 		current++;
 	else if (buffer.charAt(current) == '<')
 	{
-	    current++;
-	    while (current < buffer.length() && buffer.charAt(current - 1) != '>')
-		current++;
+	    while (++current < buffer.length() && buffer.charAt(current - 1) != '>')
+		{/* Nothing */} 
 	}
+	
 	/*
 	  Copy and return the token
 	*/		
@@ -80,27 +93,27 @@ class JASSjr_index
     }
     
     /*
-      LEX_GET_FIRST()
-      ---------------
+      lexGetFirst()
+      -------------
       Start the lexical analysis process
     */
-    public String lex_get_first(String with)
+    public String lexGetFirst(String with)
     {
 	buffer = with;
 	current = 0;
 
-	return lex_get_next();
+	return lexGetNext();
     }
 
     /*
-	GO()
-	----
+	engage()
+	--------
 	Simple indexer for TREC WSJ collection
     */
-    public void go(String args[]) 
+    public void engage(String args[]) 
     {
-	int docid = -1;
-	int document_length = 0;
+	int docId = -1;
+	int documentLength = 0;
 
 	/*
 	  Make sure we have one paramter, the filename
@@ -116,38 +129,38 @@ class JASSjr_index
 	    for (String line : (Iterable<String>) stream::iterator)
 	    {
 		String token;
-		Boolean push_next = false;
-		for (token = lex_get_first(line); token != null; token = lex_get_next())
+		Boolean pushNext = false;
+		for (token = lexGetFirst(line); token != null; token = lexGetNext())
 		{
 		    if (token.equals("<DOC>"))
 		    {
 			/*
 			  Save the previous document length
 			*/
-			if (docid != -1)
-			    length_vector.add(document_length);
+			if (docId != -1)
+			    lengthVector.add(documentLength);
 			
 			/*
 			  Move on to the next document
 			*/
-			docid++;
-			document_length = 0;
+			docId++;
+			documentLength = 0;
 			
-			if ((docid % 1000) == 0)
-			    System.out.println(docid + " documents indexed");
+			if ((docId % 1000) == 0)
+			    System.out.println(docId + " documents indexed");
 		    }
 
 		    /*
 		      if the last token we saw was a <DOCID> then the next token is the primary key
 		    */
-		    if (push_next)
+		    if (pushNext)
 		    {
-			doc_ids.add(token);
-			push_next = false;
+			docIds.add(token);
+			pushNext = false;
 		    }
 		    
 		    if (token.equals("<DOCNO>"))
-			push_next = true;
+			pushNext = true;
 		    
 		    /*
 		      Don't index XML tags
@@ -169,17 +182,17 @@ class JASSjr_index
 		    /*
 		      add the posting to the in-memory index
 		    */
-		    ArrayList<Posting> list = vocab.get(token);
+		    PostingsList list = vocab.get(token);
 		    if (list == null)
 		    {
-			ArrayList<Posting> new_list = new ArrayList<Posting>();
-			new_list.add(new Posting(docid, 1));
-			vocab.put(token, new_list);     // if the term isn't in the vocab yet 
+			PostingsList newList = new PostingsList();
+			newList.add(new Posting(docId, 1));
+			vocab.put(token, newList);     // if the term isn't in the vocab yet 
 		    }
 		    else
 		    {
-			if (list.get(list.size() - 1).d != docid)
-			    list.add(new Posting(docid, 1));							// if the docno for this occurence hasn't changed the increase tf
+			if (list.get(list.size() - 1).d != docId)
+			    list.add(new Posting(docId, 1));							// if the docno for this occurence hasn't changed the increase tf
 			else
 			    list.get(list.size() - 1).tf++;												// else create a new <d,tf> pair.
 		    }
@@ -187,7 +200,7 @@ class JASSjr_index
 		    /*
 		      Compute the document length
 		    */
-		    document_length++;
+		    documentLength++;
 		}
 	    }
 	}
@@ -199,69 +212,78 @@ class JASSjr_index
 	/*
 	  tell the user we've got to the end of parsing
 	*/
-	System.out.println("Indexed " + (docid + 1) + " documents. Serialising...");
+	System.out.println("Indexed " + (docId + 1) + " documents. Serialising...");
 	
 	/*
 	  Save the final document length
 	*/
-	length_vector.add(document_length);
+	lengthVector.add(documentLength);
 
 	try
 	{
 	    /*
 	      store the primary keys
 	    */
-	    DataOutputStream docids_out = new DataOutputStream(new FileOutputStream("docids.bin"));
-	    for (int i= 0; i < doc_ids.size(); i++)
+	    DataOutputStream docIdFile = new DataOutputStream(new FileOutputStream("docids.bin"));
+	    for (int i= 0; i < docIds.size(); i++)
 	    {
-		docids_out.write(doc_ids.get(i).getBytes(), 0, (byte) doc_ids.get(i).length());
-		docids_out.write('\n');
+		docIdFile.write(docIds.get(i).getBytes(), 0, (byte) docIds.get(i).length());
+		docIdFile.write('\n');
 	    }
 	    
 	    /*
 	      serialise the in-memory index to disk
 	    */    
-	    FileOutputStream postings_file = new FileOutputStream("postings.bin");
-	    DataOutputStream postings_out = new DataOutputStream(postings_file);
-	    DataOutputStream vocab_out = new DataOutputStream(new FileOutputStream("vocab.bin"));
+	    FileOutputStream postingsFile = new FileOutputStream("postings.bin");
+	    DataOutputStream postingsStream = new DataOutputStream(postingsFile);
+	    DataOutputStream vocabFile = new DataOutputStream(new FileOutputStream("vocab.bin"));
+
+	    int[] linear = new int [docId * 2];
+	    ByteBuffer byteBuffer = ByteBuffer.allocate(docId * 8);
+	    byteBuffer.order(ByteOrder.nativeOrder());
+	    IntBuffer intBuffer = byteBuffer.asIntBuffer();
 	    
-	    for (HashMap.Entry<String, ArrayList<Posting>> entry : vocab.entrySet())
+	    for (HashMap.Entry<String, PostingsList> entry : vocab.entrySet())
 	    {
 		/*
 		  write the postings list to one file
 		*/
-		int where = (int) postings_file.getChannel().position();
-		    
-		for (Posting pair : entry.getValue())
-		{
-		    postings_out.writeInt(to_little(pair.d));
-		    postings_out.writeInt(to_little(pair.tf));
-		}
-		    
+		int where = (int) postingsFile.getChannel().position();
+
+		for (int which = 0; which < entry.getValue().size(); which++)
+		    {
+		    linear[which * 2] = entry.getValue().get(which).d;
+		    linear[which * 2 + 1] = entry.getValue().get(which).tf;
+		    }
+
+      		intBuffer.rewind();
+		intBuffer.put(linear, 0, entry.getValue().size() * 2);
+		postingsStream.write(byteBuffer.array(), 0, entry.getValue().size() * 8);
+		
 		/*
 		  write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
 		*/
-		vocab_out.write((byte) entry.getKey().length());
-		vocab_out.write(entry.getKey().getBytes(), 0, (byte) entry.getKey().length());
-		vocab_out.write('\0');
-		vocab_out.writeInt(to_little(where));
-		vocab_out.writeInt(to_little((int) postings_file.getChannel().position() - where));
+		vocabFile.write((byte) entry.getKey().length());
+		vocabFile.write(entry.getKey().getBytes(), 0, (byte) entry.getKey().length());
+		vocabFile.write('\0');
+		vocabFile.writeInt(toLittleEndian(where));
+		vocabFile.writeInt(toLittleEndian((int) postingsFile.getChannel().position() - where));
 	    }
 
 	    /*
 	      store the document lengths
 	    */
-	    DataOutputStream doclengths_out = new DataOutputStream(new FileOutputStream("lengths.bin"));
-	    for (int i= 0; i < length_vector.size(); i++)
-		doclengths_out.writeInt(to_little(length_vector.get(i)));
+	    DataOutputStream docLengthsFile = new DataOutputStream(new FileOutputStream("lengths.bin"));
+	    for (int i= 0; i < lengthVector.size(); i++)
+		docLengthsFile.writeInt(toLittleEndian(lengthVector.get(i)));
 		   
 	    /*
 	      clean up
 	    */
-	    docids_out.close();
-	    postings_out.close();
-	    vocab_out.close();
-	    doclengths_out.close();
+	    docIdFile.close();
+	    postingsStream.close();
+	    vocabFile.close();
+	    docLengthsFile.close();
 	}
 	catch (Exception e)
 	{
@@ -273,6 +295,6 @@ class JASSjr_index
     public static void main(String args[]) 
     {
 	JASSjr_index indexer = new JASSjr_index();
-	indexer.go(args);
+	indexer.engage(args);
     } 
 } 
