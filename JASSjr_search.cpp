@@ -158,8 +158,6 @@ while (current < vocab + file_size)
 	where = *((int32_t *)(current + string_length + 2));			// +1 for the length and + 1 for the '\0'
 	size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));			// +1 for the length and + 1 for the '\0'
 
-std::cout << std::string(current + 1) << " w:" << where << " l:" << size << "\n";
-
 	dictionary[std::string(current + 1)] = vocab_entry(where, size);
 	current += string_length + 2 + 2 * sizeof(int32_t);
 	}
@@ -200,7 +198,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 			Seek and read the postings list
 		*/
 		fseek(postings_file, term_details.where, SEEK_SET);
-		fread(postings_buffer, 1, term_details.size, postings_file);
+		(void)fread(postings_buffer, 1, term_details.size, postings_file);
 		int32_t postings = term_details.size / (sizeof(int32_t) * 2);
 		std::pair<int32_t, int32_t> *list = (std::pair<int32_t, int32_t> *)(&postings_buffer[0]);
 
@@ -217,10 +215,8 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		*/
 		for (int32_t which = 0; which < postings; which++, list++)
 			{
-std::cout << "<" << list->first << "," << list->second << ">"  << std::endl;
 			rsv[list->first] += idf * ((list->second * (k1 + 1)) / (list->second + k1 * (1 - b + b * (length_vector[list->first] / average_document_length))));
 			}
-std::cout << "\n";
 		}
 
 	/*
