@@ -148,7 +148,7 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 			ch = tolower(ch);
 
 		/*
-			truncate and long tokens at 255 charactes (so that the length can be stored first and in a single byte)
+			truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
 		*/
 		if (lowercase.size() >= 0xFF)
 			lowercase[0xFF] = '\0';
