@@ -159,6 +159,7 @@ while (current < vocab + file_size)
 	size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));			// +1 for the length and + 1 for the '\0'
 
 	dictionary[std::string(current + 1)] = vocab_entry(where, size);
+// std::cout << std::string(current + 1) << " s:" <<  where << " l:" << size << "\n";
 	current += string_length + 2 + 2 * sizeof(int32_t);
 	}
 

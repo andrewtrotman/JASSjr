@@ -54,7 +54,7 @@ class JASSjr_index
     */
     public int toLittleEndian(int value)
     {
-	return ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 14) & 0xFF) << 0);
+	return ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 24) & 0xFF) << 0);
     }
     
     /*
@@ -156,7 +156,7 @@ class JASSjr_index
 				    }
 				if (token.equals("<DOCNO>"))
 				    pushNext = true;
-		    
+
 				/*
 				  Don't index XML tags
 				*/
@@ -166,7 +166,7 @@ class JASSjr_index
 				/*
 				  lower case the string
 				*/
-				token.toLowerCase();
+				token = token.toLowerCase();
 
 				/*
 				  truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
@@ -249,7 +249,8 @@ class JASSjr_index
 				linear[which * 2] = entry.getValue().get(which).d;
 				linear[which * 2 + 1] = entry.getValue().get(which).tf;
 			    }
-       
+			
+       			byteBuffer.rewind();
 			intBuffer.rewind();
 			intBuffer.put(linear, 0, entry.getValue().size() * 2);
 			postingsStream.write(byteBuffer.array(), 0, entry.getValue().size() * 8);
