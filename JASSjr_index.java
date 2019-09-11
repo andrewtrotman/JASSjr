@@ -48,13 +48,13 @@ class JASSjr_index
     ArrayList<Integer> lengthVector = new ArrayList<Integer>();
 
     /* 
-       toLittleEndian()
+       toNativeEndian()
        ----------------
        Rearrange byte order so index matches that of CPP indexer
     */
-    public int toLittleEndian(int value)
+    public int toNativeEndian(int value)
     {
-	return ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 24) & 0xFF) << 0);
+	return (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) ? ((value & 0xFF) << 24) | (((value >>> 8) & 0xFF) << 16) | (((value >>> 16) & 0xFF) << 8) | (((value >>> 24) & 0xFF) << 0) : value;
     }
     
     /*
@@ -261,8 +261,8 @@ class JASSjr_index
 			vocabFile.write((byte) entry.getKey().length());
 			vocabFile.write(entry.getKey().getBytes(), 0, (byte) entry.getKey().length());
 			vocabFile.write('\0');
-			vocabFile.writeInt(toLittleEndian(where));
-			vocabFile.writeInt(toLittleEndian((int) postingsFile.getChannel().position() - where));
+			vocabFile.writeInt(toNativeEndian(where));
+			vocabFile.writeInt(toNativeEndian((int) postingsFile.getChannel().position() - where));
 		    }
 
 		/*
