@@ -203,8 +203,8 @@ for (const auto &term : vocab)
 	/*
 		write the postings list to one file
 	*/
-	size_t where = ftell(postings_fp);
-	size_t size = sizeof(term.second[0]) * term.second.size();
+	int32_t where = ftell(postings_fp);
+	int32_t size = sizeof(term.second[0]) * term.second.size();
 	fwrite(&term.second[0], 1, size, postings_fp);
 
 	/*

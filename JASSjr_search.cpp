@@ -31,10 +31,10 @@ static constexpr double b = 0.4;					// BM25 b parameter
 class vocab_entry
 	{
 	public:
-		size_t where, size;		// where on the disk and how large (in bytes) is the postings list?
+		int32_t where, size;		// where on the disk and how large (in bytes) is the postings list?
 
 		vocab_entry() : where(0), size(0) {}
-		vocab_entry(size_t where, size_t size): where(where), size(size) {}
+		vocab_entry(int32_t where, int32_t size): where(where), size(size) {}
 	};
 
 /*
@@ -85,7 +85,7 @@ int main(int argc, const char * argv[])
 size_t file_size;
 char *vocab = read_entire_file("vocab.bin", file_size);
 char *current;
-size_t where, size, string_length;
+int32_t where, size, string_length;
 char seperators[255];
 char *into = seperators;
 int32_t *length_vector;
@@ -111,7 +111,7 @@ if (length_filesize_in_bytes == 0)
 	Allocate buffers
 */
 double documents_in_collection = length_filesize_in_bytes / sizeof(int32_t);
-size_t max_docs = static_cast<size_t>(documents_in_collection);
+int32_t max_docs = static_cast<int32_t>(documents_in_collection);
 int32_t *postings_buffer= new int32_t[(max_docs + 1) * 2];			// the postings list once loaded from disk
 double *rsv = new double[max_docs];											// array of rsv values
 double **rsv_pointers = new double *[max_docs];							// pointers to each member of rsv[] so that we can sort
@@ -155,11 +155,11 @@ current = vocab;
 while (current < vocab + file_size)
 	{
 	string_length = *current;
-	where = *((size_t *)(current + string_length + 2));			// +1 for the length and + 1 for the '\0'
-	size = *((size_t *)(current + string_length + 2 + sizeof(size_t)));			// +1 for the length and + 1 for the '\0'
+	where = *((int32_t *)(current + string_length + 2));			// +1 for the length and + 1 for the '\0'
+	size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));			// +1 for the length and + 1 for the '\0'
 
 	dictionary[std::string(current + 1)] = vocab_entry(where, size);
-	current += string_length + 2 + 2 * sizeof (size_t);
+	current += string_length + 2 + 2 * sizeof(int32_t);
 	}
 
 /*
@@ -199,7 +199,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		*/
 		fseek(postings_file, term_details.where, SEEK_SET);
 		fread(postings_buffer, 1, term_details.size, postings_file);
-		size_t postings = term_details.size / (sizeof(int32_t) * 2);
+		int32_t postings = term_details.size / (sizeof(int32_t) * 2);
 		std::pair<int32_t, int32_t> *list = (std::pair<int32_t, int32_t> *)(&postings_buffer[0]);
 
 		/*
