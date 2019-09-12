@@ -80,7 +80,7 @@ return **first < **second ? 1 : **first == **second ? *first < *second ? 1 : *fi
 	------
 	Simple search engine ranking on BM25.
 */
-int main(int argc, const char * argv[])
+int main(int argc, const char *argv[])
 {
 size_t file_size;
 char *vocab = read_entire_file("vocab.bin", file_size);
