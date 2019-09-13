@@ -6,6 +6,7 @@
 */
 import java.io.File;
 import java.util.List;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.nio.IntBuffer;
@@ -13,7 +14,9 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.ByteBuffer;
+import java.util.Comparator;
 import java.io.FileInputStream;
+import java.io.RandomAccessFile;
 import java.util.StringTokenizer;
 
 class JASSjr_search
@@ -23,8 +26,9 @@ class JASSjr_search
 	  ---------
 	*/
 	final double k1 = 0.9;      // BM25 k1 parameter
-	final double b = 0.4;	      // BM25 b parameter
+	final double b = 0.4;	    // BM25 b parameter
 
+		
 	/*
 	  Class VocabEntry
 	  ----------------
@@ -43,7 +47,7 @@ class JASSjr_search
 	/*
 	  readEntireFile()
 	  ----------------
-	  Read the entire contents of the given file into memory and return its size.
+	  Read the entire contents of the given file into memory and return as ByteBuffer.
 	*/
 	ByteBuffer readEntireFile(String filename) throws Exception
 	{
@@ -57,7 +61,29 @@ class JASSjr_search
 	}
 
 	/*
-	  Engage()
+	  CompareRsv()
+	  ------------
+	  Callback from sort for two rsv values.  Tie break on the document id.
+	*/
+	
+	class CompareRsv implements Comparator<Integer> 
+	{
+	    final double[] rsv;
+	    
+	    CompareRsv(double[] rsv)
+	    {
+		this.rsv = rsv; 
+	    }
+	    
+	    public int compare(Integer a, Integer b) 
+	    {
+		return rsv[a] < rsv[b] ? 1 : rsv[a] == rsv[b] ? a < b ? 1 : a == b ? 0 : -1 : -1;
+	    } 
+	}
+
+
+	/*
+	  engage()
 	  --------
 	  Simple search engine ranking on BM25.
 	*/
@@ -82,10 +108,15 @@ class JASSjr_search
 	    averageDocumentLength /= documentsInCollection;
 
 	    /*
-	      Read the primary_keys
+	      Read the primary keys
 	    */
 	    List<String> primaryKey = Files.readAllLines(Paths.get("docids.bin"));
 
+	    /*
+	      Open the postings list file
+	    */
+	    RandomAccessFile postingsFile = new RandomAccessFile("postings.bin", "r");
+	    
 	    /*
 	      Build the vocabulary in memory
 	    */
@@ -106,27 +137,74 @@ class JASSjr_search
 
 		    dictionary.put(term, new VocabEntry(where, size));
 		}
-/*
-        Search (one query per line)
-*/
-        Scanner stdin = new Scanner(System.in);
-        while (stdin.hasNextLine())
-	    {
-		StringTokenizer tokenizer = new StringTokenizer(stdin.nextLine());
-		while (tokenizer.hasMoreTokens())
-		    {
-			String token = tokenizer.nextToken();
-			System.out.println(token);
-		    }
-				    
-	    }
-
-
 	    
-//	    for (HashMap.Entry<String, VocabEntry> name : dictionary.entrySet())
-//		System.out.println("[" + name.getKey() + "]-> w:" + name.getValue().where + " s:" + name.getValue().size);
+	    /*
+	      Allocate buffers
+	    */
+	    int maxDocs = (int)documentsInCollection;
+	    
+	    double[] rsv = new double [maxDocs];		// array of rsv values
+	    Integer[] rsvPointers = new Integer [maxDocs];		// pointers to each member of rsv[] so that we can sort
 
-		
+	    /*
+	      Set up the rsv pointers
+	    */
+	    for (int index = 0; index < rsvPointers.length; index++)
+		rsvPointers[index] = index;
+
+	    /*
+	      Search (one query per line)
+	    */
+	    byte[] currentList;
+	    Scanner stdin = new Scanner(System.in);
+	    while (stdin.hasNextLine())
+		{
+		    Arrays.fill(rsv, 0);
+		    StringTokenizer tokenizer = new StringTokenizer(stdin.nextLine());
+		    while (tokenizer.hasMoreTokens())
+			{
+			    String token = tokenizer.nextToken();
+			    VocabEntry termDetails;
+			    if ((termDetails = dictionary.get(token)) != null)
+				{
+				    //System.out.println(token + " found, w:" + termDetails.where + " s:" + termDetails.size);
+				    currentList = new byte[termDetails.size];
+				    postingsFile.seek(termDetails.where);
+				    postingsFile.read(currentList);
+				    ByteBuffer currentListAsBytes = ByteBuffer.wrap(currentList);
+				    currentListAsBytes.order(ByteOrder.nativeOrder());
+				    int postings = currentListAsBytes.capacity() / 8;
+
+				    /*
+				      Compute the IDF component of BM25 as log(N/n).
+				      if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
+				    */
+				    if (documentsInCollection == postings)
+					continue;
+				    double idf = Math.log(documentsInCollection / postings);
+
+				    while (currentListAsBytes.position() < currentListAsBytes.capacity())
+					{
+					    int d = currentListAsBytes.getInt();
+					    int tf = currentListAsBytes.getInt();
+					    rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (lengthVector[d] / averageDocumentLength))));
+					}
+				}
+			}
+		    
+		    /*
+		      Sort the results list
+		    */
+		    Arrays.sort(rsvPointers, new CompareRsv(rsv));
+			
+		    /*
+		      Print the (at most) top 1000 documents in the results list in TREC eval format which is:
+		      query-id Q0 document-id rank score run-name
+		    */
+		    int queryId = 0;
+		    for (int position = 0; rsv[rsvPointers[position]] != 0.0 && position < 1000; position++)
+			System.out.println(queryId + " Q0 " + primaryKey.get(rsvPointers[position]) + " " + (position + 1) + " " + rsv[rsvPointers[position]] + " JASSjr");
+		}
 	}
 	
 	/*
@@ -136,7 +214,7 @@ class JASSjr_search
 	public static void main(String args[])
 	{
 	    try
-		{
+		{		  
 		    JASSjr_search engine = new JASSjr_search();
 		    engine.engage(args);
 		}
