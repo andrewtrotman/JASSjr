@@ -63,7 +63,7 @@ class JASSjr_search
 	/*
 	  CompareRsv()
 	  ------------
-	  Callback from sort for two rsv values.  Tie break on the document id.
+	  Callback from sort for two rsv values.  Tie break on the document ID.
 	*/
 	
 	class CompareRsv implements Comparator<Integer> 
@@ -142,9 +142,8 @@ class JASSjr_search
 	      Allocate buffers
 	    */
 	    int maxDocs = (int)documentsInCollection;
-	    
-	    double[] rsv = new double [maxDocs];		// array of rsv values
-	    Integer[] rsvPointers = new Integer [maxDocs];		// pointers to each member of rsv[] so that we can sort
+	    double[] rsv = new double [maxDocs];	      // array of rsv values
+	    Integer[] rsvPointers = new Integer [maxDocs];    // pointers to each member of rsv[] so that we can sort
 
 	    /*
 	      Set up the rsv pointers
@@ -156,18 +155,42 @@ class JASSjr_search
 	      Search (one query per line)
 	    */
 	    byte[] currentList;
+	    long queryId = 0;
 	    Scanner stdin = new Scanner(System.in);
 	    while (stdin.hasNextLine())
 		{
+		    /*
+		      Zero the accumulator array.
+		    */
 		    Arrays.fill(rsv, 0);
+
 		    StringTokenizer tokenizer = new StringTokenizer(stdin.nextLine());
+		    boolean firstTerm = true;
+
 		    while (tokenizer.hasMoreTokens())
 			{
 			    String token = tokenizer.nextToken();
 			    VocabEntry termDetails;
+			    
+			    /*
+			      If the first token is a number then assume a TREC query number, and skip it
+			    */
+			    if (firstTerm && Character.isDigit(token.charAt(0)))
+				{
+				    queryId = Long.parseLong(token);
+				    firstTerm = false;
+				    continue;
+				}
+			    firstTerm = false;
+
+			    /*
+			      Does the term exist in the collection?
+			    */
 			    if ((termDetails = dictionary.get(token)) != null)
 				{
-				    //System.out.println(token + " found, w:" + termDetails.where + " s:" + termDetails.size);
+				    /*
+				      Seek and read the postings list
+				    */
 				    currentList = new byte[termDetails.size];
 				    postingsFile.seek(termDetails.where);
 				    postingsFile.read(currentList);
@@ -183,6 +206,9 @@ class JASSjr_search
 					continue;
 				    double idf = Math.log(documentsInCollection / postings);
 
+				    /*
+				      Process the postings list by simply adding the BM25 component for this document into the accumulators array
+				    */
 				    while (currentListAsBytes.position() < currentListAsBytes.capacity())
 					{
 					    int d = currentListAsBytes.getInt();
@@ -201,9 +227,8 @@ class JASSjr_search
 		      Print the (at most) top 1000 documents in the results list in TREC eval format which is:
 		      query-id Q0 document-id rank score run-name
 		    */
-		    int queryId = 0;
 		    for (int position = 0; rsv[rsvPointers[position]] != 0.0 && position < 1000; position++)
-			System.out.println(queryId + " Q0 " + primaryKey.get(rsvPointers[position]) + " " + (position + 1) + " " + rsv[rsvPointers[position]] + " JASSjr");
+			System.out.println(queryId + " Q0 " + primaryKey.get(rsvPointers[position]) + " " + (position + 1) + " " + String.format("%.6f", rsv[rsvPointers[position]]) + " JASSjr");
 		}
 	}
 	
