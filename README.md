@@ -57,25 +57,25 @@ and
 ---
 	runid                 	all	JASSjr
 	num_q                 	all	50
-	num_ret               	all	899595
+	num_ret               	all	46725
 	num_rel               	all	6228
-	num_rel_ret           	all	5255
-	map                   	all	0.2168
-	gm_map                	all	0.1072
+	num_rel_ret           	all	3509
+	map                   	all	0.2080
+	gm_map                	all	0.0932
 	Rprec                 	all	0.2563
-	bpref                 	all	0.3090
+	bpref                 	all	0.2880
 	recip_rank            	all	0.5974
 	iprec_at_recall_0.00  	all	0.6456
-	iprec_at_recall_0.10  	all	0.4292
-	iprec_at_recall_0.20  	all	0.3461
-	iprec_at_recall_0.30  	all	0.3024
-	iprec_at_recall_0.40  	all	0.2442
-	iprec_at_recall_0.50  	all	0.1967
-	iprec_at_recall_0.60  	all	0.1651
-	iprec_at_recall_0.70  	all	0.1256
-	iprec_at_recall_0.80  	all	0.0865
-	iprec_at_recall_0.90  	all	0.0503
-	iprec_at_recall_1.00  	all	0.0120
+	iprec_at_recall_0.10  	all	0.4286
+	iprec_at_recall_0.20  	all	0.3451
+	iprec_at_recall_0.30  	all	0.3005
+	iprec_at_recall_0.40  	all	0.2399
+	iprec_at_recall_0.50  	all	0.1864
+	iprec_at_recall_0.60  	all	0.1561
+	iprec_at_recall_0.70  	all	0.1002
+	iprec_at_recall_0.80  	all	0.0665
+	iprec_at_recall_0.90  	all	0.0421
+	iprec_at_recall_1.00  	all	0.0089
 	P_5                   	all	0.4320
 	P_10                  	all	0.4040
 	P_15                  	all	0.3813
