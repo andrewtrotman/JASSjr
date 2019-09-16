@@ -50,7 +50,7 @@ and
 # Evaluation #
 * Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
 
-* Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 takes less than 3 second on my Mac.
+* Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 (top k=1000) takes 1 second on my Mac.
 
 * [trec_eval](https://github.com/usnistgov/trec_eval) reports:
 
