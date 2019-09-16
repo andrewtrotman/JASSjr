@@ -5,6 +5,7 @@
   Minimalistic BM25 search engine.
 */
 import java.lang.Thread;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.nio.IntBuffer;
 import java.nio.ByteOrder;
@@ -252,8 +253,8 @@ class JASSjr_index
 				  write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
 				*/
 				vocabFile.write((byte) entry.getKey().length());
-				vocabFile.write(entry.getKey().getBytes(), 0, (byte) entry.getKey().length());
-				vocabFile.write('\0');
+				byte[] ntString = Arrays.copyOf(entry.getKey().getBytes(), (byte) entry.getKey().length() + 1);
+				vocabFile.write(ntString, 0, (byte) entry.getKey().length() + 1);
 				vocabFile.writeInt(toNativeEndian(where));
 				vocabFile.writeInt(toNativeEndian((int) postingsFile.getChannel().position() - where));
 				}
