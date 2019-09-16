@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
+import java.lang.*;
 
 /*
   CLASS JASSJR_INDEX
@@ -106,7 +107,7 @@ class JASSjr_index
 	  --------
 	  Simple indexer for TREC WSJ collection
 	*/
-	public void engage(String args[]) 
+	public void engage(String args[]) throws Exception
 		{
 		int docId = -1;
 		int documentLength = 0;
@@ -120,9 +121,8 @@ class JASSjr_index
 			System.exit(0);
 			}
 	
-		try (Stream<String> stream = Files.lines(Paths.get(args[0])))
-			{
-			Boolean pushNext = false;
+		Stream<String> stream = Files.lines(Paths.get(args[0]));
+		Boolean pushNext = false;
 			for (String line : (Iterable<String>) stream::iterator)
 				{
 				String token;
@@ -182,24 +182,19 @@ class JASSjr_index
 						{
 						PostingsList newList = new PostingsList();
 						newList.add(new Posting(docId, 1));
-						vocab.put(token, newList);     // if the term isn't in the vocab yet 
+						vocab.put(token, newList);                  // if the term isn't in the vocab yet 
 						}
 					else if (list.get(list.size() - 1).d != docId)
-						list.add(new Posting(docId, 1));							// if the docno for this occurence hasn't changed the increase tf
+						list.add(new Posting(docId, 1));            // if the docno for this occurence hasn't changed the increase tf
 					else
-						list.get(list.size() - 1).tf++;												// else create a new <d,tf> pair.
+						list.get(list.size() - 1).tf++;             // else create a new <d,tf> pair.
 		    
 					/*
-					  Compute the document length
+					  compute the document length
 					*/
 					documentLength++;
 					}
 				}
-			}
-		catch (IOException e)
-			{
-			e.printStackTrace();
-			}
 	
 		/*
 		  tell the user we've got to the end of parsing
@@ -211,8 +206,6 @@ class JASSjr_index
 		*/
 		lengthVector.add(documentLength);
 
-		try
-			{
 			/*
 			  store the primary keys
 			*/
@@ -236,7 +229,7 @@ class JASSjr_index
 			ByteBuffer byteBuffer = ByteBuffer.allocate(docId * 8);
 			byteBuffer.order(ByteOrder.nativeOrder());
 			IntBuffer intBuffer = byteBuffer.asIntBuffer();
-	    
+							    
 			for (HashMap.Entry<String, PostingsList> entry : vocab.entrySet())
 				{
 				/*
@@ -283,11 +276,6 @@ class JASSjr_index
 			postingsStream.close();
 			vocabFile.close();
 			docLengthsFile.close();
-			}
-		catch (Exception e)
-			{
-			e.printStackTrace();
-			}
 		}
 
 	/*
@@ -296,7 +284,14 @@ class JASSjr_index
 	*/
 	public static void main(String args[]) 
 		{
-		JASSjr_index indexer = new JASSjr_index();
-		indexer.engage(args);
+		try
+			{
+			JASSjr_index indexer = new JASSjr_index();
+			indexer.engage(args);
+			}
+		catch (Exception e)
+			{
+			e.printStackTrace();
+			}
 		} 
 	} 
