@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>
 #include <iostream>
 #include <unordered_map>
 
@@ -105,35 +106,16 @@ size_t length_filesize_in_bytes;
 double average_document_length = 0;
 length_vector = reinterpret_cast<int32_t *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
 if (length_filesize_in_bytes == 0)
-	exit(printf("Could not find and index in the current directory\n"));
-
-/*
-	Allocate buffers
-*/
-double documents_in_collection = length_filesize_in_bytes / sizeof(int32_t);
-int32_t max_docs = static_cast<int32_t>(documents_in_collection);
-int32_t *postings_buffer= new int32_t[(max_docs + 1) * 2];			// the postings list once loaded from disk
-double *rsv = new double[max_docs];											// array of rsv values
-double **rsv_pointers = new double *[max_docs];							// pointers to each member of rsv[] so that we can sort
+	exit(printf("Could not find an index in the current directory\n"));
 
 /*
 	Compute the average document length for BM25
 */
+double documents_in_collection = length_filesize_in_bytes / sizeof(int32_t);
+int32_t max_docs = static_cast<int32_t>(documents_in_collection);
 for (int32_t document = 0; document < max_docs; document++)
 	average_document_length += length_vector[document];
 average_document_length /= documents_in_collection;
-
-/*
-	Set up the rsv pointers
-*/
-double **rsvp = rsv_pointers;
-for (double *pointer = rsv; pointer < rsv + max_docs; pointer++)
-	*rsvp++ = pointer;
-
-/*
-	Open the postings list file
-*/
-FILE *postings_file = fopen("postings.bin", "rb");
 
 /*
 	Read the primary_keys
@@ -146,7 +128,12 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	buffer[strlen(buffer) - 1] = '\0';		// strip the '\n' that fgets leaves on the end
 	primary_key.push_back(std::string(buffer));
 	}
-
+ 
+ /*
+	Open the postings list file
+*/
+FILE *postings_file = fopen("postings.bin", "rb");
+ 
 /*
 	Build the vocabulary in memory
 */
@@ -159,9 +146,22 @@ while (current < vocab + file_size)
 	size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));			// +1 for the length and + 1 for the '\0'
 
 	dictionary[std::string(current + 1)] = vocab_entry(where, size);
-// std::cout << std::string(current + 1) << " s:" <<  where << " l:" << size << "\n";
 	current += string_length + 2 + 2 * sizeof(int32_t);
 	}
+ 
+/*
+	Allocate buffers
+*/
+int32_t *postings_buffer= new int32_t[(max_docs + 1) * 2];			// the postings list once loaded from disk
+double *rsv = new double[max_docs];											// array of rsv values
+
+/*
+	Set up the rsv pointers
+*/
+double **rsv_pointers = new double *[max_docs];	
+double **rsvp = rsv_pointers;
+for (double *pointer = rsv; pointer < rsv + max_docs; pointer++)
+	*rsvp++ = pointer;
 
 /*
 	Search (one query per line)
@@ -192,31 +192,34 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 			Does the term exist in the collection?
 		*/
 		vocab_entry term_details;
-		if ((term_details = dictionary[std::string(token)]).size == 0)
-			continue;
-
-		/*
-			Seek and read the postings list
-		*/
-		fseek(postings_file, term_details.where, SEEK_SET);
-		(void)fread(postings_buffer, 1, term_details.size, postings_file);
-		int32_t postings = term_details.size / (sizeof(int32_t) * 2);
-		std::pair<int32_t, int32_t> *list = (std::pair<int32_t, int32_t> *)(&postings_buffer[0]);
-
-		/*
-			Compute the IDF component of BM25 as log(N/n).
-			if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
-		*/
-		if (documents_in_collection == postings)
-			break;
-		double idf = log(documents_in_collection / postings);
-
-		/*
-			Process the postings list by simply adding the BM25 component for this document into the accumulators array
-		*/
-		for (int32_t which = 0; which < postings; which++, list++)
+		if ((term_details = dictionary[std::string(token)]).size != 0)
 			{
-			rsv[list->first] += idf * ((list->second * (k1 + 1)) / (list->second + k1 * (1 - b + b * (length_vector[list->first] / average_document_length))));
+			/*
+				Seek and read the postings list
+			*/
+			fseek(postings_file, term_details.where, SEEK_SET);
+			(void)fread(postings_buffer, 1, term_details.size, postings_file);
+			int32_t postings = term_details.size / (sizeof(int32_t) * 2);
+			std::pair<int32_t, int32_t> *list = (std::pair<int32_t, int32_t> *)(&postings_buffer[0]);
+	
+			/*
+				Compute the IDF component of BM25 as log(N/n).
+				if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
+			*/
+			if (documents_in_collection != postings)
+			  	{
+				double idf = log(documents_in_collection / postings);
+		
+				/*
+					Process the postings list by simply adding the BM25 component for this document into the accumulators array
+				*/
+				for (int32_t which = 0; which < postings; which++, list++)
+					{
+					int32_t d = list->first;
+					int32_t tf = list->second;
+					rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (length_vector[d] / average_document_length))));
+					}
+				}
 			}
 		}
 
@@ -229,8 +232,9 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 		Print the (at most) top 1000 documents in the results list in TREC eval format which is:
 		query-id Q0 document-id rank score run-name
 	*/
-	
+	std::cout << std::fixed << std::setprecision(4);
+
 	for (int32_t position = 0; *rsv_pointers[position] != 0.0 && position < 1000; position++)
-		std::cout << query_id << " Q0 " << primary_key[rsv_pointers[position] - rsv] << " " << position + 1 << " " << *rsv_pointers[position] << " JASSjr\n";
+		std::cout << query_id << " Q0 " << primary_key[rsv_pointers[position] - rsv] << " " << position + 1 << " " << std::setw(2) << *rsv_pointers[position] << " JASSjr\n";
 	}
 }
