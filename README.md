@@ -38,35 +38,44 @@ Queries a sequences of words.  If the first token is a number it is assumed to t
 
 JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_eval) compatible results list.
 
+## Java ##
+The Java version is build in the same way, but run with 
+
+	java JASSjr_index <filename>
+
+and
+
+	java JASSjr_search
+
 # Evaluation #
 * Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
 
-* Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 takes less than 3 second on my Mac.
+* Searching and generating a [trec_eval](https://github.com/usnistgov/trec_eval) compatible output for TREC queries 51-100 (top k=1000) takes 1 second on my Mac.
 
 * [trec_eval](https://github.com/usnistgov/trec_eval) reports:
 
 ---
 	runid                 	all	JASSjr
 	num_q                 	all	50
-	num_ret               	all	899595
+	num_ret               	all	46725
 	num_rel               	all	6228
-	num_rel_ret           	all	5255
-	map                   	all	0.2168
-	gm_map                	all	0.1072
+	num_rel_ret           	all	3509
+	map                   	all	0.2080
+	gm_map                	all	0.0932
 	Rprec                 	all	0.2563
-	bpref                 	all	0.3090
+	bpref                 	all	0.2880
 	recip_rank            	all	0.5974
 	iprec_at_recall_0.00  	all	0.6456
-	iprec_at_recall_0.10  	all	0.4292
-	iprec_at_recall_0.20  	all	0.3461
-	iprec_at_recall_0.30  	all	0.3024
-	iprec_at_recall_0.40  	all	0.2442
-	iprec_at_recall_0.50  	all	0.1967
-	iprec_at_recall_0.60  	all	0.1651
-	iprec_at_recall_0.70  	all	0.1256
-	iprec_at_recall_0.80  	all	0.0865
-	iprec_at_recall_0.90  	all	0.0503
-	iprec_at_recall_1.00  	all	0.0120
+	iprec_at_recall_0.10  	all	0.4286
+	iprec_at_recall_0.20  	all	0.3451
+	iprec_at_recall_0.30  	all	0.3005
+	iprec_at_recall_0.40  	all	0.2399
+	iprec_at_recall_0.50  	all	0.1864
+	iprec_at_recall_0.60  	all	0.1561
+	iprec_at_recall_0.70  	all	0.1002
+	iprec_at_recall_0.80  	all	0.0665
+	iprec_at_recall_0.90  	all	0.0421
+	iprec_at_recall_1.00  	all	0.0089
 	P_5                   	all	0.4320
 	P_10                  	all	0.4040
 	P_15                  	all	0.3813
@@ -86,10 +95,12 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | Filename | Purpose |
 |------------|-----------|
 | README.md | This file |
-| JASSjr_index.cpp | Source code to indexer |
-| JASSjr_search.cpp | Source code to search engine |
-| GNUmakefile | make file for macOS / Linux |
-| makefile | make file for Windows |
+| JASSjr_index.cpp | C/C++ source code to indexer |
+| JASSjr_search.cpp | C/C++ source code to search engine |
+| JASSjr_index.java | Java source code to indexer |
+| JASSjr_search.java | Java source code to search engine |
+| GNUmakefile | GNU make makefile for macOS / Linux |
+| makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
 | 51-100.titles.txt | TREC topics 51-100 titles as queries |
 | 51-100.qrels.txt | TREC topics 51-100 human judgments |
