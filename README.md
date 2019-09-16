@@ -44,6 +44,7 @@ The Java version is build in the same way, but run with
 	java JASSjr_index <filename>
 
 and
+
 	java JASSjr_search
 
 # Evaluation #
