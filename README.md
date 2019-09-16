@@ -38,6 +38,14 @@ Queries a sequences of words.  If the first token is a number it is assumed to t
 
 JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_eval) compatible results list.
 
+## Java ##
+The Java version is build in the same way, but run with 
+
+	java JASSjr_index <filename>
+
+and
+	java JASSjr_search
+
 # Evaluation #
 * Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
 
@@ -86,10 +94,12 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | Filename | Purpose |
 |------------|-----------|
 | README.md | This file |
-| JASSjr_index.cpp | Source code to indexer |
-| JASSjr_search.cpp | Source code to search engine |
-| GNUmakefile | make file for macOS / Linux |
-| makefile | make file for Windows |
+| JASSjr_index.cpp | C/C++ source code to indexer |
+| JASSjr_search.cpp | C/C++ source code to search engine |
+| JASSjr_index.java | Java source code to indexer |
+| JASSjr_search.java | Java source code to search engine |
+| GNUmakefile | GNU make makefile for macOS / Linux |
+| makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
 | 51-100.titles.txt | TREC topics 51-100 titles as queries |
 | 51-100.qrels.txt | TREC topics 51-100 human judgments |
