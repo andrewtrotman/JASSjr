@@ -4,6 +4,7 @@
   Copyright (c) 2019 Andrew Trotman and Kat Lilly
   Minimalistic BM25 search engine.
 */
+import java.lang.*;
 import java.lang.Thread;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
-import java.lang.*;
+import java.io.BufferedOutputStream;
 
 /*
   CLASS JASSJR_INDEX
@@ -222,9 +223,9 @@ class JASSjr_index
 			/*
 			  serialise the in-memory index to disk
 			*/    
-			FileOutputStream postingsFile = new FileOutputStream("postings.bin");
+			BufferedOutputStream postingsFile = new BufferedOutputStream(new FileOutputStream("postings.bin"));
 			DataOutputStream postingsStream = new DataOutputStream(postingsFile);
-			DataOutputStream vocabFile = new DataOutputStream(new FileOutputStream("vocab.bin"));
+			DataOutputStream vocabFile = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("vocab.bin")));
 
 			int[] linear = new int [docId * 2];
 			ByteBuffer byteBuffer = ByteBuffer.allocate(docId * 8);
@@ -236,7 +237,7 @@ class JASSjr_index
 				/*
 				  write the postings list to one file
 				*/
-				int where = (int)postingsFile.getChannel().position();
+				int where = postingsStream.size();
 	    
 				for (int which = 0; which < entry.getValue().size(); which++)
 					{
@@ -256,7 +257,7 @@ class JASSjr_index
 				byte[] ntString = Arrays.copyOf(entry.getKey().getBytes(), (byte) entry.getKey().length() + 1);
 				vocabFile.write(ntString, 0, (byte) entry.getKey().length() + 1);
 				vocabFile.writeInt(toNativeEndian(where));
-				vocabFile.writeInt(toNativeEndian((int) postingsFile.getChannel().position() - where));
+				vocabFile.writeInt(toNativeEndian((int) postingsStream.size() - where));
 				}
 
 			/*
