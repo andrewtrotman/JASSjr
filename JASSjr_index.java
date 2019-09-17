@@ -4,7 +4,6 @@
   Copyright (c) 2019 Andrew Trotman and Kat Lilly
   Minimalistic BM25 search engine.
 */
-import java.lang.*;
 import java.lang.Thread;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -211,13 +210,11 @@ class JASSjr_index
 			/*
 			  store the primary keys
 			*/
-			int times = 0;
-			DataOutputStream docIdFile = new DataOutputStream(new FileOutputStream("docids.bin"));
+			DataOutputStream docIdFile = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("docids.bin")));
 			for (String primaryKey :  docIds)
 				{
 				primaryKey += "\n";
 				docIdFile.write(primaryKey.getBytes(), 0, primaryKey.length());
-				times++;
 				}
 
 			/*
