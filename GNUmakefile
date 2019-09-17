@@ -13,10 +13,9 @@ JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
 
 clean:
-	- rm JASSjr_search JASSjr_index JASSjr_index.class JASSjr_search.class JASSjr_index$Posting.class JASSjr_index$PostingsList.class JASSjr_search$CompareRsv.class JASSjr_search$VocabEntry.class
+	- rm JASSjr_search JASSjr_index 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
 
 clean_index:
 	- rm docids.bin lengths.bin postings.bin vocab.bin
 
 clean_all : clean clean_index
-
