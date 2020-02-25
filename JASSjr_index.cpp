@@ -124,7 +124,7 @@ while (fgets(buffer, sizeof(buffer), fp) != NULL)
 			}
 
 		/*
-			if the last token we saw was a <DOCID> then the next token is the primary key
+			if the last token we saw was a <DOCNO> then the next token is the primary key
 		*/
 		if (push_next)
 			{
