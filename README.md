@@ -2,10 +2,12 @@
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
 Copyright (c) 2019 Andrew Trotman and Kat Lilly
-
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
+
+### Cite Our Paper ###
+A. Trotman, K. Lilly (2020), JASSjr: The Minimalistic BM25 Search Engine for Teaching and Learning Information Retrieval, Proceedings of SIGIR 2020
 
 ## Why? ##
 JASSjr is the little-brother to all other search engines, especially [JASSv2](https://github.com/andrewtrotman/JASSv2) and [ATIRE](http://atire.org).  The purpose of this code base is to demonstrate how easy it is to write a search engine that will perform BM25 on a TREC collection.
