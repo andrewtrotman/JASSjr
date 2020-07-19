@@ -6,7 +6,7 @@ Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
 
-### Cite Our Paper ###
+### Please Cite Our Paper ###
 A. Trotman, K. Lilly (2020), JASSjr: The Minimalistic BM25 Search Engine for Teaching and Learning Information Retrieval, Proceedings of SIGIR 2020
 
 ## Why? ##
