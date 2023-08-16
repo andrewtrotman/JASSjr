@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
+from array import array
+import math
 import struct
+
+k1 = 0.9 # BM25 k1 parameter
+b = 0.4 # BM25 b parameter
 
 def read_file(filename):
     with open(filename, mode='rb') as file:
             return file.read()
 
 def read_lines(filename):
-    with open(filename, mode='rb') as file:
+    with open(filename) as file:
             return file.readlines()
 
 def decode_vocab(buffer):
@@ -22,21 +27,34 @@ def decode_vocab(buffer):
         where, size = struct.unpack_from('ii', buffer, offset=offset)
         offset += 8
 
-        yield word, where, size
+        yield word.decode(), where, size
 
 contents_vocab = read_file('vocab.bin')
-contents_lengths = read_file('lengths.bin')
 contents_postings = read_file('postings.bin')
+doc_lengths = array('i', read_file('lengths.bin'))
+doc_ids = read_lines('docids.bin')
 
-docids = read_lines('docids.bin')
-
+average_length = sum(doc_lengths) / len(doc_lengths)
+accumulators = [(0, 0)] * len(doc_lengths)
 vocab = {}
-for word, offset, size in decode_vocab(contents_vocab):
-    vocab[word.decode()] = (offset, size)
 
-query = input('> ')
+for word, offset, size in decode_vocab(contents_vocab):
+    vocab[word] = (offset, size)
+
+query = input()
 
 offset, size = vocab[query]
 
-for pair in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
-    print(docids[pair[0]], pair[1])
+postings_length = size / 8
+idf = math.log(len(doc_lengths) / (postings_length))
+
+for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
+    rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
+    accumulators[docid] = (rsv, docid)
+
+accumulators.sort(key=lambda x: x[0], reverse=True)
+
+for i, (freq, docid) in enumerate(accumulators, start=1):
+    if freq == 0:
+        break
+    print("{} Q0 {} {} {:.4f} JASSjr".format(0, doc_ids[docid][:-1], i, freq))
