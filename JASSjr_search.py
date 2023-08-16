@@ -52,15 +52,18 @@ try:
             query_id = terms.popleft()
 
         for term in terms:
-            offset, size = vocab[term]
+            try:
+                offset, size = vocab[term]
 
-            postings_length = size / 8
-            idf = math.log(len(doc_lengths) / (postings_length))
+                postings_length = size / 8
+                idf = math.log(len(doc_lengths) / (postings_length))
 
-            for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
-                rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-                current_rsv = accumulators[docid][1]
-                accumulators[docid] = (docid, current_rsv + rsv)
+                for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
+                    rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
+                    current_rsv = accumulators[docid][1]
+                    accumulators[docid] = (docid, current_rsv + rsv)
+            except KeyError:
+                pass
 
         accumulators.sort(key=lambda x: x[1], reverse=True)
 
