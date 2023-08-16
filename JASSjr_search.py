@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from array import array
+from collections import deque
 import math
 import struct
 
@@ -35,26 +36,39 @@ doc_lengths = array('i', read_file('lengths.bin'))
 doc_ids = read_lines('docids.bin')
 
 average_length = sum(doc_lengths) / len(doc_lengths)
-accumulators = [(0, 0)] * len(doc_lengths)
 vocab = {}
 
 for word, offset, size in decode_vocab(contents_vocab):
     vocab[word] = (offset, size)
 
-query = input()
+try:
+    query = input()
+    while query:
+        query_id = 0
+        accumulators = [(0, 0)] * len(doc_lengths)
 
-offset, size = vocab[query]
+        terms = deque(query.split())
+        if terms[0].isnumeric():
+            query_id = terms.popleft()
 
-postings_length = size / 8
-idf = math.log(len(doc_lengths) / (postings_length))
+        for term in terms:
+            offset, size = vocab[term]
 
-for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
-    rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-    accumulators[docid] = (rsv, docid)
+            postings_length = size / 8
+            idf = math.log(len(doc_lengths) / (postings_length))
 
-accumulators.sort(key=lambda x: x[0], reverse=True)
+            for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
+                rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
+                current_rsv = accumulators[docid][1]
+                accumulators[docid] = (docid, current_rsv + rsv)
 
-for i, (freq, docid) in enumerate(accumulators, start=1):
-    if freq == 0:
-        break
-    print("{} Q0 {} {} {:.4f} JASSjr".format(0, doc_ids[docid][:-1], i, freq))
+        accumulators.sort(key=lambda x: x[1], reverse=True)
+
+        for i, (docid, rsv) in enumerate(accumulators, start=1):
+            if rsv == 0 or i == 1001:
+                break
+            print("{} Q0 {} {} {:.4f} JASSjr".format(query_id, doc_ids[docid][:-1], i, rsv))
+
+        query = input()
+except EOFError:
+    pass
