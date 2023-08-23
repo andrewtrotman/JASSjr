@@ -20,7 +20,7 @@ length_vector = array('i') # hold the length of each document
 
 # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
 # TREC <DOCNO> primary keys have a hyphen in them
-lexer = re.compile("[a-zA-Z0-9][a-zA-Z0-9-]*|<DOC>|<DOCNO>")
+lexer = re.compile("[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>")
 
 docid = -1
 document_length = 0
@@ -39,13 +39,14 @@ with open(sys.argv[1], 'r') as file:
                 document_length = 0
                 if docid % 1000 == 0:
                     print(f"{docid} documents indexed")
-                continue
             # if the last token we saw was a <DOCNO> then the next token is the primary key
             if push_next:
                 doc_ids.append(token)
                 push_next = False
             if token == "<DOCNO>":
                 push_next = True
+            # Don't index XML tags
+            if token[0] == "<":
                 continue
 
             # lower case the string
