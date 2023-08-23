@@ -10,7 +10,7 @@ if len(sys.argv) != 2:
 
 docid = -1
 document_length = 0
-length_vector = []
+length_vector = array('i')
 doc_ids = []
 push_next = False
 vocab = defaultdict(lambda: array('i'))
@@ -58,8 +58,7 @@ with open("docids.bin", "w") as file:
         file.write(f"{doc}\n")
 
 with open("lengths.bin", "wb") as file:
-    for length in length_vector:
-        file.write(struct.pack('i', length))
+    length_vector.tofile(file)
 
 postings_fp = open("postings.bin", "wb")
 vocab_fp = open("vocab.bin", "wb")
@@ -70,7 +69,7 @@ for term, postings in vocab.items():
 
     vocab_fp.write(struct.pack('B', len(term)))
     vocab_fp.write(term.encode())
-    vocab_fp.write(struct.pack('B', 0)) # null termination
+    vocab_fp.write(b'\0') # null termination
     vocab_fp.write(struct.pack('i', where))
     vocab_fp.write(struct.pack('i', len(postings) * 4)) # no. bytes
 
