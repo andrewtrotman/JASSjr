@@ -15,9 +15,28 @@ doc_ids = []
 push_next = False
 vocab = defaultdict(lambda: array('i'))
 
+def lex(text):
+    current = 0
+    while True:
+        while current < len(text) and not text[current].isalnum() and text[current] != "<":
+            current += 1
+
+        start = current
+        if current < len(text) and text[current].isalnum():
+            while current < len(text) and text[current].isalnum() or text[current] == "-":
+                current += 1
+        elif current < len(text) and text[current] == "<":
+            current += 1
+            while current < len(text) and text[current-1] != ">":
+                current += 1
+        else:
+            break
+
+        yield text[start:current]
+
 with open(sys.argv[1], 'r') as file:
     for line in file:
-        for token in line.split():
+        for token in lex(line):
             if token == "<DOC>":
                 if docid != -1:
                     length_vector.append(document_length)
