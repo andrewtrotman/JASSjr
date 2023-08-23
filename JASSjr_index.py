@@ -15,7 +15,7 @@ length_vector = array('i')
 doc_ids = []
 push_next = False
 vocab = defaultdict(lambda: array('i'))
-lexer = re.compile("[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>")
+lexer = re.compile("[a-zA-Z0-9][a-zA-Z0-9-]*|<DOC>|<DOCNO>")
 
 with open(sys.argv[1], 'r') as file:
     for line in file:
@@ -27,12 +27,12 @@ with open(sys.argv[1], 'r') as file:
                 document_length = 0
                 if docid % 1000 == 0:
                     print(f"{docid} documents indexed")
+                continue
             if push_next:
                 doc_ids.append(token)
                 push_next = False
             if token == "<DOCNO>":
                 push_next = True
-            if token[0] == "<":
                 continue
 
             token = token.lower()
