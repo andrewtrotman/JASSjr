@@ -74,17 +74,17 @@ try:
                 for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
                     # Process the postings list by simply adding the BM25 component for this document into the accumulators array
                     rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-                    current_rsv = accumulators[docid][1]
-                    accumulators[docid] = (docid, current_rsv + rsv)
+                    current_rsv = accumulators[docid][0]
+                    accumulators[docid] = (current_rsv + rsv, docid)
             except KeyError:
                 pass
 
-        # Sort the results list
-        accumulators.sort(key=lambda x: x[1], reverse=True)
+        # Sort the results list. Tie break on the document ID.
+        accumulators.sort(reverse=True)
 
         # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
         # query-id Q0 document-id rank score run-name
-        for i, (docid, rsv) in enumerate(accumulators, start=1):
+        for i, (rsv, docid) in enumerate(accumulators, start=1):
             if rsv == 0 or i == 1001:
                 break
             print("{} Q0 {} {} {:.4f} JASSjr".format(query_id, doc_ids[docid][:-1], i, rsv))
