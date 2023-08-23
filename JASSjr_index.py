@@ -15,10 +15,11 @@ length_vector = array('i')
 doc_ids = []
 push_next = False
 vocab = defaultdict(lambda: array('i'))
+lexer = re.compile("[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>")
 
 with open(sys.argv[1], 'r') as file:
     for line in file:
-        for token in re.findall("[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>", line):
+        for token in lexer.findall(line):
             if token == "<DOC>":
                 if docid != -1:
                     length_vector.append(document_length)
