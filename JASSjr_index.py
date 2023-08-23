@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from array import array
 from collections import defaultdict
 import struct
 import sys
@@ -12,7 +13,7 @@ document_length = 0
 length_vector = []
 doc_ids = []
 push_next = False
-vocab = defaultdict(lambda: [])
+vocab = defaultdict(lambda: array('i'))
 
 with open(sys.argv[1], 'r') as file:
     for line in file:
@@ -37,11 +38,11 @@ with open(sys.argv[1], 'r') as file:
             token = token[0:255]
 
             postings_list = vocab[token]
-            if len(postings_list) == 0 or postings_list[-1][0] != docid:
-                postings_list.append((docid, 1))
+            if len(postings_list) == 0 or postings_list[-2] != docid:
+                postings_list.append(docid)
+                postings_list.append(1)
             else:
-                pair = postings_list[-1]
-                postings_list[-1] = (docid, pair[1] + 1)
+                postings_list[-1] += 1
 
             document_length += 1
 
@@ -65,14 +66,13 @@ vocab_fp = open("vocab.bin", "wb")
 
 for term, postings in vocab.items():
     where = postings_fp.tell()
-    for pair in postings:
-        postings_fp.write(struct.pack('ii', pair[0], pair[1]))
+    postings.tofile(postings_fp)
 
     vocab_fp.write(struct.pack('B', len(term)))
     vocab_fp.write(term.encode())
     vocab_fp.write(struct.pack('B', 0)) # null termination
     vocab_fp.write(struct.pack('i', where))
-    vocab_fp.write(struct.pack('i', len(postings) * 8))
+    vocab_fp.write(struct.pack('i', len(postings) * 4)) # no. bytes
 
 postings_fp.close()
 vocab_fp.close()
