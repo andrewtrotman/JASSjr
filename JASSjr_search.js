@@ -17,8 +17,7 @@ var b = 0.4; // BM25 b parameter
 var vocab_raw = fs.readFileSync('vocab.bin');
 var postings_raw = fs.readFileSync('postings.bin');
 var doc_lengths = fs.readFileSync('lengths.bin');
-// TODO benchmark vs latin1
-var ids = fs.readFileSync('docids.bin').toString().split(os.EOL);
+var ids = fs.readFileSync('docids.bin', 'utf8').split(os.EOL);
 
 var documents_in_collection = doc_lengths.length / 4;
 var average_document_length = 0;
