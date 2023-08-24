@@ -16,9 +16,10 @@ var b = 0.4; // BM25 b parameter
 
 var vocab_raw = fs.readFileSync('vocab.bin');
 var postings_raw = fs.readFileSync('postings.bin');
-var doc_lengths = fs.readFileSync('lengths.bin');
-var ids = fs.readFileSync('docids.bin', 'utf8').split(os.EOL);
+var doc_lengths = fs.readFileSync('lengths.bin'); // Read the document lengths
+var ids = fs.readFileSync('docids.bin', 'utf8').split(os.EOL); // Read the primary_keys
 
+// Compute the average document length for BM25
 var documents_in_collection = doc_lengths.length / 4;
 var average_document_length = 0;
 for (var i = 0; i < doc_lengths.length; i += 4)
@@ -27,7 +28,7 @@ average_document_length /= documents_in_collection;
 
 var vocab = {};
 
-// decode the vocabulary (one byte length, string, '\0', 4 byte where, 4 byte size)
+// Build the vocabulary in memory (one byte length, string, '\0', 4 byte where, 4 byte size)
 for (var offset = 0; offset < vocab_raw.length;) {
 	var length = vocab_raw[offset];
 	offset++;
@@ -39,17 +40,21 @@ for (var offset = 0; offset < vocab_raw.length;) {
 	offset += 8;
 }
 
+// Search (one query per line)
 readline.question('', search);
 
 function search(query) {
-	var query_id = 0;
-	var accumulators = new Array(documents_in_collection);
-
 	var terms = query.split(' ');
+
+	var query_id = 0;
+	var accumulators = new Array(documents_in_collection); // array of rsv values
+
+	// If the first token is a number then assume a TREC query number, and skip it
 	if (!isNaN(terms[0]))
 		query_id = terms.shift();
 
 	terms.forEach(function (term) {
+		// Does the term exist in the collection?
 		var offset = vocab[term];
 		if (offset === undefined)
 			return;
@@ -58,22 +63,29 @@ function search(query) {
 		var size = vocab_raw.subarray(offset+4, offset+8).readUInt32LE();
 
 		var documents_in_postings = size / 8;
+		// Compute the IDF component of BM25 as log(N/n).
+		// if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
 		var idf = Math.log(documents_in_collection / documents_in_postings)
 
+		// Seek and read the postings list
 		for (var i = where; i < where+size; i += 8) {
 			var docid = postings_raw.subarray(i, i+4).readUInt32LE();
 			var freq = postings_raw.subarray(i+4, i+8).readUInt32LE();
 
 			var doc_length = doc_lengths.subarray(docid*4, docid*4+4).readUInt32LE();
 
+			// Process the postings list by simply adding the BM25 component for this document into the accumulators array
 			var rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_length / average_document_length))))
 			var current = accumulators[docid] || [0, 0]
 			accumulators[docid] = [docid, current[1] + rsv];
 		}
 	});
 
+	// Sort the results list. Tie break on the document ID.
 	accumulators.sort(function (a, b) { return b[1] - a[1] || b[0] - a[0] });
 
+	// Print the (at most) top 1000 documents in the results list in TREC eval format which is:
+	// query-id Q0 document-id rank score run-name
 	for (var i = 0; i < accumulators.length; i++) {
 		var pair = accumulators[i];
 		if (!pair || i == 1000)
