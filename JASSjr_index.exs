@@ -2,6 +2,12 @@
 
 defmodule Postings do
   defstruct docnos: [], terms: %{}
+
+  def append(postings, term) do
+      [ docno | _ ] = postings.docnos
+      %Postings{postings | terms: Map.update(postings.terms, term, %{ docno => 1 },
+        fn docnos -> Map.update(docnos, docno, 1, fn tf -> tf + 1 end) end) }
+  end
 end
 
 defmodule Indexer do
@@ -19,7 +25,7 @@ defmodule Indexer do
       [docno, file] = String.split(file, "</DOCNO>", parts: 2)
       docno = String.trim(docno)
 
-      result = %{result | docnos: [ docno | result.docnos]}
+      result = %Postings{result | docnos: [ docno | result.docnos]}
 
       if length(result.docnos) |> rem(1000) == 0 do
         IO.puts("#{length(result.docnos)} documents indexed")
@@ -32,34 +38,24 @@ defmodule Indexer do
   end
 
   def parse_number(file, result, val \\ <<>>)
-  # TODO push final
-  def parse_number(<<>>, result, _val), do: result
+  def parse_number(<<>>, result, val), do: Postings.append(result, val)
   def parse_number(<<head, tail::binary>> = file, result, val) do
     case head do
       # Numeric
       x when x in 48..57 -> parse_number(tail, result, val <> <<x>>)
-      _ ->
-        [ docno | _ ] = result.docnos
-        result = %{result | terms: Map.update(result.terms, val, %{ docno => 1 },
-          fn docnos -> Map.update(docnos, docno, 1, fn tf -> tf + 1 end) end) }
-        parse(file, result)
+      _ -> parse(file, Postings.append(result, val))
     end
   end
 
   def parse_string(file, result, val \\ <<>>)
-  # TODO push final
-  def parse_string(<<>>, result, _val), do: result
+  def parse_string(<<>>, result, val), do: Postings.append(result, val)
   def parse_string(<<head, tail::binary>> = file, result, val) do
     case head do
       # Uppercase
       x when x in 65..90 -> parse_string(tail, result, val <> <<x+32>>)
       # Lowercase
       x when x in 97..122 -> parse_string(tail, result, val <> <<x>>)
-      _ ->
-        [ docno | _ ] = result.docnos
-        result = %{result | terms: Map.update(result.terms, val, %{ docno => 1 },
-          fn docnos -> Map.update(docnos, docno, 1, fn tf -> tf + 1 end) end) }
-        parse(file, result)
+      _ -> parse(file, Postings.append(result, val))
     end
   end
 
