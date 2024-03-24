@@ -16,8 +16,8 @@ defmodule Indexer do
   def parse_tag(file, result) do
     if String.starts_with?(file, "<DOCNO>") do
       {_, file} = String.split_at(file, 7)
-      file = String.trim_leading(file)
-      {docno, file} = String.split_at(file, 14)
+      [docno, file] = String.split(file, "</DOCNO>", parts: 2)
+      docno = String.trim(docno)
 
       result = %{result | docnos: [ docno | result.docnos]}
 
