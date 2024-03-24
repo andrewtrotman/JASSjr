@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ERL_FLAGS="+hms 1000000" elixir
+#!/usr/bin/env -S ERL_FLAGS="+B +hms 1000000" elixir
 
 defmodule Postings do
   defstruct docnos: [], terms: %{}
