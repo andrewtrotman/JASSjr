@@ -1,12 +1,12 @@
 #!/usr/bin/env -S ERL_FLAGS="+B +hms 1000000" elixir
 
 defmodule Postings do
-  defstruct docnos: [], terms: %{}
+  defstruct length: 0, lengths: [], docnos: [], terms: %{}
 
   def append(postings, term) do
-      [ docno | _ ] = postings.docnos
-      %Postings{postings | terms: Map.update(postings.terms, term, %{ docno => 1 },
-        fn docnos -> Map.update(docnos, docno, 1, fn tf -> tf + 1 end) end) }
+      docid = length(postings.docnos) - 1
+      %Postings{postings | length: postings.length + 1, terms: Map.update(postings.terms, term, %{ docid => 1 },
+        fn docnos -> Map.update(docnos, docid, 1, fn tf -> tf + 1 end) end) }
   end
 end
 
@@ -25,7 +25,11 @@ defmodule Indexer do
       [docno, file] = String.split(file, "</DOCNO>", parts: 2)
       docno = String.trim(docno)
 
-      result = %Postings{result | docnos: [ docno | result.docnos]}
+      result = if length(result.docnos) > 0 do
+        %Postings{result | length: 0, lengths: [ result.length | result.lengths], docnos: [ docno | result.docnos]}
+      else
+        %Postings{result | docnos: [ docno | result.docnos]}
+      end
 
       if length(result.docnos) |> rem(1000) == 0 do
         IO.puts("#{length(result.docnos)} documents indexed")
@@ -75,6 +79,32 @@ defmodule Indexer do
       _ -> parse(tail, result)
     end
   end
+
+  def serialise(result) do
+    result = %Postings{result | lengths: [ result.length | result.lengths]}
+
+    File.open!("docids.bin", [:write], fn file ->
+      Enum.each(result.docnos, fn docno ->
+        IO.write(file, "#{docno}\n")
+      end)
+    end)
+    vocab = File.open!("vocab.bin", [:write])
+    postings = File.open!("postings.bin", [:write])
+    Enum.each(result.terms, fn {k, v} ->
+      posts = Enum.flat_map(Map.to_list(v), fn t -> Tuple.to_list(t) end)
+      posts = for x <- posts, do: <<x::native-32>>, into: <<>>
+      {:ok, where} = :file.position(postings, {:cur, 0})
+      IO.binwrite(postings, posts)
+      IO.binwrite(vocab, <<byte_size(k)::8, k::binary, 0::8, where::native-32, byte_size(posts)::native-32>>)
+    end)
+    :ok = File.close(postings)
+    :ok = File.close(vocab)
+
+    lengths = for x <- result.lengths, do: <<x::native-32>>, into: <<>>
+    File.open!("lengths.bin", [:write], fn file ->
+      IO.binwrite(file, lengths)
+    end)
+  end
 end
 
 if length(System.argv()) != 1 do
@@ -87,4 +117,5 @@ end
 file = File.read!(filename)
 
 result = Indexer.parse(file)
-IO.inspect(result)
+Indexer.serialise(result)
+# IO.inspect(result)
