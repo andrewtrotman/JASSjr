@@ -84,9 +84,10 @@ defmodule Indexer do
 
   def serialise(result) do
     result = %Postings{result | lengths: [ result.length | result.lengths]}
+    docnos = Enum.reverse(result.docnos)
 
     File.open!("docids.bin", [:write], fn file ->
-      Enum.each(result.docnos, fn docno ->
+      Enum.each(docnos, fn docno ->
         IO.write(file, "#{docno}\n")
       end)
     end)
@@ -102,7 +103,8 @@ defmodule Indexer do
     :ok = File.close(postings)
     :ok = File.close(vocab)
 
-    lengths = for x <- result.lengths, do: <<x::native-32>>, into: <<>>
+    lengths = Enum.reverse(result.lengths)
+    lengths = for x <- lengths, do: <<x::native-32>>, into: <<>>
     File.open!("lengths.bin", [:write], fn file ->
       IO.binwrite(file, lengths)
     end)
