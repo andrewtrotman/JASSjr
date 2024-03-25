@@ -1,10 +1,10 @@
 #!/usr/bin/env -S ERL_FLAGS="+B +hms 1000000" elixir
 
 defmodule Postings do
-  defstruct length: 0, lengths: [], docnos: [], terms: %{}
+  defstruct length: 0, docno: 0, lengths: [], docnos: [], terms: %{}
 
   def append(postings, term) do
-      docid = length(postings.docnos) - 1
+      docid = postings.docno - 1
       %Postings{postings | length: postings.length + 1, terms: Map.update(postings.terms, term, %{ docid => 1 },
         fn docnos -> Map.update(docnos, docid, 1, fn tf -> tf + 1 end) end) }
   end
@@ -26,9 +26,9 @@ defmodule Indexer do
       docno = String.trim(docno)
 
       result = if length(result.docnos) > 0 do
-        %Postings{result | length: 0, lengths: [ result.length | result.lengths], docnos: [ docno | result.docnos]}
+        %Postings{result | length: 0, lengths: [ result.length | result.lengths], docno: result.docno + 1, docnos: [ docno | result.docnos]}
       else
-        %Postings{result | docnos: [ docno | result.docnos]}
+        %Postings{result | docno: result.docno + 1, docnos: [ docno | result.docnos]}
       end
 
       result = Postings.append(result, docno)
