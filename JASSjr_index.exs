@@ -31,6 +31,8 @@ defmodule Indexer do
         %Postings{result | docnos: [ docno | result.docnos]}
       end
 
+      result = Postings.append(result, docno)
+
       if length(result.docnos) |> rem(1000) == 0 do
         IO.puts("#{length(result.docnos)} documents indexed")
       end
