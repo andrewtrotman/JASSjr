@@ -4,14 +4,12 @@
 # b = 0.4 # BM25 b parameter
 
 defmodule Index do
-  defstruct docnos: [], lengths: [], vocab: %{}
+  defstruct docnos: [], lengths: [], vocab: %{}, postings: nil
 end
 
 defmodule SearchEngine do
-  def read_postings({ where, count}) do
-    file = File.open!("postings.bin")
-    {:ok, data} = :file.pread(file, where, count)
-    File.close(file)
+  def read_postings(postings, { where, count}) do
+    {:ok, data} = :file.pread(postings, where, count)
     for <<docno::native-32, count::native-32 <- data>>, into: %{}, do: {docno, count}
   end
 
@@ -24,7 +22,7 @@ defmodule SearchEngine do
     end
     results = Enum.map(query, fn term ->
       case Map.fetch(index.vocab, term) do
-        {:ok, loc} -> read_postings(loc)
+        {:ok, loc} -> read_postings(index.postings, loc)
         :error -> %{}
       end
     end)
@@ -59,7 +57,9 @@ defmodule SearchEngine do
     lengths = for <<x::native-32 <- File.read!("lengths.bin")>>, do: x
     vocab = for <<len::8, term::binary-size(len), 0::8, post_where::native-32, post_len::native-32 <- File.read!("vocab.bin")>>, into: %{}, do: {term, {post_where, post_len}}
 
-    accept_input(%Index{docnos: docnos, lengths: lengths, vocab: vocab})
+    File.open!("postings.bin", fn postings ->
+      accept_input(%Index{docnos: docnos, lengths: lengths, vocab: vocab, postings: postings})
+    end)
   end
 end
 
