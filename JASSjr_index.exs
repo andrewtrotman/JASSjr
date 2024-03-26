@@ -11,80 +11,80 @@ defmodule Postings do
 end
 
 defmodule Indexer do
-  def consume_tag(<<head, tail::binary>>, result) do
+  def consume_tag(<<head, tail::binary>>, index) do
     case head do
       # '>'
-      62 -> parse(tail, result)
-      _ -> consume_tag(tail, result)
+      62 -> parse(tail, index)
+      _ -> consume_tag(tail, index)
     end
   end
 
-  def parse_tag(file, result) do
+  def parse_tag(file, index) do
     if String.starts_with?(file, "<DOCNO>") do
-      if length(result.docnos) |> rem(1000) == 0 do
-        IO.puts("#{length(result.docnos)} documents indexed")
+      if index.docno |> rem(1000) == 0 do
+        IO.puts("#{index.docno} documents indexed")
       end
 
       {_, file} = String.split_at(file, 7)
       [docno, file] = String.split(file, "</DOCNO>", parts: 2)
       docno = String.trim(docno)
 
-      result = if length(result.docnos) > 0 do
-        %Postings{result | length: 0, lengths: [ result.length | result.lengths], docno: result.docno + 1, docnos: [ docno | result.docnos]}
+      index = if index.docno > 0 do
+        %Postings{index | length: 0, lengths: [ index.length | index.lengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
       else
-        %Postings{result | docno: result.docno + 1, docnos: [ docno | result.docnos]}
+        %Postings{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
       end
 
-      result = Postings.append(result, docno)
+      index = Postings.append(index, docno)
 
-      parse(file, result)
+      parse(file, index)
     else
-      consume_tag(file, result)
+      consume_tag(file, index)
     end
   end
 
-  def parse_number(file, result, val \\ <<>>)
-  def parse_number(<<>>, result, val), do: Postings.append(result, val)
-  def parse_number(<<head, tail::binary>> = file, result, val) do
+  def parse_number(file, index, val \\ <<>>)
+  def parse_number(<<>>, index, val), do: Postings.append(index, val)
+  def parse_number(<<head, tail::binary>> = file, index, val) do
     case head do
       # Numeric
-      x when x in 48..57 -> parse_number(tail, result, val <> <<x>>)
-      _ -> parse(file, Postings.append(result, val))
+      x when x in 48..57 -> parse_number(tail, index, val <> <<x>>)
+      _ -> parse(file, Postings.append(index, val))
     end
   end
 
-  def parse_string(file, result, val \\ <<>>)
-  def parse_string(<<>>, result, val), do: Postings.append(result, val)
-  def parse_string(<<head, tail::binary>> = file, result, val) do
+  def parse_string(file, index, val \\ <<>>)
+  def parse_string(<<>>, index, val), do: Postings.append(index, val)
+  def parse_string(<<head, tail::binary>> = file, index, val) do
     case head do
       # Uppercase
-      x when x in 65..90 -> parse_string(tail, result, val <> <<x+32>>)
+      x when x in 65..90 -> parse_string(tail, index, val <> <<x+32>>)
       # Lowercase
-      x when x in 97..122 -> parse_string(tail, result, val <> <<x>>)
-      _ -> parse(file, Postings.append(result, val))
+      x when x in 97..122 -> parse_string(tail, index, val <> <<x>>)
+      _ -> parse(file, Postings.append(index, val))
     end
   end
 
-  def parse(file, result \\ %Postings{})
-  def parse(<<>>, result), do: result
-  def parse(<<head, tail::binary>> = file, result) do
+  def parse(file, index \\ %Postings{})
+  def parse(<<>>, index), do: index
+  def parse(<<head, tail::binary>> = file, index) do
     case head do
       # Tag '<'
-      60 -> parse_tag(file, result)
+      60 -> parse_tag(file, index)
       # Numeric
-      x when x in 48..57 -> parse_number(file, result)
+      x when x in 48..57 -> parse_number(file, index)
       # Uppercase
-      x when x in 65..90 -> parse_string(file, result)
+      x when x in 65..90 -> parse_string(file, index)
       # Lowercase
-      x when x in 97..122 -> parse_string(file, result)
+      x when x in 97..122 -> parse_string(file, index)
       # Other
-      _ -> parse(tail, result)
+      _ -> parse(tail, index)
     end
   end
 
-  def serialise(result) do
-    result = %Postings{result | lengths: [ result.length | result.lengths]}
-    docnos = Enum.reverse(result.docnos)
+  def serialise(index) do
+    index = %Postings{index | lengths: [ index.length | index.lengths]}
+    docnos = Enum.reverse(index.docnos)
 
     File.open!("docids.bin", [:write], fn file ->
       Enum.each(docnos, fn docno ->
@@ -93,7 +93,7 @@ defmodule Indexer do
     end)
     vocab = File.open!("vocab.bin", [:write])
     postings = File.open!("postings.bin", [:write])
-    Enum.each(result.terms, fn {k, v} ->
+    Enum.each(index.terms, fn {k, v} ->
       posts = Enum.flat_map(Map.to_list(v), fn t -> Tuple.to_list(t) end)
       posts = for x <- posts, do: <<x::native-32>>, into: <<>>
       {:ok, where} = :file.position(postings, {:cur, 0})
@@ -103,7 +103,7 @@ defmodule Indexer do
     :ok = File.close(postings)
     :ok = File.close(vocab)
 
-    lengths = Enum.reverse(result.lengths)
+    lengths = Enum.reverse(index.lengths)
     lengths = for x <- lengths, do: <<x::native-32>>, into: <<>>
     File.open!("lengths.bin", [:write], fn file ->
       IO.binwrite(file, lengths)
