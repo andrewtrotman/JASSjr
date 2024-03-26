@@ -5,38 +5,32 @@ defmodule Index do
 end
 
 defmodule SearchEngine do
-  def read_postings(index, { where, count}) do
+  def rsv(index, num_results, docno, freq) do
     k1 = 0.9 # BM25 k1 parameter
     b = 0.4 # BM25 b parameter
 
+    idf = :math.log(:array.size(index.lengths) / num_results)
+    idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (:array.get(docno, index.lengths) / index.average_length))))
+  end
+
+  def read_postings(index, { where, count}) do
     {:ok, data} = :file.pread(index.postings, where, count)
-    postings = for <<docno::native-32, freq::native-32 <- data>>, into: %{}, do: {docno, freq}
-    Map.new(postings, fn {docno, freq} ->
-      idf = :math.log(:array.size(index.lengths) / Enum.count(postings))
-      rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (:array.get(docno, index.lengths) / index.average_length))))
-      {docno, rsv}
-    end)
+    for <<docno::native-32, freq::native-32 <- data>>, into: %{}, do: {docno, rsv(index, count / 8, docno, freq)}
   end
 
   def search(index, query) do
-    query = String.split(query)
-    [ head | tail ] = query
-    query = case Integer.parse(head) do
-      :error -> query
-      _ -> tail
-    end
-    results = Enum.map(query, fn term ->
+    Enum.map(query, fn term ->
       case Map.fetch(index.vocab, term) do
         {:ok, loc} -> read_postings(index, loc)
         :error -> %{}
       end
     end)
-    Enum.reduce(results, fn x, acc ->
+    |> Enum.reduce(fn x, acc ->
       Map.merge(acc, x, fn _k, v1, v2 -> v1 + v2 end)
     end)
   end
 
-  def print(index, results) do
+  def print(results, index, query_id) do
     results
     |> Map.to_list
     |> Enum.sort_by(fn {docid, tf} -> {tf, docid} end, :desc)
@@ -44,15 +38,21 @@ defmodule SearchEngine do
     |> Enum.with_index
     |> Enum.each(fn {{res, tf}, i} ->
       docno = :array.get(res, index.docnos)
-      IO.puts("0 Q0 #{docno} #{i+1} #{:io_lib.format("~.4f", [tf])} JASSjr")
+      IO.puts("#{query_id} Q0 #{docno} #{i+1} #{:io_lib.format("~.4f", [tf])} JASSjr")
     end)
   end
 
   def accept_input(index) do
     query = IO.gets("")
     if query != :eof do
-      results = search(index, query)
-      print(index, results)
+      query = String.split(query)
+      [ head | tail ] = query
+      { query_id, query } = case Integer.parse(head) do
+        :error -> { 0, query }
+        { id, _ } -> { id, tail }
+      end
+      search(index, query)
+      |> print(index, query_id)
       accept_input(index)
     end
   end
