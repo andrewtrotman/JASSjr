@@ -21,6 +21,10 @@ defmodule Indexer do
 
   def parse_tag(file, result) do
     if String.starts_with?(file, "<DOCNO>") do
+      if length(result.docnos) |> rem(1000) == 0 do
+        IO.puts("#{length(result.docnos)} documents indexed")
+      end
+
       {_, file} = String.split_at(file, 7)
       [docno, file] = String.split(file, "</DOCNO>", parts: 2)
       docno = String.trim(docno)
@@ -32,10 +36,6 @@ defmodule Indexer do
       end
 
       result = Postings.append(result, docno)
-
-      if length(result.docnos) |> rem(1000) == 0 do
-        IO.puts("#{length(result.docnos)} documents indexed")
-      end
 
       parse(file, result)
     else
@@ -120,6 +120,6 @@ end
 
 file = File.read!(filename)
 
-result = Indexer.parse(file)
-Indexer.serialise(result)
-# IO.inspect(result)
+index = Indexer.parse(file)
+IO.puts("Indexed #{index.docno} documents. Serialising...")
+Indexer.serialise(index)
