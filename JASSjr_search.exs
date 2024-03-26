@@ -12,8 +12,8 @@ defmodule SearchEngine do
     {:ok, data} = :file.pread(index.postings, where, count)
     postings = for <<docno::native-32, freq::native-32 <- data>>, into: %{}, do: {docno, freq}
     Map.new(postings, fn {docno, freq} ->
-      idf = :math.log(length(index.lengths) / Enum.count(postings))
-      rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (Enum.at(index.lengths, docno) / index.average_length))))
+      idf = :math.log(:array.size(index.lengths) / Enum.count(postings))
+      rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (:array.get(docno, index.lengths) / index.average_length))))
       {docno, rsv}
     end)
   end
@@ -61,6 +61,7 @@ defmodule SearchEngine do
     docnos = File.read!("docids.bin") |> String.split
     lengths = for <<x::native-32 <- File.read!("lengths.bin")>>, do: x
     average_length = Enum.sum(lengths) / length(lengths)
+    lengths = :array.from_list(lengths)
     vocab = for <<len::8, term::binary-size(len), 0::8, post_where::native-32, post_len::native-32 <- File.read!("vocab.bin")>>, into: %{}, do: {term, {post_where, post_len}}
 
     File.open!("postings.bin", fn postings ->
