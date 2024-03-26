@@ -43,7 +43,7 @@ defmodule SearchEngine do
     |> Enum.take(1000)
     |> Enum.with_index
     |> Enum.each(fn {{res, tf}, i} ->
-      docno = Enum.at(index.docnos, res)
+      docno = :array.get(res, index.docnos)
       IO.puts("0 Q0 #{docno} #{i+1} #{:io_lib.format("~.4f", [tf])} JASSjr")
     end)
   end
@@ -58,7 +58,7 @@ defmodule SearchEngine do
   end
 
   def start() do
-    docnos = File.read!("docids.bin") |> String.split
+    docnos = :array.from_list(File.read!("docids.bin") |> String.split)
     lengths = :array.from_list(for <<x::native-32 <- File.read!("lengths.bin")>>, do: x)
     average_length = :array.foldl(fn _, val, acc -> acc + val end, 0, lengths) / :array.size(lengths)
     vocab = for <<len::8, term::binary-size(len), 0::8, post_where::native-32, post_len::native-32 <- File.read!("vocab.bin")>>, into: %{}, do: {term, {post_where, post_len}}
