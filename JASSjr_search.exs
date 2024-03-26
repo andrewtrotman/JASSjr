@@ -39,7 +39,7 @@ defmodule SearchEngine do
   def print(index, results) do
     results
     |> Map.to_list
-    |> Enum.sort(fn {_, tf1}, {_, tf2} -> tf1 >= tf2 end)
+    |> Enum.sort_by(fn {docid, tf} -> {tf, docid} end, :desc)
     |> Enum.take(1000)
     |> Enum.with_index
     |> Enum.each(fn {{res, tf}, i} ->
