@@ -7,8 +7,14 @@ defmodule Postings do
 
   def append(postings, term) do
       docid = postings.docno - 1
-      %Postings{postings | length: postings.length + 1, terms: Map.update(postings.terms, term, %{ docid => 1 },
-        fn docnos -> Map.update(docnos, docid, 1, fn tf -> tf + 1 end) end) }
+      %Postings{postings | length: postings.length + 1, terms: Map.update(postings.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
+        if doc == docid do
+          [ tf + 1 | [ doc | tail ]]
+        else
+          [ 1 | [ docid | docnos ]]
+        end
+      end)
+    }
   end
 end
 
@@ -95,12 +101,12 @@ defmodule Indexer do
     end)
     vocab = File.open!("vocab.bin", [:write])
     postings = File.open!("postings.bin", [:write])
-    Enum.each(index.terms, fn {k, v} ->
-      posts = Enum.flat_map(Map.to_list(v), fn t -> Tuple.to_list(t) end)
+    Enum.each(index.terms, fn {term, posts} ->
+      posts = Enum.reverse(posts)
       posts = for x <- posts, do: <<x::native-32>>, into: <<>>
       {:ok, where} = :file.position(postings, {:cur, 0})
       IO.binwrite(postings, posts)
-      IO.binwrite(vocab, <<byte_size(k)::8, k::binary, 0::8, where::native-32, byte_size(posts)::native-32>>)
+      IO.binwrite(vocab, <<byte_size(term)::8, term::binary, 0::8, where::native-32, byte_size(posts)::native-32>>)
     end)
     :ok = File.close(postings)
     :ok = File.close(vocab)
