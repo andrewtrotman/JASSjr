@@ -1,8 +1,8 @@
 # JASSjr #
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
-Copyright (c) 2019 Andrew Trotman and Kat Lilly
-Copyright (c) 2023, 2024 Vaughan Kitchen
+Copyright (c) 2019 Andrew Trotman and Kat Lilly \
+Copyright (c) 2023, 2024 Vaughan Kitchen \
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
