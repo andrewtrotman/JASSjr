@@ -2,6 +2,7 @@
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
 Copyright (c) 2019 Andrew Trotman and Kat Lilly
+Copyright (c) 2023, 2024 Vaughan Kitchen
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
@@ -48,6 +49,24 @@ The Java version is build in the same way, but run with
 and
 
 	java JASSjr_search
+
+## Elixir ##
+The Elixir version can also be built manually to reduce startup times when searching
+
+	echo 'null' | elixirc JASSjr_search.exs > /dev/null
+
+and then run with
+
+	elixir -e 'SearchEngine.start'
+
+## Other ##
+The interpreted languages include a shebang and can be executed directly e.g.
+
+    ./JASSjr_index.py <filename>
+
+and
+
+    ./JASSjr_search.py
 
 # Evaluation #
 * Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
@@ -101,6 +120,12 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.cpp | C/C++ source code to search engine |
 | JASSjr_index.java | Java source code to indexer |
 | JASSjr_search.java | Java source code to search engine |
+| JASSjr_index.py | Python source code to indexer |
+| JASSjr_search.py | Python source code to search engine |
+| JASSjr_index.js | JavaScript source code to indexer |
+| JASSjr_search.js | JavaScript source code to search engine |
+| JASSjr_index.exs | Elixir source code to indexer |
+| JASSjr_search.exs | Elixir source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
