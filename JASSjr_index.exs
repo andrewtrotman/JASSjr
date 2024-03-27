@@ -62,24 +62,18 @@ defmodule Indexer do
     end
   end
 
-  def parse_number(file, index, val \\ <<>>)
-  def parse_number(<<>>, index, val), do: Index.append(index, val)
-  def parse_number(<<head, tail::binary>> = file, index, val) do
+  def parse_alnum(file, index, val \\ <<>>)
+  def parse_alnum(<<>>, index, val), do: Index.append(index, val)
+  def parse_alnum(<<head, tail::binary>> = file, index, val) do
     case head do
       # Numeric
-      x when x in 48..57 -> parse_number(tail, index, val <> <<x>>)
-      _ -> parse(file, Index.append(index, val))
-    end
-  end
-
-  def parse_string(file, index, val \\ <<>>)
-  def parse_string(<<>>, index, val), do: Index.append(index, val)
-  def parse_string(<<head, tail::binary>> = file, index, val) do
-    case head do
+      x when x in 48..57 -> parse_alnum(tail, index, val <> <<x>>)
       # Uppercase
-      x when x in 65..90 -> parse_string(tail, index, val <> <<x+32>>) # lower case the string
+      x when x in 65..90 -> parse_alnum(tail, index, val <> <<x+32>>) # lower case the string
       # Lowercase
-      x when x in 97..122 -> parse_string(tail, index, val <> <<x>>)
+      x when x in 97..122 -> parse_alnum(tail, index, val <> <<x>>)
+      # Hyphen is allowed after the initial character
+      45 -> parse_alnum(tail, index, val <> <<head>>)
       _ -> parse(file, Index.append(index, val))
     end
   end
@@ -93,11 +87,11 @@ defmodule Indexer do
       # Tag '<'
       60 -> parse_tag(file, index)
       # Numeric
-      x when x in 48..57 -> parse_number(file, index)
+      x when x in 48..57 -> parse_alnum(file, index)
       # Uppercase
-      x when x in 65..90 -> parse_string(file, index)
+      x when x in 65..90 -> parse_alnum(file, index)
       # Lowercase
-      x when x in 97..122 -> parse_string(file, index)
+      x when x in 97..122 -> parse_alnum(file, index)
       # Skip over whitespace and punctuation
       _ -> parse(tail, index)
     end
