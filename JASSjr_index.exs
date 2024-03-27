@@ -1,4 +1,6 @@
-#!/usr/bin/env -S ERL_FLAGS="+B +hms 1000000" elixir
+#!/usr/bin/env -S ERL_FLAGS="+B +hms 1073741824" elixir
+# +B disables interrupt handler
+# +hms sets default heap size (8gb)
 
 defmodule Postings do
   defstruct length: 0, docno: 0, lengths: [], docnos: [], terms: %{}
