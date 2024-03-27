@@ -2,6 +2,9 @@
 # +B disables interrupt handler
 # +hms sets default heap size (8gb)
 
+# Copyright (c) 2024 Vaughan Kitchen
+# Minimalistic BM25 search engine.
+
 defmodule Index do
   defstruct length: 0, # length of currently indexing document
   docno: 0, # cache last index into primary keys
