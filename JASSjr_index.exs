@@ -2,15 +2,22 @@
 # +B disables interrupt handler
 # +hms sets default heap size (8gb)
 
-defmodule Postings do
-  defstruct length: 0, docno: 0, lengths: [], docnos: [], terms: %{}
+defmodule Index do
+  defstruct length: 0, # length of currently indexing document
+  docno: 0, # cache last index into primary keys
+  lengths: [], # hold the length of each document
+  docnos: [], # the primary keys
+  terms: %{} # the in-memory index (terms => <tf, docid>)
 
-  def append(postings, term) do
-      docid = postings.docno - 1
-      %Postings{postings | length: postings.length + 1, terms: Map.update(postings.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
+  # Add the posting to the in-memory index
+  def append(index, term) do
+      docid = index.docno - 1
+      %Index{index | length: index.length + 1, terms: Map.update(index.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
         if doc == docid do
+          # if the docno for this occurence hasn't changed then increase tf
           [ tf + 1 | [ doc | tail ]]
         else
+          # else create a new <d,tf> pair.
           [ 1 | [ docid | docnos ]]
         end
       end)
@@ -29,6 +36,7 @@ defmodule Indexer do
 
   def parse_tag(file, index) do
     if String.starts_with?(file, "<DOCNO>") do
+      # If this is a <DOCNO> parse the primary key
       if index.docno |> rem(1000) == 0 do
         IO.puts("#{index.docno} documents indexed")
       end
@@ -37,45 +45,50 @@ defmodule Indexer do
       [docno, file] = String.split(file, "</DOCNO>", parts: 2)
       docno = String.trim(docno)
 
+      # Move on to the next document
       index = if index.docno > 0 do
-        %Postings{index | length: 0, lengths: [ index.length | index.lengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
+        %Index{index | length: 0, lengths: [ index.length | index.lengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
       else
-        %Postings{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
+        %Index{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
       end
 
-      index = Postings.append(index, docno)
+      # Include the primary key as a term to match the other indexers
+      index = Index.append(index, docno)
 
       parse(file, index)
     else
+      # Otherwise consume until end of tag
       consume_tag(file, index)
     end
   end
 
   def parse_number(file, index, val \\ <<>>)
-  def parse_number(<<>>, index, val), do: Postings.append(index, val)
+  def parse_number(<<>>, index, val), do: Index.append(index, val)
   def parse_number(<<head, tail::binary>> = file, index, val) do
     case head do
       # Numeric
       x when x in 48..57 -> parse_number(tail, index, val <> <<x>>)
-      _ -> parse(file, Postings.append(index, val))
+      _ -> parse(file, Index.append(index, val))
     end
   end
 
   def parse_string(file, index, val \\ <<>>)
-  def parse_string(<<>>, index, val), do: Postings.append(index, val)
+  def parse_string(<<>>, index, val), do: Index.append(index, val)
   def parse_string(<<head, tail::binary>> = file, index, val) do
     case head do
       # Uppercase
-      x when x in 65..90 -> parse_string(tail, index, val <> <<x+32>>)
+      x when x in 65..90 -> parse_string(tail, index, val <> <<x+32>>) # lower case the string
       # Lowercase
       x when x in 97..122 -> parse_string(tail, index, val <> <<x>>)
-      _ -> parse(file, Postings.append(index, val))
+      _ -> parse(file, Index.append(index, val))
     end
   end
 
-  def parse(file, index \\ %Postings{})
+  # One-character lookahead lexical analyser
+  def parse(file, index \\ %Index{})
   def parse(<<>>, index), do: index
   def parse(<<head, tail::binary>> = file, index) do
+    # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
     case head do
       # Tag '<'
       60 -> parse_tag(file, index)
@@ -85,15 +98,18 @@ defmodule Indexer do
       x when x in 65..90 -> parse_string(file, index)
       # Lowercase
       x when x in 97..122 -> parse_string(file, index)
-      # Other
+      # Skip over whitespace and punctuation
       _ -> parse(tail, index)
     end
   end
 
+  # serialise the in-memory index to disk
   def serialise(index) do
-    index = %Postings{index | lengths: [ index.length | index.lengths]}
+    # Save the final document length
+    index = %Index{index | lengths: [ index.length | index.lengths]}
     docnos = Enum.reverse(index.docnos)
 
+    # store the primary keys
     File.open!("docids.bin", [:write], fn file ->
       Enum.each(docnos, fn docno ->
         IO.write(file, "#{docno}\n")
@@ -102,15 +118,19 @@ defmodule Indexer do
     vocab = File.open!("vocab.bin", [:write])
     postings = File.open!("postings.bin", [:write])
     Enum.each(index.terms, fn {term, posts} ->
+      # write the postings list to one file
       posts = Enum.reverse(posts)
       posts = for x <- posts, do: <<x::native-32>>, into: <<>>
       {:ok, where} = :file.position(postings, {:cur, 0})
       IO.binwrite(postings, posts)
+      # write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
       IO.binwrite(vocab, <<byte_size(term)::8, term::binary, 0::8, where::native-32, byte_size(posts)::native-32>>)
     end)
+    # clean up
     :ok = File.close(postings)
     :ok = File.close(vocab)
 
+    # store the document lengths
     lengths = Enum.reverse(index.lengths)
     lengths = for x <- lengths, do: <<x::native-32>>, into: <<>>
     File.open!("lengths.bin", [:write], fn file ->
@@ -119,15 +139,16 @@ defmodule Indexer do
   end
 end
 
+# Make sure we have one paramter, the filename
 if length(System.argv()) != 1 do
   IO.puts("Usage: ./JASSjr_index.exs <infile.xml>")
   System.halt()
 end
 
+# Read the file to index
 [ filename | _ ] = System.argv()
-
 file = File.read!(filename)
 
 index = Indexer.parse(file)
-IO.puts("Indexed #{index.docno} documents. Serialising...")
+IO.puts("Indexed #{index.docno} documents. Serialising...") # tell the user we've got to the end of parsing
 Indexer.serialise(index)
