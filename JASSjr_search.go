@@ -120,16 +120,12 @@ func main() {
 	for stdin.Scan() {
 		/*
 		  Zero the accumulator array.
+		  Re-initialise the rsv pointers. Saving us
+		  from using a slow comparator during sort
 		*/
 		for i := range rsv {
 			rsv[i] = 0
-		}
-		/*
-		  Re-initialise the rsv pointers
-		  this saves us from using a slow sort comparator
-		*/
-		for i := len(rsvPointers) - 1; i >= 0; i-- {
-			rsvPointers[i] = i
+			rsvPointers[i] = len(rsvPointers) - 1 - i
 		}
 		var queryId int = 0
 		for i, token := range strings.Fields(stdin.Text()) {
