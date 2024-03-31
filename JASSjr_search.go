@@ -113,9 +113,6 @@ func main() {
 		  Set up the rsv pointers
 	*/
 	rsvPointers := make([]int, documentsInCollection) // pointers to each member of rsv[] so that we can sort
-	for i := range rsv {
-		rsvPointers[i] = i
-	}
 
 	/*
 		  Search (one query per line)
@@ -127,6 +124,13 @@ func main() {
 		*/
 		for i := range rsv {
 			rsv[i] = 0
+		}
+		/*
+			Re-initialise the rsv pointers
+			this saves us from using a slow sort comparator
+		*/
+		for i := len(rsvPointers)-1; i >= 0; i-- {
+			rsvPointers[i] = i
 		}
 		var queryId int = 0
 		for i, token := range strings.Fields(stdin.Text()) {
@@ -181,12 +185,8 @@ func main() {
 		/*
 			Sort the results list
 		*/
-		slices.SortFunc(rsvPointers, func(a, b int) int {
-			if res := cmp.Compare(rsv[b], rsv[a]); res == 0 {
-				return b - a
-			} else {
-				return res
-			}
+		slices.SortStableFunc(rsvPointers, func(a, b int) int {
+			return cmp.Compare(rsv[b], rsv[a])
 		})
 
 		/*
