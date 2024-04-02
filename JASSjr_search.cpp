@@ -2,6 +2,7 @@
 	JASSJR_SEARCH.CPP
 	-----------------
 	Copyright (c) 2019 Andrew Trotman and Kat Lilly
+	Copyright (c) 2024 Vaughan Kitchen
 	Minimalistic BM25 search engine.
 */
 #include <math.h>
