@@ -44,7 +44,7 @@ for @*ARGS[0].IO.lines -> $line {
 		$token = $token.lc;
 
 		# truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
-		$token = $token.substr(0..255);
+		$token = $token.substr(0, 256);
 
 		# add the posting to the in-memory index
 		if %vocab{$token}:!exists {
