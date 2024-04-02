@@ -26,7 +26,7 @@ for @*ARGS[0].IO.lines -> $line {
 			# Save the previous document length
 			@length_vector.push($document_length) if $docid != -1;
 			# Move on to the next document
-			$docid += 1;
+			$docid++;
 			$document_length = 0;
 			say("$docid documents indexed") if $docid %% 1000;
 		}
@@ -56,7 +56,7 @@ for @*ARGS[0].IO.lines -> $line {
 		}
 
 		# Compute the document length
-		$document_length += 1;
+		$document_length++;
 	}
 }
 
