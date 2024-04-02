@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <iomanip>
@@ -66,14 +67,11 @@ return block;
 /*
 	COMPARE_RSV()
 	-------------
-	Callback from qsort for two rsv values.  Tie break on the document id.
+	Callback from std::sort for two rsv values. Tie break on the document id.
 */
-int compare_rsv(const void *a, const void *b)
+bool compare_rsv(double *first, double *second)
 {
-double **first = (double **)a;
-double **second = (double **)b;
-
-return **first < **second ? 1 : **first == **second ? *first < *second ? 1 : *first == *second ? 0 : -1 : -1;
+return *first > *second ? true : *first == *second ? first > second : false;
 }
 
 /*
@@ -207,7 +205,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 				if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
 			*/
 			if (documents_in_collection != postings)
-			  	{
+				{
 				double idf = log(documents_in_collection / postings);
 		
 				/*
@@ -226,7 +224,7 @@ while (fgets(buffer, sizeof(buffer), stdin) !=  NULL)
 	/*
 		Sort the results list
 	*/
-	qsort(rsv_pointers, max_docs, sizeof(*rsv_pointers), compare_rsv);
+	std::sort(&rsv_pointers[0], &rsv_pointers[max_docs], compare_rsv);
 
 	/*
 		Print the (at most) top 1000 documents in the results list in TREC eval format which is:
