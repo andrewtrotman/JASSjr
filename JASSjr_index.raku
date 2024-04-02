@@ -19,7 +19,7 @@ my $push_next = False; # is the next token the primary key?
 for @*ARGS[0].IO.lines -> $line {
 	# A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
   	# TREC <DOCNO> primary keys have a hyphen in them
-	for $line.match(/<[a..zA..Z1..9]><[a..zA..Z0..9-]>* | '<'<-[>]>*'>'/, :global) {
+	for $line.match(/<[a..zA..Z0..9]><[a..zA..Z0..9-]>* | '<'<-[>]>*'>'/, :global) {
 		my $token = $_.Str;
 		# If we see a <DOC> tag then we're at the start of the next document
 		if $token eq '<DOC>' {
