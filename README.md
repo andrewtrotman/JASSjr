@@ -137,6 +137,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.exs | Elixir source code to search engine |
 | JASSjr_index.rb | Ruby source code to indexer |
 | JASSjr_search.rb | Ruby source code to search engine |
+| JASSjr_index.pl | Perl source code to indexer |
+| JASSjr_search.pl | Perl source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
