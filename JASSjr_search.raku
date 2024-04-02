@@ -7,7 +7,7 @@ constant $k1 = 0.9; # BM25 k1 parameter
 constant $b = 0.4; # BM25 b parameter
 
 # Read the primary_keys
-my @doc_ids = slurp('docids.bin').split("\n");
+my @doc_ids = 'docids.bin'.IO.lines;
 
 # Read the document lengths
 my $doc_lengths_raw = slurp('lengths.bin', :bin);
