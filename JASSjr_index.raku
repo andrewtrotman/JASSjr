@@ -47,12 +47,12 @@ for @*ARGS[0].IO.lines -> $line {
 		$token = $token.substr(0, 256);
 
 		# add the posting to the in-memory index
-		if %vocab{$token}:!exists {
-			%vocab{$token} = [$docid, 1];
-		} elsif %vocab{$token}[*-2] != $docid {
-			%vocab{$token}.push($docid, 1);
+		%vocab{$token} = [] if %vocab{$token}:!exists;
+		my @postings_list := %vocab{$token};
+		if @postings_list.elems == 0 || @postings_list[*-2] != $docid {
+			@postings_list.push($docid, 1);
 		} else {
-			%vocab{$token}[*-1] += 1;
+			@postings_list[*-1]++;
 		}
 
 		# Compute the document length
