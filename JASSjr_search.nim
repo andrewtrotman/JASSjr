@@ -37,20 +37,33 @@ while not vocab_strm.atEnd:
 
 vocab_strm.close()
 
-let query = readLine(stdin).strip
-let (where, length) = vocab[query]
+try:
+  while true:
+    let query = readLine(stdin)
 
-postings.setLen(0)
+    let terms = query.splitWhitespace
 
-let postings_fh = open("postings.bin")
-postings_fh.setFilePos(where)
-let postings_strm = newFileStream(postings_fh)
+    for term in terms:
+      try:
+        let (where, length) = vocab[term]
 
-for i in 0 .. length:
-  let docid = postings_strm.readInt32
-  let tf = postings_strm.readInt32
-  postings.add((docid, tf))
+        postings.setLen(0)
 
-postings_strm.close() # strm owns fh
-for i, (docid, tf) in postings:
-   echo(fmt"0 Q0 {doc_ids[docid]} {i+1} {tf} JASSjr")
+        let postings_fh = open("postings.bin")
+        postings_fh.setFilePos(where)
+        let postings_strm = newFileStream(postings_fh)
+
+        for i in 0 .. length:
+          let docid = postings_strm.readInt32
+          let tf = postings_strm.readInt32
+          postings.add((docid, tf))
+
+        postings_strm.close() # strm owns fh
+        for i, (docid, tf) in postings:
+          if i == 10:
+            break
+          echo(fmt"0 Q0 {doc_ids[docid]} {i+1} {tf} JASSjr")
+      except KeyError:
+        discard
+except EOFError:
+  discard
