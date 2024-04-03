@@ -8,8 +8,8 @@ import std/strformat
 import std/strutils
 import std/tables
 
-let k1 = 0.9 # BM25 k1 parameter
-let b = 0.4 # BM25 b parameter
+const k1 = 0.9 # BM25 k1 parameter
+const b = 0.4 # BM25 b parameter
 
 let doc_ids = readFile("docids.bin").strip.splitLines
 
