@@ -88,6 +88,6 @@ try:
     for i, (rsv, docid) in accumulators:
       if rsv == 0 or i == 10:
         break
-      echo(fmt"0 Q0 {doc_ids[docid]} {i+1} {rsv} JASSjr")
+      echo(fmt"0 Q0 {doc_ids[docid]} {i+1} {rsv:.4f} JASSjr")
 except EOFError:
   discard
