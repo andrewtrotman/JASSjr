@@ -8,6 +8,7 @@ from array import array
 from collections import deque
 import math
 import struct
+import sys
 
 k1 = 0.9 # BM25 k1 parameter
 b = 0.4 # BM25 b parameter
@@ -49,46 +50,40 @@ for word, offset, size in decode_vocab(contents_vocab):
     vocab[word] = (offset, size)
 
 # Search (one query per line)
-try:
-    query = input()
-    while query:
-        query_id = 0
-        accumulators = [(0, 0)] * len(doc_lengths) # array of rsv values
+for query in sys.stdin:
+    query_id = 0
+    accumulators = [(0, 0)] * len(doc_lengths) # array of rsv values
 
-        # If the first token is a number then assume a TREC query number, and skip it
-        terms = deque(query.split())
-        if terms[0].isnumeric():
-            query_id = terms.popleft()
+    # If the first token is a number then assume a TREC query number, and skip it
+    terms = deque(query.split())
+    if terms[0].isnumeric():
+        query_id = terms.popleft()
 
-        for term in terms:
-            # Does the term exist in the collection?
-            try:
-                offset, size = vocab[term]
+    for term in terms:
+        # Does the term exist in the collection?
+        try:
+            offset, size = vocab[term]
 
-                postings_length = size / 8
-                # Compute the IDF component of BM25 as log(N/n).
-                # if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
-                idf = math.log(len(doc_lengths) / (postings_length))
+            postings_length = size / 8
+            # Compute the IDF component of BM25 as log(N/n).
+            # if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
+            idf = math.log(len(doc_lengths) / (postings_length))
 
-                # Seek and read the postings list
-                for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
-                    # Process the postings list by simply adding the BM25 component for this document into the accumulators array
-                    rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-                    current_rsv = accumulators[docid][0]
-                    accumulators[docid] = (current_rsv + rsv, docid)
-            except KeyError:
-                pass
+            # Seek and read the postings list
+            for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
+                # Process the postings list by simply adding the BM25 component for this document into the accumulators array
+                rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
+                current_rsv = accumulators[docid][0]
+                accumulators[docid] = (current_rsv + rsv, docid)
+        except KeyError:
+            pass
 
-        # Sort the results list. Tie break on the document ID.
-        accumulators.sort(reverse=True)
+    # Sort the results list. Tie break on the document ID.
+    accumulators.sort(reverse=True)
 
-        # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
-        # query-id Q0 document-id rank score run-name
-        for i, (rsv, docid) in enumerate(accumulators, start=1):
-            if rsv == 0 or i == 1001:
-                break
-            print("{} Q0 {} {} {:.4f} JASSjr".format(query_id, doc_ids[docid][:-1], i, rsv))
-
-        query = input()
-except EOFError:
-    pass
+    # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
+    # query-id Q0 document-id rank score run-name
+    for i, (rsv, docid) in enumerate(accumulators, start=1):
+        if rsv == 0 or i == 1001:
+            break
+        print("{} Q0 {} {} {:.4f} JASSjr".format(query_id, doc_ids[docid][:-1], i, rsv))
