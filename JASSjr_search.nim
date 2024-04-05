@@ -38,13 +38,11 @@ while not vocab_strm.atEnd():
   discard vocab_strm.readUint8()
   let where = vocab_strm.readInt32()
   let length = vocab_strm.readInt32()
-  vocab[term] = (where, length div 8)
+  vocab[term] = (where, length)
 
 vocab_strm.close()
 
 var accumulators = newSeq[(float, int)](len(doc_ids))
-for i, _ in accumulators:
-  accumulators[i][1] = i
 
 try:
   while true:
@@ -63,7 +61,7 @@ try:
       discard
 
     for i, _ in accumulators:
-      accumulators[i][0] = 0
+      accumulators[i] = (0, i)
 
     for term in terms:
       try:
@@ -76,7 +74,7 @@ try:
 
         let postings_strm = newFileStream(postings_fh)
 
-        for i in 0 .. length:
+        for i in 0 .. length div 8 - 1:
           let docid = postings_strm.readInt32()
           let tf = postings_strm.readInt32()
           postings.add((docid, tf))
@@ -94,7 +92,7 @@ try:
     accumulators.sort(Descending)
 
     for i, (rsv, docid) in accumulators:
-      if rsv == 0 or i == 10:
+      if rsv == 0 or i == 1000:
         break
       echo(fmt"{query_id} Q0 {doc_ids[docid]} {i+1} {rsv:.4f} JASSjr")
 except EOFError:
