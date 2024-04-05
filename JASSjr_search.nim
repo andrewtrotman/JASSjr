@@ -48,11 +48,19 @@ for i, _ in accumulators:
 
 try:
   while true:
+    var query_id = 0
+
     let query = readLine(stdin)
 
-    let terms = query.splitWhitespace()
+    var terms = query.splitWhitespace()
     if len(terms) == 0:
       continue
+
+    try:
+      query_id = parseInt(terms[0])
+      terms.delete(0)
+    except ValueError:
+      discard
 
     for i, _ in accumulators:
       accumulators[i][0] = 0
@@ -88,6 +96,6 @@ try:
     for i, (rsv, docid) in accumulators:
       if rsv == 0 or i == 10:
         break
-      echo(fmt"0 Q0 {doc_ids[docid]} {i+1} {rsv:.4f} JASSjr")
+      echo(fmt"{query_id} Q0 {doc_ids[docid]} {i+1} {rsv:.4f} JASSjr")
 except EOFError:
   discard
