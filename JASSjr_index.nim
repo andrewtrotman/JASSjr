@@ -1,4 +1,4 @@
-#!/usr/bin/env -S nim r --hints:off
+#!/usr/bin/env -S nim r --hints:off -d:release
 
 # Copyright (c) 2024 Vaughan Kitchen
 # Minimalistic BM25 search engine.
