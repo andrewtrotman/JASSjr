@@ -22,13 +22,14 @@ var length_vector: seq[int32] # hold the length of each document
 
 # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
 # TREC <DOCNO> primary keys have a hyphen in them
+let lexer = re"[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>"
 
 var docid: int32 = -1
 var document_length: int32 = 0
 var push_next = false # is the next token the primary key?
 
 for line in lines(commandLineParams()[0]):
-  for token in line.findall(re"[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>"):
+  for token in line.findall(lexer):
     # If we see a <DOC> tag then we're at the start of the next document
     if token == "<DOC>":
       # Save the previous document length
