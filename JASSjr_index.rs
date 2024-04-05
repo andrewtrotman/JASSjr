@@ -34,8 +34,8 @@ fn main() -> std::io::Result<()> {
             while let Some(c) = chars.next() {
                 //A token is either an XML tag '<'..'>' or a sequence of alphanumerics
                 //TREC <DOCNO> primary keys have a hyphen in them
-                if !c.is_alphanumeric() && c != '<' && c != '-' {
-                    if token.len() <= 0 {
+                if !c.is_alphanumeric() && c != '-' {
+                    if token.len() <= 0 && c != '<' {
                         continue;
                     }
                     //We are in a closing tag, not ending a token
@@ -71,7 +71,7 @@ fn main() -> std::io::Result<()> {
                     }
 
                     //Don't index XML tags
-                    if !token.starts_with('<') {
+                    if !token.starts_with('<') && token.len() > 0 {
                         //Lowercase the string
                         token = token.to_lowercase();
 
@@ -95,7 +95,12 @@ fn main() -> std::io::Result<()> {
                         //Compute the document length
                         document_length +=1;
                     }
-                    token.clear();                
+
+                    if c == '<' {
+                        token.push(c);
+                    } else {
+                    token.clear();        
+                    }        
                 }else {
                     token.push(c);
                 }
@@ -103,6 +108,7 @@ fn main() -> std::io::Result<()> {
             buffer.clear();
         }
     }
+
     //If we didn't index any documents then we're done
     if docid == -1 {
         return Ok(());
@@ -116,18 +122,18 @@ fn main() -> std::io::Result<()> {
 
     //Store the primary keys
     {
-        let mut writer = BufWriter::new(File::create("docids.bin")?);
+        let mut writer = BufWriter::new(File::create("docids1.bin")?);
         for id in doc_ids {
            writer.write_all(id.as_bytes())?;
            writer.write_all(b"\n")?;
         }
         writer.flush()?;
     }
-    
+
     //Serialise the index to disk
     {
-        let mut postings_writer = BufWriter::new(File::create("postings.bin")?);
-        let mut vocab_writer = BufWriter::new(File::create("vocab.bin")?);
+        let mut postings_writer = BufWriter::new(File::create("postings1.bin")?);
+        let mut vocab_writer = BufWriter::new(File::create("vocab1.bin")?);
         for (term, postings_list) in &vocab {
             //Write the postings list to one file
             for posting in postings_list {
@@ -139,7 +145,7 @@ fn main() -> std::io::Result<()> {
             vocab_writer.write_all(term.as_bytes())?;
             vocab_writer.write_all(b"\0")?;
             vocab_writer.write_all(&i32::try_from(postings_writer.stream_position()?).unwrap().to_ne_bytes())?;
-            vocab_writer.write_all(&(&postings_list.len() * 2 * 4).to_ne_bytes())?;
+            vocab_writer.write_all(&i32::try_from(&postings_list.len() * 2 * 4).unwrap().to_ne_bytes())?;
         }
         postings_writer.flush()?;
         vocab_writer.flush()?;
@@ -147,7 +153,7 @@ fn main() -> std::io::Result<()> {
 
     //Store the document lengths
     {
-        let mut writer = BufWriter::new(File::create("lengths.bin")?);
+        let mut writer = BufWriter::new(File::create("lengths1.bin")?);
         for length in length_vector {
             writer.write_all(&length.to_ne_bytes())?;
         }
