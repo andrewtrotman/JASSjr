@@ -119,12 +119,12 @@ int main(int argc, const char *argv[])
 	/*
 		Read the primary_keys
 	*/
-	char buffer[1024];					// the user's query (and also used to load the vocab)
-	std::vector<std::string>primary_key;			// the list of global IDs (i.e. primary keys)
+	char buffer[1024];						// the user's query (and also used to load the vocab)
+	std::vector<std::string>primary_key;	// the list of global IDs (i.e. primary keys)
 	FILE *fp = fopen("docids.bin", "rb");
 	while (fgets(buffer, sizeof(buffer), fp) != NULL)
 		{
-		buffer[strlen(buffer) - 1] = '\0';		// strip the '\n' that fgets leaves on the end
+		buffer[strlen(buffer) - 1] = '\0';	// strip the '\n' that fgets leaves on the end
 		primary_key.push_back(std::string(buffer));
 		}
 
@@ -141,7 +141,7 @@ int main(int argc, const char *argv[])
 	while (current < vocab + file_size)
 		{
 		string_length = *current;
-		where = *((int32_t *)(current + string_length + 2));			// +1 for the length and + 1 for the '\0'
+		where = *((int32_t *)(current + string_length + 2));					// +1 for the length and + 1 for the '\0'
 		size = *((int32_t *)(current + string_length + 2 + sizeof(int32_t)));	// +1 for the length and + 1 for the '\0'
 
 		dictionary[std::string(current + 1)] = vocab_entry(where, size);
@@ -152,7 +152,7 @@ int main(int argc, const char *argv[])
 		Allocate buffers
 	*/
 	int32_t *postings_buffer= new int32_t[(max_docs + 1) * 2];	// the postings list once loaded from disk
-	double *rsv = new double[max_docs];				// array of rsv values
+	double *rsv = new double[max_docs];							// array of rsv values
 
 	/*
 		Set up the rsv pointers

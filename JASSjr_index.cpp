@@ -17,12 +17,12 @@
 #include <unordered_map>
 
 typedef std::vector<std::pair<int32_t, int32_t>> postings_list;	// a postings list is an ordered pair of <docid,tf> integers
-char buffer[1024 * 1024];					// index line at a time where a line fits in this buffer
-char *current;							// where the lexical analyser is in buffer[]
-char next_token[1024 * 1024];					// the token we're currently building
-std::unordered_map<std::string, postings_list> vocab;		// the in-memory index
-std::vector<std::string>doc_ids;				// the primary keys
-std::vector<int32_t> length_vector;				// hold the length of each document
+char buffer[1024 * 1024];										// index line at a time where a line fits in this buffer
+char *current;													// where the lexical analyser is in buffer[]
+char next_token[1024 * 1024];									// the token we're currently building
+std::unordered_map<std::string, postings_list> vocab;			// the in-memory index
+std::vector<std::string>doc_ids;								// the primary keys
+std::vector<int32_t> length_vector;								// hold the length of each document
 
 /*
 	LEX_GET_NEXT()
@@ -160,7 +160,7 @@ int main(int argc, const char *argv[])
 			if (list.size() == 0 || list[list.size() - 1].first != docid)
 				list.push_back(std::pair<int32_t, int32_t>(docid, 1));	// if the docno for this occurence hasn't changed the increase tf
 			else
-				list[list.size() - 1].second++;				// else create a new <d,tf> pair.
+				list[list.size() - 1].second++;							// else create a new <d,tf> pair.
 
 			/*
 				Compute the document length
