@@ -1,10 +1,12 @@
 default : cpp java
 
-all : cpp java zig
+all : cpp java fortran zig
 
 cpp : JASSjr_index JASSjr_search
 
 java : JASSjr_index.class JASSjr_search.class
+
+fortran : JASSjr_index_fortran JASSjr_search_fortran
 
 zig : JASSjr_index_zig JASSjr_search_zig
 
@@ -20,6 +22,12 @@ JASSjr_index.class : JASSjr_index.java
 JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
 
+JASSjr_index_fortran : JASSjr_index.f90
+	gfortran -std=f2003 -O3 -Wall -Wextra JASSjr_index.f90 -o JASSjr_index_fortran
+
+JASSjr_search_fortran : JASSjr_search.f90
+	gfortran -std=f2003 -O3 -Wall -Wextra JASSjr_search.f90 -o JASSjr_search_fortran
+
 JASSjr_index_zig : JASSjr_index.zig
 	zig build-exe -O ReleaseFast --name JASSjr_index_zig JASSjr_index.zig
 
@@ -29,6 +37,7 @@ JASSjr_search_zig : JASSjr_search.zig
 clean:
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
+	- rm JASSjr_index_fortran JASSjr_search_fortran
 	- rm JASSjr_index_zig JASSjr_search_zig
 
 clean_index:
