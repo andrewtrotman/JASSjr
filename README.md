@@ -19,7 +19,7 @@ As an example ranking function this code implements the ATIRE version of BM25 wi
 ## Gotchas ##
 * If the first word in a query is a number it is assumed to be a TREC query number
 
-* There are many variants of BM25, JASSjr uses the ATIRE BM25 function which ignores the k3 query component.  It is assmed that each term is unique and occurs only once (and so the k3 clause is set to 1.0).
+* There are many variants of BM25, JASSjr uses the ATIRE BM25 function which ignores the k3 query component.  It is assumed that each term is unique and occurs only once (and so the k3 clause is set to 1.0).
 
 # Usage #
 To build simply use
@@ -129,7 +129,6 @@ and
 
 So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively well.
 
-
 # Manifest #
 
 | Filename | Purpose |
@@ -159,3 +158,31 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | test_documents.xml | Example of how documents should be layed out for indexing | 
 | 51-100.titles.txt | TREC topics 51-100 titles as queries |
 | 51-100.qrels.txt | TREC topics 51-100 human judgments |
+
+# Benchmarks #
+
+There are lies, damned lies, and benchmarks
+
+These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MHz DDR4 running Musl Void Linux 6.6.23 or newer.
+
+| Language | Version            | Parser | Accumulators | Indexing | Search |
+| -------- | -------            |------- | ------------ | -------- | ------ |
+| C++      | gcc 13.2           | Lexer  | Array        | 15s      | 280ms  |
+| Elixir   | 1.15.7/erts-14.2.3 | Lexer  | HashMap      | 125s     | 850ms  |
+| Go       | 1.22.0             | Lexer  | Array        | 18s      | 250ms  |
+| Java     | 1.8.0_332          | Lexer  | Array        | 18s      | 330ms  |
+| JS       | node v18.19.1      | Regex  | Array        | 35s      | 750ms  |
+| Nim      | 2.0.0              | Regex  | Array        | 19s      | 950ms  |
+| Perl     | v5.38.2            | Regex  | Array        | 115s     | 900ms  |
+| Python   | 3.12.2             | Regex  | Array        | 74s      | 850ms  |
+| Raku     | v6.d/2023.11       | Regex  | Array        | 140min   | 8s     |
+| Ruby     | 3.3.2              | Regex  | Array        | 160s     | 2.3s   |
+
+Where Parser is one of
+* Lexer being a hand written single token look-ahead lexer
+* Regex being an equivalent regex to the lexer
+
+And search is the time to startup, read the index file, and produce results for a single query
+
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen
+
