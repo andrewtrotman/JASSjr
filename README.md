@@ -135,6 +135,7 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | Filename | Purpose |
 |------------|-----------|
 | README.md | This file |
+| LICENSE.txt | A copy of the 2-clause BSD license |
 | JASSjr_index.cpp | C/C++ source code to indexer |
 | JASSjr_search.cpp | C/C++ source code to search engine |
 | JASSjr_index.java | Java source code to indexer |
