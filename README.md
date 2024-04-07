@@ -153,6 +153,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.go | Go source code to search engine |
 | JASSjr_index.raku | Raku source code to indexer |
 | JASSjr_search.raku | Raku source code to search engine |
+| JASSjr_index.nim | Nim source code to indexer |
+| JASSjr_search.nim | Nim source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
