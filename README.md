@@ -1,8 +1,7 @@
 # JASSjr #
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
-Copyright (c) 2019 Andrew Trotman and Kat Lilly \
-Copyright (c) 2023, 2024 Vaughan Kitchen \
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen \
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
@@ -159,5 +158,3 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | test_documents.xml | Example of how documents should be layed out for indexing | 
 | 51-100.titles.txt | TREC topics 51-100 titles as queries |
 | 51-100.qrels.txt | TREC topics 51-100 human judgments |
-
-Copyright (c) 2019 Andrew Trotman and Kat Lilly
