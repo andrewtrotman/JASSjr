@@ -1,8 +1,7 @@
 # JASSjr #
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
-Copyright (c) 2019 Andrew Trotman and Kat Lilly \
-Copyright (c) 2023, 2024 Vaughan Kitchen \
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen \
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
@@ -130,12 +129,12 @@ and
 
 So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, but that isn't the point.  JASSjr is a minimalistic code base demonstrating how to write a search engine from scratch.  It performs competatively well.
 
-
 # Manifest #
 
 | Filename | Purpose |
 |------------|-----------|
 | README.md | This file |
+| LICENSE.txt | A copy of the 2-clause BSD license |
 | JASSjr_index.cpp | C/C++ source code to indexer |
 | JASSjr_search.cpp | C/C++ source code to search engine |
 | JASSjr_index.java | Java source code to indexer |
@@ -185,4 +184,5 @@ Where Parser is one of
 
 And search is the time to startup, read the index file, and produce results for a single query
 
-Copyright (c) 2019 Andrew Trotman and Kat Lilly
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen
+
