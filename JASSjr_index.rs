@@ -30,11 +30,15 @@ fn main() -> std::io::Result<()> {
         let mut token = String::new();
 
         while reader.read_line(&mut buffer)? > 0 {
-            let mut chars = buffer.trim().chars();
+            let mut chars = buffer.chars();
             while let Some(c) = chars.next() {
                 //A token is either an XML tag '<'..'>' or a sequence of alphanumerics
-                //TREC <DOCNO> primary keys have a hyphen in them
-                if !c.is_alphanumeric() && c != '-' {
+                if !c.is_alphanumeric() {
+                    //TREC <DOCNO> primary keys have a hyphen in them
+                    if c == '-' && token.len() > 0 {
+                        token.push(c);
+                        continue;
+                    }
                     if token.len() <= 0 && c != '<' {
                         continue;
                     }
@@ -95,12 +99,10 @@ fn main() -> std::io::Result<()> {
                         //Compute the document length
                         document_length +=1;
                     }
-
+                    token.clear();
                     if c == '<' {
                         token.push(c);
-                    } else {
-                    token.clear();        
-                    }        
+                    }       
                 }else {
                     token.push(c);
                 }
@@ -154,7 +156,7 @@ fn main() -> std::io::Result<()> {
     //Store the document lengths
     {
         let mut writer = BufWriter::new(File::create("lengths1.bin")?);
-        for length in length_vector {
+        for length in &length_vector {
             writer.write_all(&length.to_ne_bytes())?;
         }
         writer.flush()?;
