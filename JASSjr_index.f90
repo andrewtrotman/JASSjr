@@ -11,9 +11,11 @@ module dynarray_integer_mod
         contains
                 procedure, public :: init => dynarray_integer_init
                 procedure, public :: append => dynarray_integer_append
+                procedure, public :: size => dynarray_integer_size
                 procedure, public :: at => dynarray_integer_at
                 procedure, public :: inc => dynarray_integer_inc
                 procedure, public :: print => dynarray_integer_print
+                procedure, public :: write => dynarray_integer_write
         end type dynarray_integer_class
 
 contains
@@ -41,6 +43,13 @@ contains
                 this%length = this%length + 1
                 this%store(this%length) = val
         end subroutine dynarray_integer_append
+
+        function dynarray_integer_size(this) result(out)
+                class(dynarray_integer_class), intent(inout) :: this
+                integer :: out
+
+                out = this%length
+        end function dynarray_integer_size
 
         function dynarray_integer_at(this, i) result(out)
                 class(dynarray_integer_class), intent(inout) :: this
@@ -73,6 +82,13 @@ contains
                         print *, this%store(i)
                 end do
         end subroutine dynarray_integer_print
+
+        subroutine dynarray_integer_write(this, fh)
+                class(dynarray_integer_class), intent(inout) :: this
+                integer, intent(in) :: fh
+
+                write (fh) this%store(:this%length)
+        end subroutine dynarray_integer_write
 end module dynarray_integer_mod
 
 module dynarray_string_mod
@@ -86,6 +102,7 @@ module dynarray_string_mod
                 procedure, public :: init => dynarray_string_init
                 procedure, public :: append => dynarray_string_append
                 procedure, public :: print => dynarray_string_print
+                procedure, public :: write => dynarray_string_write
         end type dynarray_string_class
 
 contains
@@ -122,6 +139,17 @@ contains
                         print *, this%store(i)
                 end do
         end subroutine dynarray_string_print
+
+        subroutine dynarray_string_write(this, fh)
+                class(dynarray_string_class), intent(inout) :: this
+                integer, intent(in) :: fh
+                integer :: i
+
+                do i = 1, this%length
+                        write (fh) this%store(i)(1:len_trim(this%store(i)))
+                        write (fh) new_line('A')
+                end do
+        end subroutine dynarray_string_write
 end module dynarray_string_mod
 
 module vocab_mod
@@ -143,6 +171,7 @@ module vocab_mod
                 procedure, public :: init => vocab_init
                 procedure, public :: add => vocab_add
                 procedure, public :: print => vocab_print
+                procedure, public :: write => vocab_write
         end type vocab_class
 
 contains
@@ -208,6 +237,27 @@ contains
                         end if
                 end do
         end subroutine vocab_print
+
+        subroutine vocab_write(this, vocab_fh, postings_fh)
+                class(vocab_class), intent(inout) :: this
+                integer, intent(in) :: vocab_fh, postings_fh
+                integer :: where, i
+
+                do i = 1, this%capacity
+                        if (associated(this%store(i)%postings)) then
+                                ! Write the postings list to one file
+                                inquire (unit=postings_fh, size=where)
+                                call this%store(i)%postings%write(postings_fh)
+
+                                ! Write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
+                                write (vocab_fh) int(len_trim(this%store(i)%term), 1)
+                                write (vocab_fh) this%store(i)%term(1:len_trim(this%store(i)%term))
+                                write (vocab_fh) int(0, 1)
+                                write (vocab_fh) where
+                                write (vocab_fh) this%store(i)%postings%size() * 4 ! in bytes
+                        end if
+                end do
+        end subroutine vocab_write
 end module vocab_mod
 
 module lexer_mod
@@ -311,7 +361,7 @@ program index
 
         ! Open the file to index
         call get_command_argument(1, buffer)
-        open (action='read', file=buffer(1:len_trim(buffer)), iostat=rc, unit=10)
+        open (unit=10, action='read', file=buffer(1:len_trim(buffer)), iostat=rc)
         if (rc /= 0) stop 'ERROR: open failed'
 
         ! Init
@@ -359,11 +409,38 @@ program index
                 end do
         end do
 
-        call vocab%print()
+        ! If we didn't index any documents then we're done.
+        if (docid == -1) stop
+
+        ! Save the final document length
+        call length_vector%append(document_length)
+
+        ! Tell the user we've got to the end of parsing
+        print '(A, I0, A)', 'Indexed ', docid + 1, ' documents. Serialising...'
+
+        ! Store the primary keys
+        open (unit=11, action='write', file='docids.bin', iostat=rc, status='replace', access='stream')
+        if (rc /= 0) stop 'ERROR: open failed'
+        call doc_ids%write(11)
+
+        ! Serialise the in-memory index to disk
+        open (unit=12, action='write', file='vocab.bin', iostat=rc, status='replace', access='stream')
+        if (rc /= 0) stop 'ERROR: open failed'
+        open (unit=13, action='write', file='postings.bin', iostat=rc, status='replace', access='stream')
+        if (rc /= 0) stop 'ERROR: open failed'
+        call vocab%write(12, 13)
+
+        ! Store the document lengths
+        open (unit=14, action='write', file='lengths.bin', iostat=rc, status='replace', access='stream')
+        if (rc /= 0) stop 'ERROR: open failed'
+        call length_vector%write(14)
 
         ! Clean up
         close (10)
-
+        close (11)
+        close (12)
+        close (13)
+        close (14)
 contains
         subroutine lowercase(str)
                 character(len=*), intent(inout) :: str
