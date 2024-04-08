@@ -320,13 +320,14 @@ contains
                 end select
         end function is_alnum
 
-        subroutine lexer_init(this, buffer)
+        subroutine lexer_init(this, buffer, buffer_length)
                 class(lexer_class), intent(inout) :: this
                 character(len=*), intent(in) :: buffer
+                integer, intent(in) :: buffer_length
 
                 this%buffer = buffer
                 this%current = 1
-                this%length = len_trim(buffer)
+                this%length = buffer_length
         end subroutine lexer_init
 
         ! One-character lookahead lexical analyser
@@ -379,6 +380,7 @@ program index
         integer :: rc ! return code
         logical :: push_next
         character(len=1024 * 1024) :: buffer
+        integer :: buffer_length
         character(len=:), allocatable :: token
 
         ! Make sure we have one parameter, the filename
@@ -404,9 +406,10 @@ program index
 
         ! Read the file line by line
         do
-                read (10, '(A)', iostat=rc) buffer
-                if (rc /= 0) exit
-                call lexer%init(buffer)
+                read (10, '(A)', iostat=rc, size=buffer_length, advance='no') buffer
+                if (is_iostat_end(rc)) exit
+                rc = 0
+                call lexer%init(buffer, buffer_length)
                 ! Read the line token by token
                 do
                         token = lexer%get_next(rc)
@@ -431,7 +434,7 @@ program index
                         ! Lowercase the string
                         call lowercase(token)
                         ! Truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
-                        if (len_trim(token) > 255) token = token(1:255)
+                        if (len(token) > 255) token = token(1:255)
                         ! Add the posting to the in-memory index
                         call vocab%add(token, docid)
                         ! Compute the document length
