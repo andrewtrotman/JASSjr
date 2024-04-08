@@ -232,26 +232,26 @@ contains
 
                 if (this%length * 2 > this%capacity) call this%expand()
 
-                i = hash(term, this%capacity) + 1
+                i = hash(term, this%capacity)
 
-                do while (associated(this%store(i)%postings))
-                        if (this%store(i)%term == term) then
-                                if (this%store(i)%postings%at(-2) == docid) then
-                                        call this%store(i)%postings%inc(-1)
+                do while (associated(this%store(i+1)%postings))
+                        if (this%store(i+1)%term == term) then
+                                if (this%store(i+1)%postings%at(-2) == docid) then
+                                        call this%store(i+1)%postings%inc(-1)
                                         return
                                 end if
-                                call this%store(i)%postings%append(docid)
-                                call this%store(i)%postings%append(1)
+                                call this%store(i+1)%postings%append(docid)
+                                call this%store(i+1)%postings%append(1)
                                 return
                         end if
-                        i = mod(i + 1, this%capacity) + 1
+                        i = mod(i + 1, this%capacity)
                 end do
 
-                this%store(i)%term = term
-                allocate(this%store(i)%postings)
-                call this%store(i)%postings%init()
-                call this%store(i)%postings%append(docid)
-                call this%store(i)%postings%append(1)
+                this%store(i+1)%term = term
+                allocate(this%store(i+1)%postings)
+                call this%store(i+1)%postings%init()
+                call this%store(i+1)%postings%append(docid)
+                call this%store(i+1)%postings%append(1)
 
                 this%length = this%length + 1
         end subroutine vocab_add
