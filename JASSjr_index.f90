@@ -379,7 +379,7 @@ program index
         integer :: argc, docid, document_length
         integer :: rc ! return code
         logical :: push_next
-        character(len=1024 * 1024) :: buffer
+        character(len=2048) :: buffer ! fortran memsets the buffer on every read so don't make it too big
         integer :: buffer_length
         character(len=:), allocatable :: token
 
