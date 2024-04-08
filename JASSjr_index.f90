@@ -212,13 +212,13 @@ contains
                 do i = 1, old_cap
                         if (.NOT. associated(buffer(i)%postings)) cycle
 
-                        j = hash(buffer(i)%term, this%capacity) + 1
+                        j = hash(buffer(i)%term, this%capacity)
 
-                        do while (associated(this%store(j)%postings))
-                                j = mod(j + 1, this%capacity) + 1
+                        do while (associated(this%store(j+1)%postings))
+                                j = mod(j + 1, this%capacity)
                         end do
 
-                        this%store(j) = buffer(i)
+                        this%store(j+1) = buffer(i)
                 end do
 
                 deallocate(buffer)
