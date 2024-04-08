@@ -169,6 +169,7 @@ module vocab_mod
                 type(pair), allocatable :: store(:)
         contains
                 procedure, public :: init => vocab_init
+                procedure, private :: expand => vocab_expand
                 procedure, public :: add => vocab_add
                 procedure, public :: print => vocab_print
                 procedure, public :: write => vocab_write
@@ -176,15 +177,16 @@ module vocab_mod
 
 contains
         ! djb2 hash function from http://www.cse.yorku.ca/~oz/hash.html
-        function hash(str) result(out)
-                character(len=*), intent(in):: str
+        function hash(str, cap) result(out)
+                character(len=*), intent(in) :: str
+                integer, intent(in) :: cap
                 integer :: out
                 integer :: i
 
                 out = 5381
 
                 do i = 1, len(str)
-                        out = ishft(out, 5) + out + ichar(str(i:i)) ! hash * 33 + c
+                        out = mod(ishft(out, 5) + out + ichar(str(i:i)), cap) ! hash * 33 + c
                 end do
         end function hash
 
@@ -196,15 +198,41 @@ contains
                 allocate(this%store(this%capacity))
         end subroutine vocab_init
 
+        subroutine vocab_expand(this)
+                class(vocab_class), intent(inout) :: this
+                type(pair), allocatable :: buffer(:)
+                integer :: old_cap, i, j
+
+                old_cap = this%capacity
+                this%capacity = this%capacity * 2
+
+                call move_alloc(this%store, buffer)
+                allocate(this%store(this%capacity))
+
+                do i = 1, old_cap
+                        if (.NOT. associated(buffer(i)%postings)) cycle
+
+                        j = hash(buffer(i)%term, this%capacity) + 1
+
+                        do while (associated(this%store(j)%postings))
+                                j = mod(j + 1, this%capacity) + 1
+                        end do
+
+                        this%store(j) = buffer(i)
+                end do
+
+                deallocate(buffer)
+        end subroutine vocab_expand
+
         subroutine vocab_add(this, term, docid)
                 class(vocab_class), intent(inout) :: this
                 character(len=*), intent(in) :: term
                 integer, intent(in) :: docid
                 integer :: i
 
-                ! TODO expand if full
+                if (this%length * 2 > this%capacity) call this%expand()
 
-                i = mod(hash(term), this%capacity) + 1
+                i = hash(term, this%capacity) + 1
 
                 do while (associated(this%store(i)%postings))
                         if (this%store(i)%term == term) then
@@ -224,6 +252,8 @@ contains
                 call this%store(i)%postings%init()
                 call this%store(i)%postings%append(docid)
                 call this%store(i)%postings%append(1)
+
+                this%length = this%length + 1
         end subroutine vocab_add
 
         subroutine vocab_print(this)
