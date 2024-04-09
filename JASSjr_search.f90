@@ -126,18 +126,24 @@ contains
         end subroutine vocab_print
 end module vocab_mod
 
-program index
+program search
         use vocab_mod
         implicit none
 
+        real :: k1 = 0.9 ! BM25 k1 parameter
+        real :: b = 0.4 ! BM25 b parameter
+
         integer, allocatable :: length_vector(:)
+        integer, allocatable :: postings(:)
+        real, allocatable :: rsv(:)
+        integer, allocatable :: rsv_pointers(:)
         character(len=255), allocatable :: primary_keys(:)
         type(vocab_class) :: vocab
         character(len=1024) :: buffer
         character(len=255) :: query(10) ! maximum query size is 10 terms
-        integer :: file_size, string_length, postings_where, postings_size, no_terms, query_id, query_start, i
+        integer :: file_size, string_length, postings_where, postings_size, no_terms, query_id, query_start, docid, i, j
         character(len=1) :: string_length_raw
-        real :: average_document_length
+        real :: average_document_length, tf, idf
         integer :: rc ! return code
 
         ! Read the document lengths
@@ -174,14 +180,29 @@ program index
         end do
         close (10)
 
+        ! Open the postings list file
+        open (unit=10, action='read', file='postings.bin', iostat=rc, access='stream', form='unformatted')
+        if (rc /= 0) stop 'ERROR: open failed'
+
         ! Allocate buffers
+        allocate(postings(size(length_vector) * 2))
 
         ! Set up the rsv pointers
+        allocate(rsv(size(length_vector)))
+        allocate(rsv_pointers(size(length_vector)))
+
+        do i = 1, size(rsv_pointers)
+                rsv_pointers(i) = i
+        end do
 
         ! Search (one query per line)
         do
                 read (*, '(A)', iostat=rc) buffer
                 if (is_iostat_end(rc)) exit
+
+                ! Zero the accumulator array
+                rsv = 0
+
                 no_terms = 1
                 do
                         ! Try read n terms from the query
@@ -200,8 +221,69 @@ program index
                 do i = query_start, no_terms
                         call vocab%get(rc, trim(query(i)), postings_where, postings_size)
                         if (rc /= 0) cycle
-                        print *, postings_where, postings_size
+
+                        read (10, pos=postings_where+1) postings ! TODO limit postings read
+
+                        idf = log(real(size(primary_keys)) / real(postings_size))
+
+                        do j = 1, postings_size / 4, 2
+                                docid = postings(j)
+                                tf = postings(j+1)
+                                rsv(docid) = rsv(docid) + idf * (tf * (k1 + 1)) &
+                                        / (tf + k1 * (1 - b + b * (length_vector(docid) / average_document_length)))
+                        end do
+                end do
+
+                call sort
+
+                do i = 1, size(rsv_pointers)
+                        docid = rsv_pointers(i)
+                        if (i == 1001) exit
+                        if (.NOT. rsv(docid) .GT. 0) exit
+                        print '(I0, 1X, A, 1X, A, 1X, I0, 1X, F0.4, 1X, A)' &
+                                , query_id, 'Q0', trim(primary_keys(docid)), i, rsv(docid), 'JASSjr'
                 end do
         end do
 
-end program index
+        close (10)
+contains
+        subroutine sort
+                call quicksort(1, size(rsv_pointers))
+        end subroutine sort
+
+        recursive subroutine quicksort(lo, hi)
+                integer, intent(in) :: lo, hi
+
+                integer :: left, right, tmp
+                real :: pivot
+
+                if (.NOT. lo .LT. hi) then
+                        return
+                end if
+
+                pivot = rsv(rsv_pointers((lo + hi) / 2))
+                left = lo - 1
+                right = hi + 1
+                do
+                        left = left + 1
+                        do while (rsv(rsv_pointers(left)) .GT. pivot)
+                                left = left + 1
+                        end do
+                        right = right - 1
+                        do while (rsv(rsv_pointers(right)) .LT. pivot)
+                                right = right - 1
+                        end do
+
+                        if (left >= right) then
+                                exit
+                        end if
+
+                        tmp = rsv_pointers(left)
+                        rsv_pointers(left) = rsv_pointers(right)
+                        rsv_pointers(right) = tmp
+                end do
+
+                call quicksort(lo, right)
+                call quicksort(right + 1, hi)
+        end subroutine quicksort
+end program search
