@@ -7,6 +7,10 @@ const native_endian = @import("builtin").target.cpu.arch.endian();
 const k1 = 0.9; // BM25 k1 parameter
 const b = 0.4; // BM25 b parameter
 
+fn compare_rsv(rsv: []f64, first: usize, second: usize) bool {
+    return if (rsv[first] == rsv[second]) first > second else rsv[first] > rsv[second];
+}
+
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
@@ -85,27 +89,39 @@ pub fn main() !void {
         // Zero the accumulator array
         for (0..documents_in_collection) |i| {
             rsv[i] = 0;
-            rsv_pointers[i] = i;
         }
+
+        const query_id = 0;
 
         var it = std.mem.split(u8, line, " ");
         while (it.next()) |term| {
+            // Does the term exist in the collection?
             if (vocab.get(term)) |pair| {
+                // Seek and read the postings list
                 try postings_fh.seekTo(pair[0]);
                 _ = try fh.readAll(std.mem.sliceAsBytes(postings)[0..pair[1]]);
 
+                // Compute the IDF component of BM25 as log(N/n)
                 const idf = @log(@as(f64, @floatFromInt(documents_in_collection)) / @as(f64, @floatFromInt(pair[1] / 8)));
 
+                // Process the postings list by simply adding the BM25 component for this document into the accumulators array
                 for (postings, 0..) |p, i| {
                     if (i == pair[1] / 8) break;
                     const docid = p[0];
                     const tf: f64 = @floatFromInt(p[1]);
-                    rsv[docid] = idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (@as(f64, @floatFromInt(lengths_vector[docid])) / average_document_length)));
+                    rsv[docid] += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (@as(f64, @floatFromInt(lengths_vector[docid])) / average_document_length)));
                 }
             }
         }
-        for (rsv) |r| {
-            if (r > 0) std.debug.print("{}\n", .{r});
+
+        // Sort the results list
+        std.sort.pdq(usize, rsv_pointers, rsv, compare_rsv);
+
+        // Print the (at most) top 1000 documents in the results list in TREC eval format which is:
+        // query-id Q0 document-id rank score run-name
+        for (rsv_pointers, 0..) |r, i| {
+            if (rsv[r] == 0 or r == 1000) break;
+            if (r > 0) std.debug.print("{d} Q0 {s} {d} {d:.4} JASSjr\n", .{ query_id, primary_keys[r], i + 1, rsv[r] });
         }
     }
 }
