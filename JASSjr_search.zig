@@ -91,9 +91,11 @@ pub fn main() !void {
             rsv[i] = 0;
         }
 
-        const query_id = 0;
-
         var it = std.mem.splitAny(u8, line, " \r\n");
+
+        const query_id = std.fmt.parseInt(isize, it.peek().?, 10) catch 0;
+        if (query_id != 0) _ = it.next();
+
         while (it.next()) |term| {
             if (term.len == 0) continue;
             // Does the term exist in the collection?
