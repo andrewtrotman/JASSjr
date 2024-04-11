@@ -93,8 +93,9 @@ pub fn main() !void {
 
         const query_id = 0;
 
-        var it = std.mem.split(u8, line, " ");
+        var it = std.mem.splitAny(u8, line, " \r\n");
         while (it.next()) |term| {
+            if (term.len == 0) continue;
             // Does the term exist in the collection?
             if (vocab.get(term)) |pair| {
                 // Seek and read the postings list
