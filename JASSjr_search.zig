@@ -123,7 +123,7 @@ pub fn main() !void {
         // Print the (at most) top 1000 documents in the results list in TREC eval format which is:
         // query-id Q0 document-id rank score run-name
         for (rsv_pointers, 0..) |r, i| {
-            if (rsv[r] == 0 or r == 1000) break;
+            if (rsv[r] == 0 or i == 1000) break;
             if (r > 0) std.debug.print("{d} Q0 {s} {d} {d:.4} JASSjr\n", .{ query_id, primary_keys[r], i + 1, rsv[r] });
         }
     }
