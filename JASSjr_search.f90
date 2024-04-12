@@ -224,10 +224,10 @@ program search
 
                         read (10, pos=postings_where+1) postings ! TODO limit postings read
 
-                        idf = log(real(size(primary_keys)) / real(postings_size))
+                        idf = log(real(size(primary_keys)) / real(postings_size / 8))
 
                         do j = 1, postings_size / 4, 2
-                                docid = postings(j)
+                                docid = postings(j) + 1
                                 tf = postings(j+1)
                                 rsv(docid) = rsv(docid) + idf * (tf * (k1 + 1)) &
                                         / (tf + k1 * (1 - b + b * (length_vector(docid) / average_document_length)))
