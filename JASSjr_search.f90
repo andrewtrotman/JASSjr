@@ -135,7 +135,7 @@ program search
 
         integer, allocatable :: length_vector(:)
         integer, allocatable :: postings(:)
-        real, allocatable :: rsv(:)
+        real(kind=8), allocatable :: rsv(:)
         integer, allocatable :: rsv_pointers(:)
         character(len=255), allocatable :: primary_keys(:)
         type(vocab_class) :: vocab
@@ -143,7 +143,7 @@ program search
         character(len=255) :: query(10) ! maximum query size is 10 terms
         integer :: file_size, string_length, postings_where, postings_size, no_terms, query_id, query_start, docid, i, j
         character(len=1) :: string_length_raw
-        real :: average_document_length, tf, idf
+        real(kind=8) :: average_document_length, tf, idf
         integer :: rc ! return code
 
         ! Read the document lengths
@@ -155,7 +155,7 @@ program search
         close (10)
 
         ! Compute the average document length for BM25
-        average_document_length = real(sum(length_vector)) / real(size(length_vector))
+        average_document_length = real(sum(length_vector), 8) / real(size(length_vector), 8)
 
         ! Read the primary_keys
         allocate(primary_keys(size(length_vector)))
@@ -224,7 +224,7 @@ program search
 
                         read (10, pos=postings_where+1) postings ! TODO limit postings read
 
-                        idf = log(real(size(primary_keys)) / real(postings_size / 8))
+                        idf = log(real(size(primary_keys), 8) / real(postings_size / 8, 8))
 
                         do j = 1, postings_size / 4, 2
                                 docid = postings(j) + 1
@@ -255,7 +255,7 @@ contains
                 integer, intent(in) :: lo, hi
 
                 integer :: left, right, tmp
-                real :: pivot
+                real(kind=8) :: pivot
 
                 if (.NOT. lo .LT. hi) then
                         return
