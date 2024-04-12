@@ -130,8 +130,12 @@ program search
         use vocab_mod
         implicit none
 
-        real :: k1 = 0.9 ! BM25 k1 parameter
-        real :: b = 0.4 ! BM25 b parameter
+        ! Literals are 32-bit unless type specified which can only be done with a custom type
+        ! Here 15 refers to significant decimal digits which requires double precision
+        integer, parameter :: dp = selected_real_kind(15)
+
+        real(kind=8) :: k1 = 0.9_dp ! BM25 k1 parameter
+        real(kind=8) :: b = 0.4_dp ! BM25 b parameter
 
         integer, allocatable :: length_vector(:)
         integer, allocatable :: postings(:)
