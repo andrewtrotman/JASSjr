@@ -244,8 +244,15 @@ program search
                         docid = rsv_pointers(i)
                         if (i == 1001) exit
                         if (.NOT. rsv(docid) .GT. 0) exit
-                        print '(I0, 1X, A, 1X, A, 1X, I0, 1X, F0.4, 1X, A)' &
-                                , query_id, 'Q0', trim(primary_keys(docid)), i, rsv(docid), 'JASSjr'
+
+                        ! Many fortran compilers (including gfortran) omit the leading 0 when printing
+                        if (rsv(docid) < 1) then
+                                print '(I0, 1X, A, 1X, A, 1X, I0, 1X, A, F0.4, 1X, A)' &
+                                        , query_id, 'Q0', trim(primary_keys(docid)), i, '0', rsv(docid), 'JASSjr'
+                        else
+                                print '(I0, 1X, A, 1X, A, 1X, I0, 1X, F0.4, 1X, A)' &
+                                        , query_id, 'Q0', trim(primary_keys(docid)), i, rsv(docid), 'JASSjr'
+                        end if
                 end do
         end do
 
