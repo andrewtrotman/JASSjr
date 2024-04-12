@@ -99,7 +99,6 @@ func main() {
 		size := binary.NativeEndian.Uint32(vocabAsBytes[offset:])
 		offset += 4
 
-		// TODO pointer type?
 		dictionary[term] = vocabEntry{int32(where), int32(size)}
 	}
 
@@ -192,7 +191,7 @@ func main() {
 			if rsv[r] == 0 || i == 1000 {
 				break
 			}
-			fmt.Printf("%d Q0 %s %d %.4f JASSjr\n", queryId, primaryKeys[rsvPointers[i]], i+1, rsv[r])
+			fmt.Printf("%d Q0 %s %d %.4f JASSjr\n", queryId, primaryKeys[r], i+1, rsv[r])
 		}
 	}
 	if err := stdin.Err(); err != nil {
