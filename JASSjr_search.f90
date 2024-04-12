@@ -226,7 +226,7 @@ program search
                         call vocab%get(rc, trim(query(i)), postings_where, postings_size)
                         if (rc /= 0) cycle
 
-                        read (10, pos=postings_where+1) postings ! TODO limit postings read
+                        read (10, pos=postings_where+1) postings(1:postings_size / 4)
 
                         idf = log(real(size(primary_keys), 8) / real(postings_size / 8, 8))
 
