@@ -258,27 +258,29 @@ contains
         recursive subroutine quicksort(lo, hi)
                 integer, intent(in) :: lo, hi
 
-                integer :: left, right, tmp
-                real(kind=8) :: pivot
+                integer :: pivot, left, right, tmp
+                real(kind=8) :: delta = 0.0000000001
 
                 if (.NOT. lo .LT. hi) then
                         return
                 end if
 
-                pivot = rsv(rsv_pointers((lo + hi) / 2))
+                pivot = rsv_pointers((lo + hi) / 2)
                 left = lo - 1
                 right = hi + 1
                 do
                         left = left + 1
-                        do while (rsv(rsv_pointers(left)) .GT. pivot)
+                        do while (rsv(rsv_pointers(left)) .GT. rsv(pivot) &
+                        .OR. (abs(rsv(rsv_pointers(left)) - rsv(pivot)) .LE. delta .AND. rsv_pointers(left) .GT. pivot))
                                 left = left + 1
                         end do
                         right = right - 1
-                        do while (rsv(rsv_pointers(right)) .LT. pivot)
+                        do while (rsv(rsv_pointers(right)) .LT. rsv(pivot) &
+                        .OR. (abs(rsv(rsv_pointers(right)) - rsv(pivot)) .LE. delta .AND. rsv_pointers(right) .LT. pivot))
                                 right = right - 1
                         end do
 
-                        if (left >= right) then
+                        if (left .GE. right) then
                                 exit
                         end if
 
