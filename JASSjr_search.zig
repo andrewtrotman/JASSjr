@@ -11,6 +11,20 @@ fn compare_rsv(rsv: []f64, first: usize, second: usize) bool {
     return if (rsv[first] == rsv[second]) first > second else rsv[first] > rsv[second];
 }
 
+// The Zig standard library as of 0.12.0-dev.3639+9cfac4718 doesn't randomise the hash seed
+// Due to the hash table implementation writing out and reading back with the same seed value is incredibly slow
+// Here we provide a custom hash table context so that we can hash to different values
+const StringContext = struct {
+    pub fn hash(self: @This(), str: []const u8) u64 {
+        _ = self;
+        return std.hash.Wyhash.hash(42, str);
+    }
+    pub fn eql(self: @This(), first: []const u8, second: []const u8) bool {
+        _ = self;
+        return std.mem.eql(u8, first, second);
+    }
+};
+
 // Simple search engine ranking on BM25.
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -50,7 +64,7 @@ pub fn main() !void {
     fh = try std.fs.cwd().openFile("vocab.bin", .{});
     stream = std.io.bufferedReader(fh.reader());
 
-    var vocab = std.StringHashMap(struct { u32, u32 }).init(arena.allocator());
+    var vocab = std.HashMap([]const u8, struct { u32, u32 }, StringContext, std.hash_map.default_max_load_percentage).init(arena.allocator());
 
     while (true) {
         const len = stream.reader().readByte() catch |err| switch (err) {
