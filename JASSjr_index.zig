@@ -44,12 +44,13 @@ const Lexer = struct {
 // Simple indexer for TREC WSJ collection
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    const stdout = std.io.getStdOut().writer();
 
     const argv = try std.process.argsAlloc(arena.allocator());
 
     // Make sure we have one parameter, the filename
     if (argv.len != 2) {
-        std.debug.print("Usage: {s} <infile.xml>\n", .{argv[0]});
+        try stdout.print("Usage: {s} <infile.xml>\n", .{argv[0]});
         std.process.exit(0);
     }
 
@@ -76,7 +77,7 @@ pub fn main() !void {
                 doc_id += 1;
                 document_length = 0;
                 if (@rem(doc_id, 1000) == 0)
-                    std.debug.print("{d} documents indexed\n", .{doc_id});
+                    try stdout.print("{d} documents indexed\n", .{doc_id});
             }
             // If the last token we saw was a <DOCNO> then the next token is the primary key
             if (push_next) {
@@ -124,7 +125,7 @@ pub fn main() !void {
     try lengths_vector.append(document_length);
 
     // Tell the user we've got to the end of parsing
-    std.debug.print("Indexed {d} documents. Serialing...\n", .{doc_id + 1});
+    try stdout.print("Indexed {d} documents. Serialing...\n", .{doc_id + 1});
 
     // Store the primary keys
     const docids_fh = try std.fs.cwd().createFile("docids.bin", .{});

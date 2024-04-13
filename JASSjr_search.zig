@@ -28,6 +28,7 @@ const StringContext = struct {
 // Simple search engine ranking on BM25.
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    const stdout = std.io.getStdOut().writer();
 
     // Read the document lengths
     var fh = try std.fs.cwd().openFile("lengths.bin", .{});
@@ -140,7 +141,7 @@ pub fn main() !void {
         // query-id Q0 document-id rank score run-name
         for (rsv_pointers, 0..) |r, i| {
             if (rsv[r] == 0 or i == 1000) break;
-            if (r > 0) std.debug.print("{d} Q0 {s} {d} {d:.4} JASSjr\n", .{ query_id, primary_keys[r], i + 1, rsv[r] });
+            try stdout.print("{d} Q0 {s} {d} {d:.4} JASSjr\n", .{ query_id, primary_keys[r], i + 1, rsv[r] });
         }
     }
 }
