@@ -53,7 +53,7 @@ pub fn main() !void {
 
     var vocab = std.StringHashMap(std.ArrayList(Posting)).init(arena.allocator());
     var doc_ids = std.ArrayList([]u8).init(arena.allocator());
-    var length_vector = std.ArrayList(i32).init(arena.allocator());
+    var lengths_vector = std.ArrayList(i32).init(arena.allocator());
 
     var doc_id: i32 = -1;
     var document_length: i32 = 0;
@@ -69,7 +69,7 @@ pub fn main() !void {
             if (std.mem.eql(u8, token, "<DOC>")) {
                 // Save the previous document length
                 if (doc_id != -1)
-                    try length_vector.append(document_length);
+                    try lengths_vector.append(document_length);
                 // Move on to the next document
                 doc_id += 1;
                 document_length = 0;
@@ -92,19 +92,20 @@ pub fn main() !void {
             // Lower case the string
             _ = std.ascii.lowerString(token, token);
 
-            // Truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
+            // Truncate any long tokens at 255 characters (so that the length can be stored first and in a single byte)
+            const token2 = if (token.len < 255) token else token[0..255];
 
             // Add the posting to the in-memory index
-            const gop = try vocab.getOrPut(token);
+            const gop = try vocab.getOrPut(token2);
             if (!gop.found_existing) {
                 // If the term isn't in the vocab yet
-                const term = try arena.allocator().dupe(u8, token);
+                const term = try arena.allocator().dupe(u8, token2);
                 gop.key_ptr.* = term;
                 gop.value_ptr.* = std.ArrayList(Posting).init(arena.allocator());
                 try gop.value_ptr.append(.{ doc_id, 1 });
             } else {
                 if (gop.value_ptr.getLast()[0] == doc_id) {
-                    // If the docno for this occurence hasn't changed the increase tf
+                    // If the docno for this occurence hasn't changed then increase tf
                     gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
                 } else {
                     // Else create a new <d,tf> pair.
@@ -117,11 +118,59 @@ pub fn main() !void {
         }
     }
 
+    // Save the final document length
+    try lengths_vector.append(document_length);
+
+    // Tell the user we've got to the end of parsing
+    std.debug.print("Indexed {d} documents. Serialing...\n", .{doc_id + 1});
+
+    // Store the primary keys
+    const docids_fh = try std.fs.cwd().createFile("docids.bin", .{});
+    var docids_stream = std.io.bufferedWriter(docids_fh.writer());
+
+    for (doc_ids.items) |primary_key| {
+        try docids_stream.writer().writeAll(primary_key);
+        try docids_stream.writer().writeByte('\n');
+    }
+
+    // Serialise the in-memory index to disk
+    const postings_fh = try std.fs.cwd().createFile("postings.bin", .{});
+    var postings_stream = std.io.bufferedWriter(postings_fh.writer());
+
+    const vocab_fh = try std.fs.cwd().createFile("vocab.bin", .{});
+    var vocab_stream = std.io.bufferedWriter(vocab_fh.writer());
+
+    var where: usize = 0;
     var it = vocab.iterator();
     while (it.next()) |kv| {
-        std.debug.print("{s}\n", .{kv.key_ptr.*});
-        for (kv.value_ptr.items) |pair| {
-            std.debug.print("  {d} {d}\n", pair);
-        }
+        // Write the postings list to one file
+        try postings_stream.writer().writeAll(std.mem.sliceAsBytes(kv.value_ptr.items));
+
+        // Write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
+        try vocab_stream.writer().writeByte(@truncate(kv.key_ptr.len));
+        try vocab_stream.writer().writeAll(kv.key_ptr.*);
+        try vocab_stream.writer().writeByte(0);
+        try vocab_stream.writer().writeInt(u32, @truncate(where), native_endian);
+        try vocab_stream.writer().writeInt(u32, @truncate(kv.value_ptr.items.len * 8), native_endian);
+
+        where += kv.value_ptr.items.len * 8;
     }
+
+    // Store the document lengths
+    const lengths_fh = try std.fs.cwd().createFile("lengths.bin", .{});
+    var lengths_stream = std.io.bufferedWriter(lengths_fh.writer());
+    try lengths_stream.writer().writeAll(std.mem.sliceAsBytes(lengths_vector.items));
+
+    // Cleanup
+    try lengths_stream.flush();
+    lengths_fh.close();
+
+    try vocab_stream.flush();
+    vocab_fh.close();
+
+    try postings_stream.flush();
+    postings_fh.close();
+
+    try docids_stream.flush();
+    docids_fh.close();
 }
