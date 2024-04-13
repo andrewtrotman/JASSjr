@@ -28,7 +28,9 @@ const StringContext = struct {
 // Simple search engine ranking on BM25.
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const stdout = std.io.getStdOut().writer();
+    const stdout_raw = std.io.getStdOut().writer();
+    var stdout_stream = std.io.bufferedWriter(stdout_raw);
+    const stdout = stdout_stream.writer();
 
     // Read the document lengths
     var fh = try std.fs.cwd().openFile("lengths.bin", .{});
@@ -86,7 +88,7 @@ pub fn main() !void {
 
     // Open the postings list file
     const postings = try arena.allocator().alloc(struct { u32, u32 }, documents_in_collection * 2);
-    var postings_fh = try std.fs.cwd().openFile("postings.bin", .{});
+    const postings_fh = try std.fs.cwd().openFile("postings.bin", .{});
     defer postings_fh.close();
 
     // Allocate buffers
@@ -143,5 +145,6 @@ pub fn main() !void {
             if (rsv[r] == 0 or i == 1000) break;
             try stdout.print("{d} Q0 {s} {d} {d:.4} JASSjr\n", .{ query_id, primary_keys[r], i + 1, rsv[r] });
         }
+        try stdout_stream.flush();
     }
 }
