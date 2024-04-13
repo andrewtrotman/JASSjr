@@ -21,10 +21,10 @@ JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
 
 JASSjr_index_zig : JASSjr_index.zig
-	zig build-exe --name JASSjr_index_zig JASSjr_index.zig
+	zig build-exe -O ReleaseFast --name JASSjr_index_zig JASSjr_index.zig
 
 JASSjr_search_zig : JASSjr_search.zig
-	zig build-exe --name JASSjr_search_zig JASSjr_search.zig
+	zig build-exe -O ReleaseFast --name JASSjr_search_zig JASSjr_search.zig
 
 clean:
 	- rm JASSjr_index JASSjr_search

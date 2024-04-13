@@ -11,6 +11,7 @@ fn compare_rsv(rsv: []f64, first: usize, second: usize) bool {
     return if (rsv[first] == rsv[second]) first > second else rsv[first] > rsv[second];
 }
 
+// Simple search engine ranking on BM25.
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
@@ -93,6 +94,7 @@ pub fn main() !void {
 
         var it = std.mem.splitAny(u8, line, " \r\n");
 
+        // If the first token is a number then assume a TREC query number, and skip it
         const query_id = std.fmt.parseInt(isize, it.peek().?, 10) catch 0;
         if (query_id != 0) _ = it.next();
 

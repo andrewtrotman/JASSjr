@@ -41,11 +41,13 @@ const Lexer = struct {
     }
 };
 
+// Simple indexer for TREC WSJ collection
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
     const argv = try std.process.argsAlloc(arena.allocator());
 
+    // Make sure we have one parameter, the filename
     if (argv.len != 2) {
         std.debug.print("Usage: {s} <infile.xml>\n", .{argv[0]});
         std.process.exit(0);
