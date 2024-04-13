@@ -185,7 +185,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Python   | 3.12.2                    | Regex  | Array        | 74s      | 850ms  |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |
 | Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.3s   |
-| Zig      | 0.12.0-dev.3639+9cfac4718 | Lexer  | Array        | 8s       | 100ms  |
+| Zig      | 0.12.0-dev.3639+9cfac4718 | Lexer  | Array        | 8s       | 130ms  |
 
 Where Parser is one of
 * Lexer being a hand written single token look-ahead lexer
