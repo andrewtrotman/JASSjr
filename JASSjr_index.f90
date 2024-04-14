@@ -195,7 +195,7 @@ contains
 
                 this%capacity = 128
                 this%length = 0
-                allocate(this%store(this%capacity))
+                allocate(this%store(0:this%capacity-1))
         end subroutine vocab_init
 
         subroutine vocab_expand(this)
@@ -207,18 +207,18 @@ contains
                 this%capacity = this%capacity * 2
 
                 call move_alloc(this%store, buffer)
-                allocate(this%store(this%capacity))
+                allocate(this%store(0:this%capacity-1))
 
-                do i = 1, old_cap
+                do i = 0, old_cap-1
                         if (.NOT. allocated(buffer(i)%term)) cycle
 
                         j = hash(buffer(i)%term, this%capacity)
 
-                        do while (allocated(this%store(j+1)%term))
+                        do while (allocated(this%store(j)%term))
                                 j = mod(j + 1, this%capacity)
                         end do
 
-                        this%store(j+1) = buffer(i)
+                        this%store(j) = buffer(i)
                 end do
 
                 deallocate(buffer)
@@ -234,23 +234,23 @@ contains
 
                 i = hash(term, this%capacity)
 
-                do while (allocated(this%store(i+1)%term))
-                        if (this%store(i+1)%term == term) then
-                                if (this%store(i+1)%postings%at(-2) == docid) then
-                                        call this%store(i+1)%postings%inc(-1)
+                do while (allocated(this%store(i)%term))
+                        if (this%store(i)%term == term) then
+                                if (this%store(i)%postings%at(-2) == docid) then
+                                        call this%store(i)%postings%inc(-1)
                                         return
                                 end if
-                                call this%store(i+1)%postings%append(docid)
-                                call this%store(i+1)%postings%append(1)
+                                call this%store(i)%postings%append(docid)
+                                call this%store(i)%postings%append(1)
                                 return
                         end if
                         i = mod(i + 1, this%capacity)
                 end do
 
-                this%store(i+1)%term = term
-                call this%store(i+1)%postings%init()
-                call this%store(i+1)%postings%append(docid)
-                call this%store(i+1)%postings%append(1)
+                this%store(i)%term = term
+                call this%store(i)%postings%init()
+                call this%store(i)%postings%append(docid)
+                call this%store(i)%postings%append(1)
 
                 this%length = this%length + 1
         end subroutine vocab_add
@@ -272,7 +272,7 @@ contains
                 integer, intent(in) :: vocab_fh, postings_fh
                 integer :: where, i
 
-                do i = 1, this%capacity
+                do i = 0, this%capacity-1
                         if (allocated(this%store(i)%term)) then
                                 ! Write the postings list to one file
                                 inquire (unit=postings_fh, size=where)

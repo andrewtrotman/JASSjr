@@ -43,7 +43,7 @@ contains
 
                 this%capacity = 128
                 this%length = 0
-                allocate(this%store(this%capacity))
+                allocate(this%store(0:this%capacity-1))
         end subroutine vocab_init
 
         subroutine vocab_expand(this)
@@ -55,18 +55,18 @@ contains
                 this%capacity = this%capacity * 2
 
                 call move_alloc(this%store, buffer)
-                allocate(this%store(this%capacity))
+                allocate(this%store(0:this%capacity-1))
 
-                do i = 1, old_cap
+                do i = 0, old_cap-1
                         if (.NOT. allocated(buffer(i)%term)) cycle
 
                         j = hash(buffer(i)%term, this%capacity)
 
-                        do while (allocated(this%store(j+1)%term))
+                        do while (allocated(this%store(j)%term))
                                 j = mod(j + 1, this%capacity)
                         end do
 
-                        this%store(j+1) = buffer(i)
+                        this%store(j) = buffer(i)
                 end do
 
                 deallocate(buffer)
@@ -82,13 +82,13 @@ contains
 
                 i = hash(term, this%capacity)
 
-                do while (allocated(this%store(i+1)%term))
+                do while (allocated(this%store(i)%term))
                         i = mod(i + 1, this%capacity)
                 end do
 
-                this%store(i+1)%term = term
-                this%store(i+1)%where = where
-                this%store(i+1)%size = size
+                this%store(i)%term = term
+                this%store(i)%where = where
+                this%store(i)%size = size
 
                 this%length = this%length + 1
         end subroutine vocab_add
@@ -102,10 +102,10 @@ contains
                 rc = 0
                 i = hash(term, this%capacity)
 
-                do while (allocated(this%store(i+1)%term))
-                        if (term == this%store(i+1)%term) then
-                                where = this%store(i+1)%where
-                                size = this%store(i+1)%size
+                do while (allocated(this%store(i)%term))
+                        if (term == this%store(i)%term) then
+                                where = this%store(i)%where
+                                size = this%store(i)%size
                                 return
                         end if
                         i = mod(i + 1, this%capacity)
@@ -118,7 +118,7 @@ contains
                 class(vocab_class), intent(inout) :: this
                 integer :: i
 
-                do i = 1, this%capacity
+                do i = 0, this%capacity-1
                         if (allocated(this%store(i)%term)) then
                                 print *, this%store(i)%term, this%store(i)%where, this%store(i)%size
                         end if
