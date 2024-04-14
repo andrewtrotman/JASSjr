@@ -22,9 +22,13 @@ As an example ranking function this code implements the ATIRE version of BM25 wi
 * There are many variants of BM25, JASSjr uses the ATIRE BM25 function which ignores the k3 query component.  It is assumed that each term is unique and occurs only once (and so the k3 clause is set to 1.0).
 
 # Usage #
-To build simply use
+To build for C++ and Java simply use
 
 	make
+
+or for all compiled languages use
+
+    make all
 
 To index use
 
@@ -155,6 +159,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.raku | Raku source code to search engine |
 | JASSjr_index.nim | Nim source code to indexer |
 | JASSjr_search.nim | Nim source code to search engine |
+| JASSjr_index.zig | Zig source code to indexer |
+| JASSjr_search.zig | Zig source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -167,18 +173,19 @@ There are lies, damned lies, and benchmarks
 
 These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MHz DDR4 running Musl Void Linux 6.6.23 or newer.
 
-| Language | Version            | Parser | Accumulators | Indexing | Search |
-| -------- | -------            |------- | ------------ | -------- | ------ |
-| C++      | gcc 13.2           | Lexer  | Array        | 15s      | 280ms  |
-| Elixir   | 1.15.7/erts-14.2.3 | Lexer  | HashMap      | 125s     | 850ms  |
-| Go       | 1.22.0             | Lexer  | Array        | 18s      | 250ms  |
-| Java     | 1.8.0_332          | Lexer  | Array        | 18s      | 330ms  |
-| JS       | node v18.19.1      | Regex  | Array        | 35s      | 750ms  |
-| Nim      | 2.0.0              | Regex  | Array        | 19s      | 950ms  |
-| Perl     | v5.38.2            | Regex  | Array        | 115s     | 900ms  |
-| Python   | 3.12.2             | Regex  | Array        | 74s      | 850ms  |
-| Raku     | v6.d/2023.11       | Regex  | Array        | 140min   | 8s     |
-| Ruby     | 3.3.2              | Regex  | Array        | 160s     | 2.3s   |
+| Language | Version                   | Parser | Accumulators | Indexing | Search |
+| -------- | -------                   |------- | ------------ | -------- | ------ |
+| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 280ms  |
+| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 850ms  |
+| Go       | 1.22.0                    | Lexer  | Array        | 18s      | 250ms  |
+| Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 330ms  |
+| JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  |
+| Nim      | 2.0.0                     | Regex  | Array        | 19s      | 950ms  |
+| Perl     | v5.38.2                   | Regex  | Array        | 115s     | 900ms  |
+| Python   | 3.12.2                    | Regex  | Array        | 74s      | 850ms  |
+| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |
+| Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.3s   |
+| Zig      | 0.12.0-dev.3639+9cfac4718 | Lexer  | Array        | 8s       | 130ms  |
 
 Where Parser is one of
 * Lexer being a hand written single token look-ahead lexer
