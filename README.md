@@ -161,6 +161,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.nim | Nim source code to search engine |
 | JASSjr_index.zig | Zig source code to indexer |
 | JASSjr_search.zig | Zig source code to search engine |
+| JASSjr_index.f90 | Fortran source code to indexer |
+| JASSjr_search.f90 | Fortran source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -177,6 +179,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | -------- | -------                   |------- | ------------ | -------- | ------ |
 | C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 280ms  |
 | Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 850ms  |
+| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | -        | -      |
 | Go       | 1.22.0                    | Lexer  | Array        | 18s      | 250ms  |
 | Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 330ms  |
 | JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  |
