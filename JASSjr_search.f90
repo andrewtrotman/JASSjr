@@ -43,7 +43,7 @@ contains
 
                 this%capacity = 128
                 this%length = 0
-                allocate(this%store(0:this%capacity-1))
+                allocate(this%store(0:this%capacity-1)) ! 0 indexed store
         end subroutine vocab_init
 
         subroutine vocab_expand(this)
@@ -51,12 +51,14 @@ contains
                 type(item), allocatable :: buffer(:)
                 integer :: old_cap, i, j
 
+                ! Create new store with double the capacity
                 old_cap = this%capacity
                 this%capacity = this%capacity * 2
 
                 call move_alloc(this%store, buffer)
                 allocate(this%store(0:this%capacity-1))
 
+                ! Rehash the old values and insert them again
                 do i = 0, old_cap-1
                         if (.NOT. allocated(buffer(i)%term)) cycle
 
@@ -82,6 +84,7 @@ contains
 
                 i = hash(term, this%capacity)
 
+                ! Linear probe until we find somewhere to insert
                 do while (allocated(this%store(i)%term))
                         i = mod(i + 1, this%capacity)
                 end do
@@ -102,6 +105,7 @@ contains
                 rc = 0
                 i = hash(term, this%capacity)
 
+                ! Linear probe until we find a term that matches. If we hit null exit with error
                 do while (allocated(this%store(i)%term))
                         if (term == this%store(i)%term) then
                                 where = this%store(i)%where
@@ -179,6 +183,7 @@ program search
                 read (10, iostat=rc) string_length_raw
                 if (is_iostat_end(rc)) exit
                 string_length = ichar(string_length_raw(1:1))
+                ! read character(len), '\0', integer(kind=4), integer(kind=4)
                 read (10) buffer(1:string_length), string_length_raw, postings_where, postings_size
                 call vocab%add(buffer(1:string_length), postings_where, postings_size)
         end do
@@ -219,17 +224,22 @@ program search
 
                 query_start = 1
                 query_id = 0
+                ! If the first token is a number then assume a TREC query number, and skip it
                 read (buffer, *, iostat=rc) query_id
                 if (rc == 0) query_start = 2
 
                 do i = query_start, no_terms
+                        ! Does the term exist in the collection?
                         call vocab%get(rc, trim(query(i)), postings_where, postings_size)
                         if (rc /= 0) cycle
 
+                        ! Seek and read the postings list
                         read (10, pos=postings_where+1) postings(1:postings_size / 4)
 
+                        ! Compute the IDF component of BM25 as log(N/n)
                         idf = log(real(size(primary_keys), 8) / real(postings_size / 8, 8))
 
+                        ! Process the postings list by simply adding the BM25 component for this document into the accumulators array
                         do j = 1, postings_size / 4, 2
                                 docid = postings(j) + 1
                                 tf = postings(j+1)
@@ -238,14 +248,17 @@ program search
                         end do
                 end do
 
+                ! Sort the results list
                 call sort
 
+                ! Print the (at most) top 1000 documents in the results list in TREC eval format which is:
+                ! query-id Q0 document-id rank score run-name
                 do i = 1, size(rsv_pointers)
                         docid = rsv_pointers(i)
                         if (i == 1001) exit
                         if (.NOT. rsv(docid) .GT. 0) exit
 
-                        ! Many fortran compilers (including gfortran) omit the leading 0 when printing
+                        ! Many fortran compilers (including gfortran) omit the leading 0 when printing so we add it back
                         if (rsv(docid) < 1) then
                                 print '(I0, 1X, A, 1X, A, 1X, I0, 1X, A, F0.4, 1X, A)' &
                                         , query_id, 'Q0', trim(primary_keys(docid)), i, '0', rsv(docid), 'JASSjr'
@@ -262,6 +275,7 @@ contains
                 call quicksort(1, size(rsv_pointers))
         end subroutine sort
 
+        ! Quicksort with Hoare partitioning
         recursive subroutine quicksort(lo, hi)
                 integer, intent(in) :: lo, hi
 
@@ -275,27 +289,35 @@ contains
                 pivot = rsv_pointers((lo + hi) / 2)
                 left = lo - 1
                 right = hi + 1
+                ! Until the values left of the pivot are greater than it, and to the right are lesser
                 do
+                        ! Increment left index at least once and while it is greater than the pivot
                         left = left + 1
                         do while (rsv(rsv_pointers(left)) .GT. rsv(pivot) &
                         .OR. (abs(rsv(rsv_pointers(left)) - rsv(pivot)) .LE. delta .AND. rsv_pointers(left) .GT. pivot))
                                 left = left + 1
                         end do
+
+                        ! Decrement right index at least once and while it is lesser than the pivot
                         right = right - 1
                         do while (rsv(rsv_pointers(right)) .LT. rsv(pivot) &
                         .OR. (abs(rsv(rsv_pointers(right)) - rsv(pivot)) .LE. delta .AND. rsv_pointers(right) .LT. pivot))
                                 right = right - 1
                         end do
 
+                        ! If the indices crossed then the values left of the pivot are greater than it
+                        ! and the values right of the pivot are lesser. So we break
                         if (left .GE. right) then
                                 exit
                         end if
 
+                        ! Otherwise we swap the values
                         tmp = rsv_pointers(left)
                         rsv_pointers(left) = rsv_pointers(right)
                         rsv_pointers(right) = tmp
                 end do
 
+                ! Now sort the two halves where left and right crossed
                 call quicksort(lo, right)
                 call quicksort(right + 1, hi)
         end subroutine quicksort

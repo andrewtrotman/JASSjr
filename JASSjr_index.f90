@@ -32,6 +32,7 @@ contains
                 integer(kind=4), intent(in) :: val
                 integer(kind=4), allocatable :: buffer(:)
 
+                ! Double the capacity if we've hit the limit
                 if (this%length == this%capacity) then
                         call move_alloc(this%store, buffer)
                         this%capacity = this%capacity * 2
@@ -51,6 +52,7 @@ contains
                 out = this%length
         end function dynarray_integer_size
 
+        ! Access helper with negative indices for access from end of array
         function dynarray_integer_at(this, i) result(out)
                 class(dynarray_integer_class), intent(inout) :: this
                 integer, intent(in) :: i
@@ -63,6 +65,7 @@ contains
                 end if
         end function dynarray_integer_at
 
+        ! Helper function to increment an element (we can because this is our own data structure)
         subroutine dynarray_integer_inc(this, i)
                 class(dynarray_integer_class), intent(inout) :: this
                 integer, intent(in) :: i
@@ -83,6 +86,7 @@ contains
                 end do
         end subroutine dynarray_integer_print
 
+        ! Write the array as contiguous bytes for 'lengths.bin' or 'postings.bin'
         subroutine dynarray_integer_write(this, fh)
                 class(dynarray_integer_class), intent(inout) :: this
                 integer, intent(in) :: fh
@@ -119,6 +123,7 @@ contains
                 character(len=*), intent(in) :: val
                 character(len=255), allocatable :: buffer(:)
 
+                ! Double the capacity if we've hit the limit
                 if (this%length == this%capacity) then
                         call move_alloc(this%store, buffer)
                         this%capacity = this%capacity * 2
@@ -140,6 +145,7 @@ contains
                 end do
         end subroutine dynarray_string_print
 
+        ! Write the array as newline terminated strings for 'docids.bin'
         subroutine dynarray_string_write(this, fh)
                 class(dynarray_string_class), intent(inout) :: this
                 integer, intent(in) :: fh
@@ -195,7 +201,7 @@ contains
 
                 this%capacity = 128
                 this%length = 0
-                allocate(this%store(0:this%capacity-1))
+                allocate(this%store(0:this%capacity-1)) ! 0 indexed store
         end subroutine vocab_init
 
         subroutine vocab_expand(this)
@@ -203,12 +209,14 @@ contains
                 type(pair), allocatable :: buffer(:)
                 integer :: old_cap, i, j
 
+                ! Create new store with double the capacity
                 old_cap = this%capacity
                 this%capacity = this%capacity * 2
 
                 call move_alloc(this%store, buffer)
                 allocate(this%store(0:this%capacity-1))
 
+                ! Rehash the old values and insert them again
                 do i = 0, old_cap-1
                         if (.NOT. allocated(buffer(i)%term)) cycle
 
@@ -234,12 +242,15 @@ contains
 
                 i = hash(term, this%capacity)
 
+                ! Linear probe until we find somewhere to insert
                 do while (allocated(this%store(i)%term))
                         if (this%store(i)%term == term) then
+                                ! If the docno for this occurence hasn't changed the increase tf
                                 if (this%store(i)%postings%at(-2) == docid) then
                                         call this%store(i)%postings%inc(-1)
                                         return
                                 end if
+                                ! Else create a new <d,tf> pair
                                 call this%store(i)%postings%append(docid)
                                 call this%store(i)%postings%append(1)
                                 return
@@ -247,6 +258,7 @@ contains
                         i = mod(i + 1, this%capacity)
                 end do
 
+                ! If the term isn't in the vocab yet
                 this%store(i)%term = term
                 call this%store(i)%postings%init()
                 call this%store(i)%postings%append(docid)
@@ -267,6 +279,7 @@ contains
                 end do
         end subroutine vocab_print
 
+        ! Write the HashTable as int8, char(:), '\0', int32, int32 for 'vocab.bin'
         subroutine vocab_write(this, vocab_fh, postings_fh)
                 class(vocab_class), intent(inout) :: this
                 integer, intent(in) :: vocab_fh, postings_fh
