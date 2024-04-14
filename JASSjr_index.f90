@@ -160,7 +160,7 @@ module vocab_mod
         ! Fortran doesn't allow array of pointers
         type :: pair
                 character(len=:), allocatable :: term
-                type(dynarray_integer_class), pointer :: postings => null()
+                type(dynarray_integer_class) :: postings
         end type pair
 
 
@@ -210,11 +210,11 @@ contains
                 allocate(this%store(this%capacity))
 
                 do i = 1, old_cap
-                        if (.NOT. associated(buffer(i)%postings)) cycle
+                        if (.NOT. allocated(buffer(i)%term)) cycle
 
                         j = hash(buffer(i)%term, this%capacity)
 
-                        do while (associated(this%store(j+1)%postings))
+                        do while (allocated(this%store(j+1)%term))
                                 j = mod(j + 1, this%capacity)
                         end do
 
@@ -234,7 +234,7 @@ contains
 
                 i = hash(term, this%capacity)
 
-                do while (associated(this%store(i+1)%postings))
+                do while (allocated(this%store(i+1)%term))
                         if (this%store(i+1)%term == term) then
                                 if (this%store(i+1)%postings%at(-2) == docid) then
                                         call this%store(i+1)%postings%inc(-1)
@@ -248,7 +248,6 @@ contains
                 end do
 
                 this%store(i+1)%term = term
-                allocate(this%store(i+1)%postings)
                 call this%store(i+1)%postings%init()
                 call this%store(i+1)%postings%append(docid)
                 call this%store(i+1)%postings%append(1)
@@ -261,7 +260,7 @@ contains
                 integer :: i
 
                 do i = 1, this%capacity
-                        if (associated(this%store(i)%postings)) then
+                        if (allocated(this%store(i)%term)) then
                                 print '(A)', this%store(i)%term
                                 call this%store(i)%postings%print()
                         end if
@@ -274,7 +273,7 @@ contains
                 integer :: where, i
 
                 do i = 1, this%capacity
-                        if (associated(this%store(i)%postings)) then
+                        if (allocated(this%store(i)%term)) then
                                 ! Write the postings list to one file
                                 inquire (unit=postings_fh, size=where)
                                 call this%store(i)%postings%write(postings_fh)
