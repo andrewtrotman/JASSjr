@@ -16,12 +16,12 @@ defmodule Index do
   def append(index, term) do
       docid = index.docno - 1
       %Index{index | length: index.length + 1, terms: Map.update(index.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
-        if doc == docid do
-          # if the docno for this occurence hasn't changed then increase tf
-          [ tf + 1 | [ doc | tail ]]
-        else
-          # else create a new <d,tf> pair.
+        if doc != docid do
+          # if the docno for this occurence has changed then create a new <d,tf> pair
           [ 1 | [ docid | docnos ]]
+        else
+          # else increase the tf
+          [ tf + 1 | [ doc | tail ]]
         end
       end)
     }

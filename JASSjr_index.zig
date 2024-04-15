@@ -107,12 +107,12 @@ pub fn main() !void {
                 gop.value_ptr.* = std.ArrayList(Posting).init(arena.allocator());
                 try gop.value_ptr.append(.{ doc_id, 1 });
             } else {
-                if (gop.value_ptr.getLast()[0] == doc_id) {
-                    // If the docno for this occurence hasn't changed then increase tf
-                    gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
-                } else {
-                    // Else create a new <d,tf> pair.
+                if (gop.value_ptr.getLast()[0] != doc_id) {
+                    // If the docno for this occurence has changed then create a new <d,tf> pair
                     try gop.value_ptr.append(.{ doc_id, 1 });
+                } else {
+                    // Else increase the tf
+                    gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
                 }
             }
 
@@ -125,7 +125,7 @@ pub fn main() !void {
     try lengths_vector.append(document_length);
 
     // Tell the user we've got to the end of parsing
-    try stdout.print("Indexed {d} documents. Serialing...\n", .{doc_id + 1});
+    try stdout.print("Indexed {d} documents. Serialising...\n", .{doc_id + 1});
 
     // Store the primary keys
     const docids_fh = try std.fs.cwd().createFile("docids.bin", .{});

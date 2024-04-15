@@ -186,9 +186,9 @@ class JASSjr_index
 						vocab.put(token, newList);                  // if the term isn't in the vocab yet 
 						}
 					else if (list.get(list.size() - 1).d != docId)
-						list.add(new Posting(docId, 1));            // if the docno for this occurence hasn't changed the increase tf
+						list.add(new Posting(docId, 1));            // if the docno for this occurence has changed then create a new <d,tf> pair
 					else
-						list.get(list.size() - 1).tf++;             // else create a new <d,tf> pair.
+						list.get(list.size() - 1).tf++;             // else increase the tf
 		    
 					/*
 					  compute the document length

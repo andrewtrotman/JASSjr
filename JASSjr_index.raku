@@ -47,12 +47,12 @@ for @*ARGS[0].IO.lines -> $line {
 		$token = $token.substr(0, 256);
 
 		# add the posting to the in-memory index
-		%vocab{$token} = [] if %vocab{$token}:!exists;
+		%vocab{$token} = [] if %vocab{$token}:!exists; # if the term isn't in the vocab yet
 		my @postings_list := %vocab{$token};
 		if @postings_list.elems == 0 || @postings_list[*-2] != $docid {
-			@postings_list.push($docid, 1);
+			@postings_list.push($docid, 1); # if the docno for this occurence has changed then create a new <d,tf> pair
 		} else {
-			@postings_list[*-1]++;
+			@postings_list[*-1]++; # else increase the tf
 		}
 
 		# Compute the document length

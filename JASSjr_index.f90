@@ -245,14 +245,14 @@ contains
                 ! Linear probe until we find somewhere to insert
                 do while (allocated(this%store(i)%term))
                         if (this%store(i)%term == term) then
-                                ! If the docno for this occurence hasn't changed the increase tf
-                                if (this%store(i)%postings%at(-2) == docid) then
-                                        call this%store(i)%postings%inc(-1)
+                                ! If the docno for this occurence has changed then create a new <d,tf> pair
+                                if (this%store(i)%postings%at(-2) != docid) then
+                                        call this%store(i)%postings%append(docid)
+                                        call this%store(i)%postings%append(1)
                                         return
                                 end if
-                                ! Else create a new <d,tf> pair
-                                call this%store(i)%postings%append(docid)
-                                call this%store(i)%postings%append(1)
+                                ! Else increase the tf
+                                call this%store(i)%postings%inc(-1)
                                 return
                         end if
                         i = mod(i + 1, this%capacity)

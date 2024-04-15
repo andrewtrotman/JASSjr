@@ -63,9 +63,11 @@ for line in lines(commandLineParams()[0]):
 
     let postings_list = addr(vocab[token2])
     if len(postings_list[]) == 0 or postings_list[][^2] != docid:
+      # if the docno for this occurence has changed then create a new <d,tf> pair
       postings_list[].add(docid)
       postings_list[].add(1)
     else:
+      # else increase the tf
       postings_list[][^1] += 1
 
     # Compute the document length

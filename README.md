@@ -183,7 +183,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s      | 250ms  |
 | D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s      | 220ms  |
 | Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 850ms  |
-| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | -        | -      |
+| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23s      | 580ms  |
 | Go       | 1.22.0                    | Lexer  | Array        | 18s      | 250ms  |
 | Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 330ms  |
 | JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  |

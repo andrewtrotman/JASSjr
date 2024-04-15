@@ -158,9 +158,9 @@ int main(int argc, const char *argv[])
 			*/
 			postings_list &list = vocab[lowercase];
 			if (list.size() == 0 || list[list.size() - 1].first != docid)
-				list.push_back(std::pair<int32_t, int32_t>(docid, 1));	// if the docno for this occurence hasn't changed the increase tf
+				list.push_back(std::pair<int32_t, int32_t>(docid, 1));	// if the docno for this occurence has changed then create a new <d,tf> pair
 			else
-				list[list.size() - 1].second++;							// else create a new <d,tf> pair.
+				list[list.size() - 1].second++;							// else increase the tf
 
 			/*
 				Compute the document length

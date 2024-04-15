@@ -43,12 +43,12 @@ File.foreach(ARGV[0]) do |line|
     token = token.slice(0, 255)
 
     # add the posting to the in-memory index
-    vocab[token] = [] if !vocab.key?(token)
+    vocab[token] = [] if !vocab.key?(token) # if the term isn't in the vocab yet
     postings_list = vocab[token]
     if postings_list.length == 0 || postings_list[-2] != docid
-      postings_list << docid << 1
+      postings_list << docid << 1 # if the docno for this occurence has changed then create a new <d,tf> pair
     else
-      postings_list[-1] += 1
+      postings_list[-1] += 1 # else increase the tf
     end
 
     # Compute the document length
