@@ -53,6 +53,7 @@ JASSjr_search_zig : JASSjr_search.zig
 clean:
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
+	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
 	- rm JASSjr_index_fortran JASSjr_search_fortran
 	- rm JASSjr_index_zig JASSjr_search_zig
 
