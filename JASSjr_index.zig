@@ -107,12 +107,12 @@ pub fn main() !void {
                 gop.value_ptr.* = std.ArrayList(Posting).init(arena.allocator());
                 try gop.value_ptr.append(.{ doc_id, 1 });
             } else {
-                if (gop.value_ptr.getLast()[0] == doc_id) {
-                    // If the docno for this occurence hasn't changed then increase tf
-                    gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
-                } else {
-                    // Else create a new <d,tf> pair.
+                if (gop.value_ptr.getLast()[0] != doc_id) {
+                    // If the docno for this occurence has changed then create a new <d,tf> pair
                     try gop.value_ptr.append(.{ doc_id, 1 });
+                } else {
+                    // Else increase the tf
+                    gop.value_ptr.items[gop.value_ptr.items.len - 1][1] += 1;
                 }
             }
 

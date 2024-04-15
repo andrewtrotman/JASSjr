@@ -174,9 +174,9 @@ func main() {
 				newList = append(newList, posting{docId, 1})
 				vocab[token] = newList // if the term isn't in the vocab yet
 			} else if list[len(list)-1].d != docId {
-				vocab[token] = append(list, posting{docId, 1}) // if the docno for this occurence hasn't changed the increase tf
+				vocab[token] = append(list, posting{docId, 1}) // if the docno for this occurence has changed then create a new <d,tf> pair
 			} else {
-				list[len(list)-1].tf++ // else create a new <d,tf> pair.
+				list[len(list)-1].tf++ // else increase the tf
 			}
 
 			/*

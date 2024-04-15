@@ -48,12 +48,12 @@ while (<>) {
 		$token = substr $token, 0, 255;
 
 		# add the posting to the in-memory index
-		$vocab{$token} = [] if not exists $vocab{$token};
+		$vocab{$token} = [] if not exists $vocab{$token}; # if the term isn't in the vocab yet
 		my $postings_list = $vocab{$token};
 		if (scalar @{$postings_list} == 0 || @{$postings_list}[-2] ne $docid) {
-			push @{$postings_list}, $docid, 1;
+			push @{$postings_list}, $docid, 1; # if the docno for this occurence has changed then create a new <d,tf> pair
 		} else {
-			@{$postings_list}[-1] += 1;
+			@{$postings_list}[-1] += 1; # else increase the tf
 		}
 
 		# Compute the document length

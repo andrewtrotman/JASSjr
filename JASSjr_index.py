@@ -58,9 +58,11 @@ with open(sys.argv[1], 'r') as file:
             # add the posting to the in-memory index
             postings_list = vocab[token]
             if len(postings_list) == 0 or postings_list[-2] != docid:
+                # if the docno for this occurence has changed then create a new <d,tf> pair
                 postings_list.append(docid)
                 postings_list.append(1)
             else:
+                # else increase the tf
                 postings_list[-1] += 1
 
             # Compute the document length

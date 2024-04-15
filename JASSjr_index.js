@@ -69,9 +69,11 @@ rl.on('line', function (line) {
 		// add the posting to the in-memory index
 		postings_list = vocab[token];
 		if (postings_list.length == 0 || postings_list[postings_list.length - 2] != docid) {
+			// if the docno for this occurence has changed then create a new <d,tf> pair
 			postings_list.push(docid);
 			postings_list.push(1);
 		} else {
+			// else increase the tf
 			postings_list[postings_list.length-1]++;
 		}
 
