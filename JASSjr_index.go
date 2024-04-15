@@ -195,7 +195,7 @@ func main() {
 	/*
 		tell the user we've got to the end of parsing
 	*/
-	fmt.Println("Indexed", docId+1, "documents. Serialing...")
+	fmt.Println("Indexed", docId+1, "documents. Serialising...")
 
 	/*
 		store the primary keys

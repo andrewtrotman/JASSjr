@@ -125,7 +125,7 @@ pub fn main() !void {
     try lengths_vector.append(document_length);
 
     // Tell the user we've got to the end of parsing
-    try stdout.print("Indexed {d} documents. Serialing...\n", .{doc_id + 1});
+    try stdout.print("Indexed {d} documents. Serialising...\n", .{doc_id + 1});
 
     // Store the primary keys
     const docids_fh = try std.fs.cwd().createFile("docids.bin", .{});
