@@ -53,8 +53,7 @@ defmodule SearchEngine do
   end
 
   def accept_input(index) do
-    query = IO.gets("")
-    if query != :eof do
+    Enum.each(IO.stream(), fn query ->
       # If the first token is a number then assume a TREC query number, and skip it
       query = String.split(query)
       [ head | tail ] = query
@@ -64,8 +63,7 @@ defmodule SearchEngine do
       end
       search(index, query)
       |> print(index, query_id)
-      accept_input(index)
-    end
+    end)
   end
 
   def start() do
