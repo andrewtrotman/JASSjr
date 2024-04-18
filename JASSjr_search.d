@@ -27,10 +27,10 @@ const auto b = 0.4;  // BM25 b parameter
 void main(string[] argv)
 {
 	// Read the document lengths
-	auto document_lengths = cast(int[]) read("lengths.bin");
+	auto doc_lengths = cast(int[]) read("lengths.bin");
 
 	// Compute the average document length for BM25
-	auto average_document_length = cast(double) sum(document_lengths) / cast(double) document_lengths.length;
+	auto average_document_length = cast(double) sum(doc_lengths) / cast(double) doc_lengths.length;
 
 	// Read the primary keys
 	auto primary_keys = File("docids.bin").byLineCopy().array();
@@ -95,7 +95,7 @@ void main(string[] argv)
 			foreach (Tuple!(int, int) post; postings[0 .. postings_length])
 			{
 				auto docid = post[0], tf = cast(double) post[1];
-				rsv[docid] += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (cast(double) document_lengths[docid] / average_document_length)));
+				rsv[docid] += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (cast(double) doc_lengths[docid] / average_document_length)));
 			}
 		}
 

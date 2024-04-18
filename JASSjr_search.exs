@@ -6,7 +6,7 @@
 # Minimalistic BM25 search engine.
 
 defmodule Index do
-  defstruct average_length: 0, docnos: [], lengths: [], vocab: %{}, postings_fh: nil
+  defstruct average_length: 0, docnos: [], doclengths: [], vocab: %{}, postings_fh: nil
 end
 
 defmodule SearchEngine do
@@ -15,8 +15,8 @@ defmodule SearchEngine do
     b = 0.4 # BM25 b parameter
 
     # Compute the IDF component of BM25 as log(N/n)
-    idf = :math.log(:array.size(index.lengths) / num_results)
-    idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (:array.get(docno, index.lengths) / index.average_length))))
+    idf = :math.log(:array.size(index.doclengths) / num_results)
+    idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (:array.get(docno, index.doclengths) / index.average_length))))
   end
 
   # Seek and read the postings list
@@ -70,12 +70,12 @@ defmodule SearchEngine do
 
   def start() do
     docnos = :array.from_list(File.read!("docids.bin") |> String.split)
-    lengths = :array.from_list(for <<x::native-32 <- File.read!("lengths.bin")>>, do: x)
-    average_length = :array.foldl(fn _, val, acc -> acc + val end, 0, lengths) / :array.size(lengths)
+    doclengths = :array.from_list(for <<x::native-32 <- File.read!("lengths.bin")>>, do: x)
+    average_length = :array.foldl(fn _, val, acc -> acc + val end, 0, doclengths) / :array.size(doclengths)
     vocab = for <<len::8, term::binary-size(len), 0::8, post_where::native-32, post_len::native-32 <- File.read!("vocab.bin")>>, into: %{}, do: {term, {post_where, post_len}}
 
     File.open!("postings.bin", fn postings_fh ->
-      accept_input(%Index{average_length: average_length, docnos: docnos, lengths: lengths, vocab: vocab, postings_fh: postings_fh})
+      accept_input(%Index{average_length: average_length, docnos: docnos, doclengths: doclengths, vocab: vocab, postings_fh: postings_fh})
     end)
   end
 end

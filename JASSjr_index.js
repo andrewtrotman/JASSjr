@@ -16,7 +16,7 @@ if (process.argv.length != 3) {
 
 var vocab = {}; // the in-memory index
 var doc_ids = []; // the primary keys
-var length_vector = []; // hold the length of each document
+var doc_lengths = []; // hold the length of each document
 
 var docid = -1;
 var document_length = 0;
@@ -39,7 +39,7 @@ rl.on('line', function (line) {
 		if (token == '<DOC>') {
 			// Save the previous document length
 			if (docid != -1)
-				length_vector.push(document_length);
+				doc_lengths.push(document_length);
 			// Move on to the next document
 			docid++;
 			document_length = 0;
@@ -87,17 +87,17 @@ rl.on('close', function () {
 	if (docid == -1)
 		process.exit(0);
 
+	// Save the final document length
+	doc_lengths.push(document_length);
+
 	// tell the user we've got to the end of parsing
 	console.log('Indexed %d documents. Serialising...', docid + 1);
-
-	// Save the final document length
-	length_vector.push(document_length);
 
 	// store the primary keys
 	fs.writeFileSync('docids.bin', doc_ids.join(os.EOL) + '\n');
 
 	// store the document lengths
-	fs.writeFileSync('lengths.bin', Uint32Array.from(length_vector));
+	fs.writeFileSync('lengths.bin', Uint32Array.from(doc_lengths));
 
 	var postings_fd = fs.createWriteStream('postings.bin');
 	var vocab_fd = fs.createWriteStream('vocab.bin');

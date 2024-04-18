@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
 
 vocab = defaultdict(lambda: array('i')) # the in-memory index
 doc_ids = [] # the primary keys
-length_vector = array('i') # hold the length of each document
+doc_lengths = array('i') # hold the length of each document
 
 # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
 # TREC <DOCNO> primary keys have a hyphen in them
@@ -33,7 +33,7 @@ with open(sys.argv[1], 'r') as file:
             if token == "<DOC>":
                 # Save the previous document length
                 if docid != -1:
-                    length_vector.append(document_length)
+                    doc_lengths.append(document_length)
                 # Move on to the next document
                 docid += 1
                 document_length = 0
@@ -72,11 +72,11 @@ with open(sys.argv[1], 'r') as file:
 if docid == -1:
     sys.exit()
 
+# Save the final document length
+doc_lengths.append(document_length)
+
 # tell the user we've got to the end of parsing
 print(f"Indexed {docid + 1} documents. Serialising...")
-
-# Save the final document length
-length_vector.append(document_length)
 
 # store the primary keys
 with open("docids.bin", "w") as file:
@@ -101,7 +101,7 @@ for term, postings in vocab.items():
 
 # store the document lengths
 with open("lengths.bin", "wb") as file:
-    length_vector.tofile(file)
+    doc_lengths.tofile(file)
 
 # clean up
 postings_fp.close()

@@ -14,7 +14,7 @@ die "Usage: $0 <infile.xml>" if scalar @ARGV != 1;
 
 my %vocab; # the in-memory index
 my @doc_ids; # the primary keys
-my @length_vector; # hold the length of each document
+my @doc_lengths; # hold the length of each document
 
 my $docid = -1;
 my $document_length = 0;
@@ -27,7 +27,7 @@ while (<>) {
 		# If we see a <DOC> tag then we're at the start of the next document
 		if ($_ eq '<DOC>') {
 			# Save the previous document length
-			push @length_vector, $document_length if $docid != -1;
+			push @doc_lengths, $document_length if $docid != -1;
 			# Move on to the next document
 			$docid += 1;
 			$document_length = 0;
@@ -65,7 +65,7 @@ while (<>) {
 exit if $docid == -1;
 
 # Save the final document length
-push @length_vector, $document_length;
+push @doc_lengths, $document_length;
 
 # tell the user we've got to the end of parsing
 say "Indexed @{[$docid + 1]} documents. Serialising...";
@@ -92,7 +92,7 @@ while (my ($term, $postings) = each %vocab) {
 
 # store the document lengths
 open my $lengths_fh, '>:raw', 'lengths.bin' or die;
-print $lengths_fh pack 'l*', @length_vector;
+print $lengths_fh pack 'l*', @doc_lengths;
 
 # clean up
 close $docids_fh;

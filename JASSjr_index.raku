@@ -10,7 +10,7 @@ if @*ARGS.elems != 1 {
 
 my %vocab; # the in-memory index
 my @doc_ids; # the primary keys
-my @length_vector; # hold the length of each document
+my @doc_lengths; # hold the length of each document
 
 my $docid = -1;
 my $document_length = 0;
@@ -24,7 +24,7 @@ for @*ARGS[0].IO.lines -> $line {
 		# If we see a <DOC> tag then we're at the start of the next document
 		if $token eq '<DOC>' {
 			# Save the previous document length
-			@length_vector.push($document_length) if $docid != -1;
+			@doc_lengths.push($document_length) if $docid != -1;
 			# Move on to the next document
 			$docid++;
 			$document_length = 0;
@@ -64,7 +64,7 @@ for @*ARGS[0].IO.lines -> $line {
 exit if $docid == -1;
 
 # Save the final document length
-@length_vector.push($document_length);
+@doc_lengths.push($document_length);
 
 # tell the user we've got to the end of parsing
 say("Indexed {$docid+1} documents. Serialising...");
@@ -105,7 +105,7 @@ $buffer.reallocate(0);
 
 # store the document lengths
 my $lengths_fh = open('lengths.bin', :w, :bin);
-for @length_vector {
+for @doc_lengths {
 	$buffer.write-int32(0, $_);
 	$lengths_fh.write($buffer);
 }

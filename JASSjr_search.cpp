@@ -88,7 +88,7 @@ int main(int argc, const char *argv[])
 	int32_t where, size, string_length;
 	char seperators[255];
 	char *into = seperators;
-	int32_t *length_vector;
+	int32_t *doc_lengths;
 
 	/*
 		Set up the tokenizer seperator characters
@@ -103,7 +103,7 @@ int main(int argc, const char *argv[])
 	*/
 	size_t length_filesize_in_bytes;
 	double average_document_length = 0;
-	length_vector = reinterpret_cast<int32_t *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
+	doc_lengths = reinterpret_cast<int32_t *>(read_entire_file("lengths.bin", length_filesize_in_bytes));
 	if (length_filesize_in_bytes == 0)
 		exit(printf("Could not find an index in the current directory\n"));
 
@@ -113,7 +113,7 @@ int main(int argc, const char *argv[])
 	double documents_in_collection = length_filesize_in_bytes / sizeof(int32_t);
 	int32_t max_docs = static_cast<int32_t>(documents_in_collection);
 	for (int32_t document = 0; document < max_docs; document++)
-		average_document_length += length_vector[document];
+		average_document_length += doc_lengths[document];
 	average_document_length /= documents_in_collection;
 
 	/*
@@ -216,7 +216,7 @@ int main(int argc, const char *argv[])
 						{
 						int32_t d = list->first;
 						int32_t tf = list->second;
-						rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (length_vector[d] / average_document_length))));
+						rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (doc_lengths[d] / average_document_length))));
 						}
 					}
 				}

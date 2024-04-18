@@ -56,7 +56,7 @@ pub fn main() !void {
 
     var vocab = std.StringHashMap(std.ArrayList(Posting)).init(arena.allocator());
     var doc_ids = std.ArrayList([]u8).init(arena.allocator());
-    var lengths_vector = std.ArrayList(i32).init(arena.allocator());
+    var doc_lengths = std.ArrayList(i32).init(arena.allocator());
 
     var doc_id: i32 = -1;
     var document_length: i32 = 0;
@@ -72,7 +72,7 @@ pub fn main() !void {
             if (std.mem.eql(u8, token, "<DOC>")) {
                 // Save the previous document length
                 if (doc_id != -1)
-                    try lengths_vector.append(document_length);
+                    try doc_lengths.append(document_length);
                 // Move on to the next document
                 doc_id += 1;
                 document_length = 0;
@@ -122,7 +122,7 @@ pub fn main() !void {
     }
 
     // Save the final document length
-    try lengths_vector.append(document_length);
+    try doc_lengths.append(document_length);
 
     // Tell the user we've got to the end of parsing
     try stdout.print("Indexed {d} documents. Serialising...\n", .{doc_id + 1});
@@ -162,7 +162,7 @@ pub fn main() !void {
     // Store the document lengths
     const lengths_fh = try std.fs.cwd().createFile("lengths.bin", .{});
     var lengths_stream = std.io.bufferedWriter(lengths_fh.writer());
-    try lengths_stream.writer().writeAll(std.mem.sliceAsBytes(lengths_vector.items));
+    try lengths_stream.writer().writeAll(std.mem.sliceAsBytes(doc_lengths.items));
 
     // Cleanup
     try lengths_stream.flush();

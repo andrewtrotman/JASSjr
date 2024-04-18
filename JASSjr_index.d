@@ -65,7 +65,7 @@ int main(string[] argv)
 
 	Posting[][string] vocab;
 	string[] doc_ids;
-	int[] length_vector;
+	int[] doc_lengths;
 
 	auto docid = -1;
 	auto document_length = 0;
@@ -89,7 +89,7 @@ int main(string[] argv)
 			{
 				// Save the previous document length
 				if (docid != -1)
-					length_vector ~= document_length;
+					doc_lengths ~= document_length;
 
 				// Move on to the next document
 				docid++;
@@ -135,7 +135,7 @@ int main(string[] argv)
 	}
 
 	// Save the final document length
-	length_vector ~= document_length;
+	doc_lengths ~= document_length;
 
 	// Tell the user we've got to the end of parsing
 	writefln("Indexed %d documents. Serialising", docid+1);
@@ -166,7 +166,7 @@ int main(string[] argv)
 
 
 	// Store the document lengths
-	File("lengths.bin", "w").rawWrite(length_vector);
+	File("lengths.bin", "w").rawWrite(doc_lengths);
 
 	return 0;
 }

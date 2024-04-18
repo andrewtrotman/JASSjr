@@ -37,15 +37,15 @@ pub fn main() !void {
 
     const lengths_stat = try fh.stat();
     const documents_in_collection = lengths_stat.size / 4;
-    const lengths_vector = try arena.allocator().alloc(u32, documents_in_collection);
-    _ = try fh.readAll(std.mem.sliceAsBytes(lengths_vector));
+    const doc_lengths = try arena.allocator().alloc(u32, documents_in_collection);
+    _ = try fh.readAll(std.mem.sliceAsBytes(doc_lengths));
 
     fh.close();
 
     // Compute the average document length for BM25
     var average_document_length: f64 = 0;
-    for (lengths_vector) |val| average_document_length += @floatFromInt(val);
-    average_document_length /= @floatFromInt(lengths_vector.len);
+    for (doc_lengths) |val| average_document_length += @floatFromInt(val);
+    average_document_length /= @floatFromInt(doc_lengths.len);
 
     // Read the primary keys
     fh = try std.fs.cwd().openFile("docids.bin", .{});
@@ -131,7 +131,7 @@ pub fn main() !void {
                     if (i == pair[1] / 8) break;
                     const docid = p[0];
                     const tf: f64 = @floatFromInt(p[1]);
-                    rsv[docid] += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (@as(f64, @floatFromInt(lengths_vector[docid])) / average_document_length)));
+                    rsv[docid] += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * (@as(f64, @floatFromInt(doc_lengths[docid])) / average_document_length)));
                 }
             }
         }

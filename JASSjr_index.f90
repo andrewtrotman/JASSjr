@@ -387,7 +387,7 @@ program index
         type(lexer_class) :: lexer
         type(vocab_class) :: vocab
         type(dynarray_string_class) :: doc_ids
-        type(dynarray_integer_class) :: length_vector
+        type(dynarray_integer_class) :: doc_lengths
         integer :: argc, docid, document_length
         integer :: rc ! return code
         logical :: push_next
@@ -414,7 +414,7 @@ program index
         push_next = .FALSE.
         call vocab%init()
         call doc_ids%init()
-        call length_vector%init()
+        call doc_lengths%init()
 
         ! Read the file line by line
         do
@@ -429,7 +429,7 @@ program index
                         ! If we see a <DOC> tag then we're at the start of the next document
                         if (token == '<DOC>') then
                                 ! Save the previous document length
-                                if (docid /= -1) call length_vector%append(document_length)
+                                if (docid /= -1) call doc_lengths%append(document_length)
                                 ! Move on to the next document
                                 docid = docid + 1
                                 document_length = 0
@@ -458,7 +458,7 @@ program index
         if (docid == -1) stop
 
         ! Save the final document length
-        call length_vector%append(document_length)
+        call doc_lengths%append(document_length)
 
         ! Tell the user we've got to the end of parsing
         print '(A, I0, A)', 'Indexed ', docid + 1, ' documents. Serialising...'
@@ -478,7 +478,7 @@ program index
         ! Store the document lengths
         open (unit=14, action='write', file='lengths.bin', iostat=rc, status='replace', access='stream')
         if (rc /= 0) stop 'ERROR: open failed'
-        call length_vector%write(14)
+        call doc_lengths%write(14)
 
         ! Clean up
         close (10)

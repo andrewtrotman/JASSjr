@@ -8,7 +8,7 @@
 defmodule Index do
   defstruct length: 0, # length of currently indexing document
   docno: 0, # cache last index into primary keys
-  lengths: [], # hold the length of each document
+  doclengths: [], # hold the length of each document
   docnos: [], # the primary keys
   terms: %{} # the in-memory index (terms => <tf, docid>)
 
@@ -50,7 +50,7 @@ defmodule Indexer do
 
       # Move on to the next document
       index = if index.docno > 0 do
-        %Index{index | length: 0, lengths: [ index.length | index.lengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
+        %Index{index | length: 0, doclengths: [ index.length | index.doclengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
       else
         %Index{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
       end
@@ -103,7 +103,7 @@ defmodule Indexer do
   # serialise the in-memory index to disk
   def serialise(index) do
     # Save the final document length
-    index = %Index{index | lengths: [ index.length | index.lengths]}
+    index = %Index{index | doclengths: [ index.length | index.doclengths]}
     docnos = Enum.reverse(index.docnos)
 
     # store the primary keys
@@ -127,11 +127,11 @@ defmodule Indexer do
     :ok = File.close(postings)
     :ok = File.close(vocab)
 
-    # store the document lengths
-    lengths = Enum.reverse(index.lengths)
-    lengths = for x <- lengths, do: <<x::native-32>>, into: <<>>
+    # store the document doclengths
+    doclengths = Enum.reverse(index.doclengths)
+    doclengths = for x <- doclengths, do: <<x::native-32>>, into: <<>>
     File.open!("lengths.bin", [:write], fn file ->
-      IO.binwrite(file, lengths)
+      IO.binwrite(file, doclengths)
     end)
   end
 end
