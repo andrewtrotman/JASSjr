@@ -98,15 +98,15 @@ class JASSjr_search
 			}
 		lengthsAsBytes.order(ByteOrder.nativeOrder());
 		IntBuffer lengthsAsIntegers = lengthsAsBytes.asIntBuffer();
-		int[] lengthVector = new int [lengthsAsBytes.capacity() / 4];
-		lengthsAsIntegers.get(lengthVector);
+		int[] docLengths = new int [lengthsAsBytes.capacity() / 4];
+		lengthsAsIntegers.get(docLengths);
 
 		/*
 		  Compute the average document length for BM25
 		*/
-		double documentsInCollection = lengthVector.length;
+		double documentsInCollection = docLengths.length;
 		double averageDocumentLength = 0;
-		for (int which : lengthVector)
+		for (int which : docLengths)
 			averageDocumentLength += which;
 		averageDocumentLength /= documentsInCollection;
 
@@ -212,7 +212,7 @@ class JASSjr_search
 							{
 							int d = currentListAsBytes.getInt();
 							int tf = currentListAsBytes.getInt();
-							rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (lengthVector[d] / averageDocumentLength))));
+							rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (docLengths[d] / averageDocumentLength))));
 							}
 						}
 					}

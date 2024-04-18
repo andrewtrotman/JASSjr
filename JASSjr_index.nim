@@ -18,7 +18,7 @@ if paramCount() != 1:
 
 var vocab = initTable[string, seq[int32]]() # the in-memory index
 var doc_ids: seq[string] # the primary keys
-var length_vector: seq[int32] # hold the length of each document
+var doc_lengths: seq[int32] # hold the length of each document
 
 # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
 # TREC <DOCNO> primary keys have a hyphen in them
@@ -34,7 +34,7 @@ for line in lines(commandLineParams()[0]):
     if token == "<DOC>":
       # Save the previous document length
       if docid != -1:
-        length_vector.add(document_length)
+        doc_lengths.add(document_length)
       # Move on to the next document
       docid += 1
       document_length = 0
@@ -78,7 +78,7 @@ if docid == -1:
   quit()
 
 # Save the final document length
-length_vector.add(document_length)
+doc_lengths.add(document_length)
 
 # tell the user we've got to the end of parsing
 echo(fmt"Indexed { docid + 1 } documents. Serialising...")
@@ -105,7 +105,7 @@ for term, postings in vocab.pairs():
 
 # store the document lengths
 let doc_lengths_strm = newFileStream("lengths.bin", fmWrite)
-doc_lengths_strm.writeData(addr(length_vector[0]), len(length_vector) * sizeof(length_vector[0]))
+doc_lengths_strm.writeData(addr(doc_lengths[0]), len(doc_lengths) * sizeof(doc_lengths[0]))
 
 # clean up
 docids_fh.close()

@@ -93,7 +93,7 @@ Simple indexer for TREC WSJ collection
 func main() {
 	vocab := make(map[string][]posting)
 	docIds := make([]string, 0)
-	lengthVector := make([]int32, 0)
+	docLengths := make([]int32, 0)
 
 	var docId int32 = -1
 	var documentLength int32 = 0
@@ -121,7 +121,7 @@ func main() {
 					Save the previous document length
 				*/
 				if docId != -1 {
-					lengthVector = append(lengthVector, documentLength)
+					docLengths = append(docLengths, documentLength)
 				}
 
 				/*
@@ -190,7 +190,7 @@ func main() {
 	/*
 		Save the final document length
 	*/
-	lengthVector = append(lengthVector, documentLength)
+	docLengths = append(docLengths, documentLength)
 
 	/*
 		tell the user we've got to the end of parsing
@@ -259,6 +259,6 @@ func main() {
 	defer docLengthsFile.Close()
 	docLengthsWriter := bufio.NewWriter(docLengthsFile)
 	defer docLengthsWriter.Flush()
-	err = binary.Write(docLengthsWriter, binary.NativeEndian, lengthVector)
+	err = binary.Write(docLengthsWriter, binary.NativeEndian, docLengths)
 	check(err)
 }

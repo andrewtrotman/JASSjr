@@ -22,7 +22,7 @@ char *current;													// where the lexical analyser is in buffer[]
 char next_token[1024 * 1024];									// the token we're currently building
 std::unordered_map<std::string, postings_list> vocab;			// the in-memory index
 std::vector<std::string>doc_ids;								// the primary keys
-std::vector<int32_t> length_vector;								// hold the length of each document
+std::vector<int32_t> doc_lengths;								// hold the length of each document
 
 /*
 	LEX_GET_NEXT()
@@ -111,7 +111,7 @@ int main(int argc, const char *argv[])
 					Save the previous document length
 				*/
 				if (docid != -1)
-					length_vector.push_back(document_length);
+					doc_lengths.push_back(document_length);
 
 				/*
 					Move on to the next document
@@ -176,14 +176,14 @@ int main(int argc, const char *argv[])
 		return 0;
 
 	/*
+		Save the final document length
+	*/
+	doc_lengths.push_back(document_length);
+
+	/*
 		tell the user we've got to the end of parsing
 	*/
 	std::cout << "Indexed " << docid + 1 << " documents. Serialising...\n";
-
-	/*
-		Save the final document length
-	*/
-	length_vector.push_back(document_length);
 
 	/*
 		store the primary keys
@@ -221,7 +221,7 @@ int main(int argc, const char *argv[])
 		store the document lengths
 	*/
 	FILE *lengths_fp = fopen("lengths.bin", "w+b");
-	fwrite(&length_vector[0], sizeof(length_vector[0]), length_vector.size(), lengths_fp);
+	fwrite(&doc_lengths[0], sizeof(doc_lengths[0]), doc_lengths.size(), lengths_fp);
 
 	/*
 		clean up

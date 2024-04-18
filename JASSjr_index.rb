@@ -8,7 +8,7 @@ abort("Usage: #{$0} <infile.xml>") if ARGV.length != 1
 
 vocab = {} # the in-memory index
 doc_ids = [] # the primary keys
-length_vector = [] # hold the length of each document
+doc_lengths = [] # hold the length of each document
 
 docid = -1
 document_length = 0
@@ -21,7 +21,7 @@ File.foreach(ARGV[0]) do |line|
     # If we see a <DOC> tag then we're at the start of the next document
     if token == "<DOC>"
       # Save the previous document length
-      length_vector << document_length if docid != -1
+      doc_lengths << document_length if docid != -1
       # Move on to the next document
       docid += 1
       document_length = 0
@@ -59,11 +59,11 @@ end
 # If we didn't index any documents then we're done.
 exit if docid == -1
 
+# Save the final document length
+doc_lengths << document_length
+
 # tell the user we've got to the end of parsing
 puts("Indexed #{docid + 1} documents. Serialising...")
-
-# Save the final document length
-length_vector << document_length
 
 # store the primary keys
 File.open("docids.bin", "w") { |file| file.puts(doc_ids) }
@@ -84,7 +84,7 @@ vocab.each do |term, postings|
 end
 
 # store the document lengths
-File.open("lengths.bin", "w") { |file| file.write(length_vector.pack("l*")) }
+File.open("lengths.bin", "w") { |file| file.write(doc_lengths.pack("l*")) }
 
 # clean up
 postings_fp.close

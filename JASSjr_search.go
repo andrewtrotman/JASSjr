@@ -52,16 +52,16 @@ func main() {
 	*/
 	lengthsAsBytes, err := os.ReadFile("lengths.bin")
 	check(err)
-	lengthVector := make([]int32, len(lengthsAsBytes)/4)
-	err = binary.Read(bytes.NewReader(lengthsAsBytes), binary.NativeEndian, lengthVector)
+	docLengths := make([]int32, len(lengthsAsBytes)/4)
+	err = binary.Read(bytes.NewReader(lengthsAsBytes), binary.NativeEndian, docLengths)
 	check(err)
 
 	/*
 	  Compute the average document length for BM25
 	*/
-	documentsInCollection := len(lengthVector)
+	documentsInCollection := len(docLengths)
 	var averageDocumentLength float64 = 0
-	for _, which := range lengthVector {
+	for _, which := range docLengths {
 		averageDocumentLength += float64(which)
 	}
 	averageDocumentLength /= float64(documentsInCollection)
@@ -173,7 +173,7 @@ func main() {
 			for i := 0; i < len(currentList); i += 2 {
 				d := currentList[i]
 				tf := float64(currentList[i+1])
-				rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1*(1-b+b*(float64(lengthVector[d])/averageDocumentLength))))
+				rsv[d] += idf * ((tf * (k1 + 1)) / (tf + k1*(1-b+b*(float64(docLengths[d])/averageDocumentLength))))
 			}
 		}
 		/*

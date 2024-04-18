@@ -141,7 +141,7 @@ program search
         real(kind=8) :: k1 = 0.9_dp ! BM25 k1 parameter
         real(kind=8) :: b = 0.4_dp ! BM25 b parameter
 
-        integer, allocatable :: length_vector(:)
+        integer, allocatable :: doc_lengths(:)
         integer, allocatable :: postings(:)
         real(kind=8), allocatable :: rsv(:)
         integer, allocatable :: rsv_pointers(:)
@@ -158,18 +158,18 @@ program search
         open (unit=10, action='read', file='lengths.bin', iostat=rc, access='stream', form='unformatted')
         if (rc /= 0) stop 'ERROR: open failed'
         inquire (unit=10, size=file_size)
-        allocate(length_vector(file_size / 4))
-        read (10) length_vector
+        allocate(doc_lengths(file_size / 4))
+        read (10) doc_lengths
         close (10)
 
         ! Compute the average document length for BM25
-        average_document_length = real(sum(length_vector), 8) / real(size(length_vector), 8)
+        average_document_length = real(sum(doc_lengths), 8) / real(size(doc_lengths), 8)
 
         ! Read the primary_keys
-        allocate(primary_keys(size(length_vector)))
+        allocate(primary_keys(size(doc_lengths)))
         open (unit=10, action='read', file='docids.bin', iostat=rc)
         if (rc /= 0) stop 'ERROR: open failed'
-        do i = 1, size(length_vector)
+        do i = 1, size(doc_lengths)
                 read (10, '(A)', iostat=rc) primary_keys(i)
                 if (rc /= 0) stop 'ERROR: read failed'
         end do
@@ -194,11 +194,11 @@ program search
         if (rc /= 0) stop 'ERROR: open failed'
 
         ! Allocate buffers
-        allocate(postings(size(length_vector) * 2))
+        allocate(postings(size(doc_lengths) * 2))
 
         ! Set up the rsv pointers
-        allocate(rsv(size(length_vector)))
-        allocate(rsv_pointers(size(length_vector)))
+        allocate(rsv(size(doc_lengths)))
+        allocate(rsv_pointers(size(doc_lengths)))
 
         do i = 1, size(rsv_pointers)
                 rsv_pointers(i) = i
@@ -244,7 +244,7 @@ program search
                                 docid = postings(j) + 1
                                 tf = postings(j+1)
                                 rsv(docid) = rsv(docid) + idf * (tf * (k1 + 1)) &
-                                        / (tf + k1 * (1 - b + b * (length_vector(docid) / average_document_length)))
+                                        / (tf + k1 * (1 - b + b * (doc_lengths(docid) / average_document_length)))
                         end do
                 end do
 

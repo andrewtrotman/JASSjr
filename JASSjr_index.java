@@ -47,7 +47,7 @@ class JASSjr_index
 	String nextToken;
 	HashMap<String, PostingsList> vocab = new HashMap<String, PostingsList>();
 	ArrayList<String> docIds = new ArrayList<String>();
-	ArrayList<Integer> lengthVector = new ArrayList<Integer>();
+	ArrayList<Integer> docLengths = new ArrayList<Integer>();
 
 	/* 
 		toNativeEndian()
@@ -135,7 +135,7 @@ class JASSjr_index
 						  Save the previous document length
 						*/
 						if (docId != -1)
-							lengthVector.add(documentLength);
+							docLengths.add(documentLength);
 			
 						/*
 						  Move on to the next document
@@ -196,16 +196,16 @@ class JASSjr_index
 					documentLength++;
 					}
 				}
-	
+
+		/*
+		  Save the final document length
+		*/
+		docLengths.add(documentLength);
+
 		/*
 		  tell the user we've got to the end of parsing
 		*/
 		System.out.println("Indexed " + (docId + 1) + " documents. Serialising...");
-	
-		/*
-		  Save the final document length
-		*/
-		lengthVector.add(documentLength);
 
 			/*
 			  store the primary keys
@@ -261,12 +261,12 @@ class JASSjr_index
 			  store the document lengths
 			*/
 			DataOutputStream docLengthsFile = new DataOutputStream(new FileOutputStream("lengths.bin"));
-			for (int i= 0; i < lengthVector.size(); i++)
-				linear[i] = lengthVector.get(i);
+			for (int i= 0; i < docLengths.size(); i++)
+				linear[i] = docLengths.get(i);
 		
 			intBuffer.rewind();
-			intBuffer.put(linear, 0, lengthVector.size());
-			docLengthsFile.write(byteBuffer.array(), 0, lengthVector.size() * 4);
+			intBuffer.put(linear, 0, docLengths.size());
+			docLengthsFile.write(byteBuffer.array(), 0, docLengths.size() * 4);
 		   
 			/*
 			  clean up
