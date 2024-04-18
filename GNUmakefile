@@ -1,4 +1,4 @@
-default : cpp java
+default : cpp java tools
 
 all : cpp java d_dmd d_ldc fortran zig
 
@@ -50,12 +50,17 @@ JASSjr_index_zig : JASSjr_index.zig
 JASSjr_search_zig : JASSjr_search.zig
 	zig build-exe -O ReleaseFast --name JASSjr_search_zig JASSjr_search.zig
 
+.PHONY: tools
+tools:
+	make -C tools
+
 clean:
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
 	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
 	- rm JASSjr_index_fortran JASSjr_search_fortran
 	- rm JASSjr_index_zig JASSjr_search_zig
+	- make -C tools clean
 
 clean_index:
 	- rm docids.bin lengths.bin postings.bin vocab.bin
