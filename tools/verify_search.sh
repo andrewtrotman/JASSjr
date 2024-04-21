@@ -13,13 +13,8 @@ if [ -f results.gold.bin -a -f docids.gold.bin -a -f lengths.gold.bin -a -f post
 	cp postings.gold.bin postings.bin
 	cp vocab.gold.bin vocab.bin
 else
-	echo "Generating gold standard with JASSjr_index"
-	./JASSjr_index "$2" > stdout.gold.bin
-	./JASSjr_search < 51-100.titles.txt > results.gold.bin
-	mv docids.bin docids.gold.bin
-	mv lengths.bin lengths.gold.bin
-	mv postings.bin postings.gold.bin
-	mv vocab.bin vocab.gold.bin
+	echo "A gold standard is required please generate with ./tools/verify_search.sh"
+	exit
 fi
 
 echo "Verifying $@"
