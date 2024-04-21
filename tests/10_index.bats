@@ -67,6 +67,10 @@ test_index_command() {
 	test_index_command ./JASSjr_index.pl
 }
 
+@test "PHP" {
+	test_index_command ./JASSjr_index.php
+}
+
 @test "Python" {
 	test_index_command ./JASSjr_index.py
 }
