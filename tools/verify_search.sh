@@ -2,7 +2,7 @@
 
 # Copyright (c) 2024 Vaughan Kitchen
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	echo "Usage: $0 <prog>"
 	exit
 fi
@@ -22,11 +22,11 @@ else
 	mv vocab.bin vocab.gold.bin
 fi
 
-echo "Verifying $1"
-./"$@" < 51-100.titles.txt > results.bin
+echo "Verifying $@"
+"$@" < 51-100.titles.txt > results.bin
 
 if ! cmp results.bin results.gold.bin; then
 	echo "ERROR: example queries results differs"
 else
-	echo "$1 appears to be correct"
+	echo "$@ appears to be correct"
 fi
