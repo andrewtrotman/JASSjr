@@ -138,7 +138,7 @@ int main(string[] argv)
 	doc_lengths ~= document_length;
 
 	// Tell the user we've got to the end of parsing
-	writefln("Indexed %d documents. Serialising", docid+1);
+	writefln("Indexed %d documents. Serialising...", docid+1);
 
 	// Store the primary keys
 	auto docids_fh = File("docids.bin", "w");

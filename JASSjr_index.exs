@@ -56,7 +56,7 @@ defmodule Indexer do
       end
 
       # Include the primary key as a term to match the other indexers
-      index = Index.append(index, docno)
+      index = Index.append(index, String.downcase(docno))
 
       parse(file, index)
     else
