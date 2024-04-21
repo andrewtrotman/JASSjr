@@ -172,6 +172,12 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | test_documents.xml | Example of how documents should be layed out for indexing | 
 | 51-100.titles.txt | TREC topics 51-100 titles as queries |
 | 51-100.qrels.txt | TREC topics 51-100 human judgments |
+| tools/GNUmakefile | GNU make makefile for macOS / Linux |
+| tools/index_stats.py | Print general index stats |
+| tools/show_document.cpp | Print document from collection when given a docid |
+| tools/verify_indexer.sh | Verifies an indexer matches the reference implementation |
+| tools/verify_search.sh | Verifies a search engine matches the reference implementation |
+| tools/vocab_diff.py | Debug vocab file differences |
 
 # Benchmarks #
 
