@@ -165,6 +165,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.f90 | Fortran source code to search engine |
 | JASSjr_index.d | D source code to indexer |
 | JASSjr_search.d | D source code to search engine |
+| JASSjr_index.php | PHP source code to indexer |
+| JASSjr_search.php | PHP source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -189,6 +191,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  |
 | Nim      | 2.0.0                     | Regex  | Array        | 19s      | 950ms  |
 | Perl     | v5.38.2                   | Regex  | Array        | 115s     | 900ms  |
+| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  |
 | Python   | 3.12.2                    | Regex  | Array        | 74s      | 850ms  |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |
 | Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.3s   |

@@ -168,6 +168,10 @@ test_search_command() {
 	test_search_command ./JASSjr_search.pl
 }
 
+@test "PHP" {
+	test_search_command ./JASSjr_search.php
+}
+
 @test "Python" {
 	test_search_command ./JASSjr_search.py
 }
