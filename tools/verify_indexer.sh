@@ -57,6 +57,12 @@ if ! cmp results.bin results.gold.bin; then
 	correct=false
 fi
 
+echo "Verifying vocab"
+if ! ./tools/vocab_diff.py vocab.gold.bin vocab.bin > /dev/null; then
+	echo "ERROR: vocab differs"
+	correct=false
+fi
+
 if $correct; then
 	echo "${@:1:$#-1} appears to be correct"
 fi

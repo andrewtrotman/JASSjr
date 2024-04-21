@@ -39,26 +39,27 @@ for word, offset, size in decode_vocab(read_file(sys.argv[2])):
 terms_a = set(vocab_a.keys())
 terms_b = set(vocab_b.keys())
 
-print(f"These terms are only in {sys.argv[1]}")
+correct = True
 res = list(terms_a - terms_b)
-if len(res) > 100:
-    print(res[slice(100)], "...")
-else:
-    print(res)
+if len(res) != 0:
+    correct = False
+    print(f"These terms are only in {sys.argv[1]}")
+    if len(res) > 100:
+        print(res[slice(100)], "...")
+    else:
+        print(res)
+    print()
 
-print()
-print(f"These terms are only in {sys.argv[2]}")
 res = list(terms_b - terms_a)
-if len(res) > 100:
-    print(res[slice(100)], "...")
-else:
-    print(res)
+if len(res) != 0:
+    correct = False
+    print(f"These terms are only in {sys.argv[2]}")
+    if len(res) > 100:
+        print(res[slice(100)], "...")
+    else:
+        print(res)
+    print()
 
-set_a = set(vocab_a.items())
-set_b = set(vocab_b.items())
-
-print()
-print(f"These terms have differing sizes")
 res = []
 if len(vocab_a) < len(vocab_b):
     for term in vocab_a:
@@ -74,7 +75,14 @@ else:
                 res.append((term, vocab_a[term], vocab_b[term]))
         except:
             pass
-if len(res) > 100:
-    print(res[slice(100)], "...")
-else:
-    print(res)
+if len(res) != 0:
+    correct = False
+    print(f"These terms have differing sizes")
+    if len(res) > 100:
+        print(res[slice(100)], "...")
+    else:
+        print(res)
+    print()
+
+if not correct:
+    sys.exit(1)
