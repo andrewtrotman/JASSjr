@@ -2,14 +2,17 @@
 
 # Copyright (c) 2024 Vaughan Kitchen
 
-if [ $# -ne 2 ]; then
+# Takes the command as is e.g.
+# ./tools/verify_indexer.sh go run JASSjr_index.go wsj.xml
+
+if [ $# -lt 2 ]; then
 	echo "Usage: $0 <prog> <infile>"
 	exit
 fi
 
 if [ ! -f stdout.gold.bin -o ! -f results.gold.bin -o ! -f docids.gold.bin -o ! -f lengths.gold.bin -o ! -f postings.gold.bin -o ! -f vocab.gold.bin ]; then
 	echo "Generating gold standard with JASSjr_index"
-	./JASSjr_index "$2" > stdout.gold.bin
+	./JASSjr_index "${@: -1}" > stdout.gold.bin
 	./JASSjr_search < 51-100.titles.txt > results.gold.bin
 	mv docids.bin docids.gold.bin
 	mv lengths.bin lengths.gold.bin
@@ -17,8 +20,8 @@ if [ ! -f stdout.gold.bin -o ! -f results.gold.bin -o ! -f docids.gold.bin -o ! 
 	mv vocab.bin vocab.gold.bin
 fi
 
-echo "Verifying $1"
-./"$@" > stdout.bin
+echo "Verifying ${@:1:$#-1}"
+"$@" > stdout.bin
 
 correct=true
 
@@ -55,5 +58,5 @@ if ! cmp results.bin results.gold.bin; then
 fi
 
 if $correct; then
-	echo "$1 appears to be correct"
+	echo "${@:1:$#-1} appears to be correct"
 fi
