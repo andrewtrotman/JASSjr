@@ -92,7 +92,7 @@ loop do
 
   # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
   # query-id Q0 document-id rank score run-name
-  accumulators.take_while { |pair| pair[1] > 0 }.each_with_index do |(rsv, docid), i|
+  accumulators.take_while { |pair| pair[0] > 0 }.each_with_index do |(rsv, docid), i|
     break if i == 1000
     puts("#{query_id} Q0 #{doc_ids[docid]} #{i+1} #{"%.4f" % rsv} JASSjr")
   end
