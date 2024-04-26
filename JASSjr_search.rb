@@ -68,7 +68,7 @@ loop do
 
   # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
   # query-id Q0 document-id rank score run-name
-  accumulators.take_while { |rsv, | rsv > 0 }.take(1000).each_with_index do |(rsv, docid), i|
+  accumulators.take(1000).each_with_index do |(rsv, docid), i|
     puts("#{query_id} Q0 #{doc_ids[docid]} #{i+1} #{'%.4f' % rsv} JASSjr")
   end
 end
