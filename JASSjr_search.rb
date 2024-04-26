@@ -61,7 +61,7 @@ loop do
   end
 
   # Sort the results list. Tie break on the document ID.
-  accumulators.sort!.reverse!
+  accumulators.sort! { |a, b| a[0] == b[0] ? b[1] <=> a[1] : b[0] <=> a[0] }
 
   # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
   # query-id Q0 document-id rank score run-name
