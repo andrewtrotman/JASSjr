@@ -34,7 +34,7 @@ loop do
   break if query.nil?
 
   query_id = 0
-  accumulators = Array.new(doc_ids.length) { |i| [0, i] }
+  accumulators = Hash.new(0)
 
   # If the first token is a number then assume a TREC query number, and skip it
   begin
@@ -56,9 +56,12 @@ loop do
     # Process the postings list by simply adding the BM25 component for this document into the accumulators array
     postings.each_slice(2) do |docid, tf|
       rsv = idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-      accumulators[docid][0] += rsv
+      accumulators[docid] += rsv
     end
   end
+
+  # Turn the accumulators back into an array to get a stable ordering
+  accumulators = accumulators.collect { |k, v| [v, k] }
 
   # Sort the results list. Tie break on the document ID.
   accumulators.sort! { |a, b| a[0] == b[0] ? b[1] <=> a[1] : b[0] <=> a[0] }
