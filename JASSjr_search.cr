@@ -79,8 +79,7 @@ loop do
     idf = Math.log(doc_ids.size.to_f / (postings.size / 2))
 
     # Process the postings list by simply adding the BM25 component for this document into the accumulators array
-    postings.each_slice(2) do |pair|
-      docid, tf = pair
+    postings.each_slice(2) do |(docid, tf)|
       rsv = idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
       prev = accumulators[docid]
       accumulators[docid] = {prev[0] + rsv, prev[1]}
@@ -92,7 +91,7 @@ loop do
 
   # Print the (at most) top 1000 documents in the results list in TREC eval format which is:
   # query-id Q0 document-id rank score run-name
-  accumulators.take_while { |pair| pair[0] > 0 }.each_with_index do |(rsv, docid), i|
+  accumulators.take_while { |(rsv,)| rsv > 0 }.each_with_index do |(rsv, docid), i|
     break if i == 1000
     puts("#{query_id} Q0 #{doc_ids[docid]} #{i+1} #{"%.4f" % rsv} JASSjr")
   end
