@@ -200,7 +200,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  |
 | Python   | 3.12.2                    | Regex  | Array        | 74s      | 850ms  |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |
-| Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.3s   |
+| Ruby     | 3.2.4                     | Regex  | HashMap      | 160s     | 1.25s  |
 | Zig      | 0.12.0                    | Lexer  | Array        | 8s       | 130ms  |
 
 Where Parser is one of
