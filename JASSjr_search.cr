@@ -1,4 +1,4 @@
-#!/usr/bin/env -S crystal run
+#!/usr/bin/env crystal
 
 # Copyright (c) 2024 Vaughan Kitchen
 # Minimalistic BM25 search engine.
