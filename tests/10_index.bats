@@ -31,6 +31,10 @@ test_index_command() {
 	test_index_command ./JASSjr_index
 }
 
+@test "Crystal" {
+	test_index_command ./JASSjr_index.cr
+}
+
 @test "D (dmd)" {
 	test_index_command ./JASSjr_index_d_dmd
 }

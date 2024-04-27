@@ -132,6 +132,10 @@ test_search_command() {
 	test_search_command ./JASSjr_search
 }
 
+@test "Crystal" {
+	test_search_command ./JASSjr_search.cr
+}
+
 @test "D (dmd)" {
 	test_search_command ./JASSjr_search_d_dmd
 }
