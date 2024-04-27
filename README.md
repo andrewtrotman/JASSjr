@@ -187,24 +187,26 @@ There are lies, damned lies, and benchmarks
 
 These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MHz DDR4 running Musl Void Linux 6.6.23 or newer.
 
-| Language | Version                   | Parser | Accumulators | Indexing | Search | Search 50 |
-| -------- | -------                   |------- | ------------ | -------- | ------ | --------- |
-| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 180ms  | 580ms     |
+| Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
+| -------- | -------                   |------- | ------------ | -------- | ------  | --------- |
+| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15.37s   | 180ms   | 580ms     |
 | Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29s      | 160ms  |           |
-| D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s      | 250ms  |           |
-| D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s      | 220ms  |           |
-| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 880ms  | 2.19s     |
-| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23s      | 560ms  | 1.08s     |
-| Go       | 1.22.0                    | Lexer  | Array        | 18s      | 220ms  | 680ms     |
-| Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 320ms  | 1.18s     |
-| JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  | 3.78s     |
-| Nim      | 2.0.0                     | Regex  | Array        | 19s      | 350ms  | 1.09s     |
-| Perl     | v5.38.2                   | Regex  | Array        | 115s     | 950ms  | 3.63s     |
-| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  | 830ms     |
-| Python   | 3.12.2                    | Regex  | Array        | 74s      | 830ms  | 2.84s     |
-| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8.07s  | 173.40s   |
-| Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.29s  | 64.18s    |
-| Zig      | 0.12.0                    | Lexer  | Array        | 8s       | 80ms   | 490ms     |
+| D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s??    | 250ms?? | 1.70s??   |
+| D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s??    | 220ms?? | 815ms??   |
+| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 126.17s  | 880ms   | 2.19s     |
+| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23.83s   | 560ms   | 1.08s     |
+| Go       | 1.22.0                    | Lexer  | Array        | 18.42s   | 220ms   | 680ms     |
+| Java     | 1.8.0_332                 | Lexer  | Array        | 17.97s   | 320ms   | 1.18s     |
+| JS       | node v18.19.1             | Regex  | Array        | 34.37s   | 750ms   | 3.78s     |
+| Nim      | 2.0.0                     | Regex  | Array        | 19.07s   | 350ms   | 1.09s     |
+| Perl     | v5.38.2                   | Regex  | Array        | 117.78s  | 950ms   | 3.63s     |
+| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 29.50s   | 350ms   | 830ms     |
+| Python   | 3.12.2                    | Regex  | Array        | 76.30s   | 830ms   | 2.84s     |
+| Raku     | v6.d/2023.11              | Regex  | Array        | 140min?? | 8.07s   | 173.40s   |
+| Ruby     | 3.3.2                     | Regex  | Array        | 156.45s  | 2.29s   | 64.18s    |
+| Zig      | 0.12.0                    | Lexer  | Array        | 8.60s    | 80ms    | 490ms     |
+
+Times are recorded as median of 11 iterations and ?? are times which haven't been confirmed by `/tools/benchmark.sh`
 
 Where Parser is one of
 * Lexer being a hand written single token look-ahead lexer
