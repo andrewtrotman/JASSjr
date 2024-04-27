@@ -8,11 +8,17 @@ if [ $# -eq 0 ]; then
 	exit
 fi
 
-in=$(cat)
+# Read stdin to a string only if there is data waiting there
+if [ ! -t 0 ]; then
+	in=$(cat)
+fi
 iters="$1"
 shift
 
+echo "Benchmarking: $@"
+
 # One run as a warmup
+echo "Warmup"
 "$@" > /dev/null
 
 timings=''
