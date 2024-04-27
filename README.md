@@ -187,30 +187,30 @@ There are lies, damned lies, and benchmarks
 
 These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MHz DDR4 running Musl Void Linux 6.6.23 or newer.
 
-| Language | Version                   | Parser | Accumulators | Indexing | Search |
-| -------- | -------                   |------- | ------------ | -------- | ------ |
-| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 280ms  |
-| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29s      | 160ms  |
-| D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s      | 250ms  |
-| D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s      | 220ms  |
-| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 850ms  |
-| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23s      | 580ms  |
-| Go       | 1.22.0                    | Lexer  | Array        | 18s      | 250ms  |
-| Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 330ms  |
-| JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  |
-| Nim      | 2.0.0                     | Regex  | Array        | 19s      | 950ms  |
-| Perl     | v5.38.2                   | Regex  | Array        | 115s     | 900ms  |
-| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  |
-| Python   | 3.12.2                    | Regex  | Array        | 74s      | 850ms  |
-| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |
-| Ruby     | 3.2.4                     | Regex  | HashMap      | 160s     | 1.25s  |
-| Zig      | 0.12.0                    | Lexer  | Array        | 8s       | 130ms  |
+| Language | Version                   | Parser | Accumulators | Indexing | Search | Search 50 |
+| -------- | -------                   |------- | ------------ | -------- | ------ | --------- |
+| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 180ms  | 580ms     |
+| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29s      | 160ms  |           |
+| D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s      | 250ms  |           |
+| D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s      | 220ms  |           |
+| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 880ms  | 2.19s     |
+| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23s      | 560ms  | 1.08s     |
+| Go       | 1.22.0                    | Lexer  | Array        | 18s      | 220ms  | 680ms     |
+| Java     | 1.8.0_332                 | Lexer  | Array        | 18s      | 320ms  | 1.18s     |
+| JS       | node v18.19.1             | Regex  | Array        | 35s      | 750ms  | 3.78s     |
+| Nim      | 2.0.0                     | Regex  | Array        | 19s      | 350ms  | 1.09s     |
+| Perl     | v5.38.2                   | Regex  | Array        | 115s     | 950ms  | 3.63s     |
+| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  | 830ms     |
+| Python   | 3.12.2                    | Regex  | Array        | 74s      | 830ms  | 2.84s     |
+| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |           |
+| Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.29s  | 64.18s    |
+| Zig      | 0.12.0                    | Lexer  | Array        | 8s       | 80ms   | 490ms     |
 
 Where Parser is one of
 * Lexer being a hand written single token look-ahead lexer
 * Regex being an equivalent regex to the lexer
 
-And search is the time to startup, read the index file, and produce results for a single query
+Search is the time to startup, read the index file, and produce results for a single query. Search 50 is a single startup and then produce results for 50 queries. Times for both of these are the median of 11 iterations
 
 # Tests #
 
