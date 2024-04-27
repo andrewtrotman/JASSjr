@@ -202,7 +202,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Perl     | v5.38.2                   | Regex  | Array        | 115s     | 950ms  | 3.63s     |
 | PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 30s      | 350ms  | 830ms     |
 | Python   | 3.12.2                    | Regex  | Array        | 74s      | 830ms  | 2.84s     |
-| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8s     |           |
+| Raku     | v6.d/2023.11              | Regex  | Array        | 140min   | 8.07s  | 173.40s   |
 | Ruby     | 3.3.2                     | Regex  | Array        | 160s     | 2.29s  | 64.18s    |
 | Zig      | 0.12.0                    | Lexer  | Array        | 8s       | 80ms   | 490ms     |
 
