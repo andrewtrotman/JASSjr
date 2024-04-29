@@ -62,7 +62,10 @@ for line in fh:lines() do
 		end
 		-- Don't index XML tags
 		if token[1] ~= "<" then
-			-- TODO handle / at start of string
+			-- Due to lack of regex and needing to match closing tags, we pick up strings starting with /
+			if token[1] == "/" then
+				token = token(2)
+			end
 			-- Lowercase the string
 			token = string.lower(token)
 
