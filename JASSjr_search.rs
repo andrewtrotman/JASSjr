@@ -50,13 +50,13 @@ fn main() -> std::io::Result<()> {
         let string_length: usize = vocab_as_bytes[offset].into();
         offset += 1;
 
-        let term = String::from_utf8(vocab_as_bytes[offset..string_length].to_vec()).unwrap();
+        let term = String::from_utf8(vocab_as_bytes[offset..(offset + string_length)].to_vec()).unwrap();
         offset += string_length + 1; //null terminated
 
-        let position: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..offset+4).unwrap()).unwrap());
+        let position: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..(offset+4)).unwrap()).unwrap());
         offset += 4;
 
-        let size: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..offset+4).unwrap()).unwrap()) ;
+        let size: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..(offset+4)).unwrap()).unwrap()) ;
         offset += 4;
 
         vocab.insert(term, VocabEntry {position: position, size: size});
