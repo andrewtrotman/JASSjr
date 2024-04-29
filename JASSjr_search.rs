@@ -43,7 +43,7 @@ fn main() -> std::io::Result<()> {
     */
 
     //build the vocab in memory
-    let mut vocab: HashMap<String,Vec<(i32,i32)>> = HashMap::new();
+    let mut vocab: HashMap<String,VocabEntry> = HashMap::new();
     let vocab_as_bytes = std::fs::read("vocab.bin")?;
     let mut offset = 0;
     while offset < vocab_as_bytes.capacity() {
@@ -53,7 +53,13 @@ fn main() -> std::io::Result<()> {
         let term = String::from_utf8(vocab_as_bytes[offset..string_length].to_vec()).unwrap();
         offset += string_length + 1; //null terminated
 
-        position
+        let position: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..offset+4).unwrap()).unwrap());
+        offset += 4;
+
+        let size: i32 = i32::from_ne_bytes(<[u8;4]>::try_from(vocab_as_bytes.get(offset..offset+4).unwrap()).unwrap()) ;
+        offset += 4;
+
+        vocab.insert(term, VocabEntry {position: position, size: size});
     }
 
     //search (one query per line)
