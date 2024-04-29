@@ -73,13 +73,15 @@ for line in fh:lines() do
 			token = token(1, 255)
 
 			-- Add the posting to the in-memory index
-			local postings = vocab[token] or {}
-			local postings_len = #postings -- TODO make this more efficient? (is O(log(n))
+			local postings = vocab[token] or {} -- if the term isn't in the vocab yet
+			local postings_len = postings["n"] or 0
 			if postings_len == 0 or postings[postings_len - 1] ~= docid then
 				-- If the docno for this occurence has changed then create a new <d,tf> pair
 				table.insert(postings, docid)
 				table.insert(postings, 1)
+				postings["n"] = postings_len + 2
 			else
+				-- Else increase the tf
 				postings[postings_len] = postings[postings_len] + 1
 			end
 			vocab[token] = postings
@@ -117,7 +119,7 @@ for term, postings in pairs(vocab) do
 	end
 
 	-- Write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size)
-	vocab_fh:write(string.char(string.len(term)), term, "\0", pack_int(where), pack_int(#postings * 4))
+	vocab_fh:write(string.char(string.len(term)), term, "\0", pack_int(where), pack_int(postings["n"] * 4))
 end
 
 -- Store the document lengths
