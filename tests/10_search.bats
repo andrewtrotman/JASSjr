@@ -1,5 +1,9 @@
 #!/usr/bin/env bats
 
+zero=`cat << EOF
+0 Q0 0 1 2.7475 JASSjr
+EOF`
+
 one=`cat << EOF
 0 Q0 10 1 2.0802 JASSjr
 EOF`
@@ -97,6 +101,9 @@ setup() {
 test_search_command() {
 	command="$1"
 
+	run $command <<< zero
+	assert_output "$zero"
+
 	run $command <<< one
 	assert_output "$one"
 
@@ -162,6 +169,10 @@ test_search_command() {
 
 @test "JavaScript" {
 	test_search_command ./JASSjr_search.js
+}
+
+@test "Lua" {
+	test_search_command ./JASSjr_search.lua
 }
 
 @test "Nim" {

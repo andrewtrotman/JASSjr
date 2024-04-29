@@ -169,6 +169,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.php | PHP source code to search engine |
 | JASSjr_index.cr | Crystal source code to indexer |
 | JASSjr_search.cr | Crystal source code to search engine |
+| JASSjr_index.lua | Lua source code to indexer |
+| JASSjr_search.lua | Lua source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -198,12 +200,13 @@ These are for example purposes only. Each implementation is intending to be idio
 | Go       | 1.22.0                    | Lexer  | Array        | 18.42s   | 220ms   | 680ms     |
 | Java     | 1.8.0_332                 | Lexer  | Array        | 17.97s   | 320ms   | 1.18s     |
 | JS       | node v18.19.1             | Regex  | Array        | 34.37s   | 750ms   | 3.78s     |
+| Lua      | LuaJIT 2.1.0-beta3        | Regex  | HashMap      | 63.75s   | 360ms   | 1.19s     |
 | Nim      | 2.0.0                     | Regex  | Array        | 19.07s   | 350ms   | 1.09s     |
 | Perl     | v5.38.2                   | Regex  | Array        | 117.78s  | 950ms   | 3.63s     |
 | PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 29.50s   | 350ms   | 830ms     |
 | Python   | 3.12.2                    | Regex  | Array        | 76.30s   | 830ms   | 2.84s     |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min?? | 8.07s   | 173.40s   |
-| Ruby     | 3.3.2                     | Regex  | Array        | 156.45s  | 1.16s   | 4.73s     |
+| Ruby     | 3.3.2                     | Regex  | HashMap      | 156.45s  | 1.16s   | 4.73s     |
 | Zig      | 0.12.0                    | Lexer  | Array        | 8.60s    | 80ms    | 490ms     |
 
 Times are recorded as median of 11 iterations and ?? are times which haven't been confirmed by `/tools/benchmark.sh`
