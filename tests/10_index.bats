@@ -63,6 +63,10 @@ test_index_command() {
 	test_index_command ./JASSjr_index.js
 }
 
+@test "Lua" {
+	test_index_command ./JASSjr_index.lua
+}
+
 @test "Nim" {
 	test_index_command ./JASSjr_index.nim
 }
