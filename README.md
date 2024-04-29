@@ -190,7 +190,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
 | -------- | -------                   |------- | ------------ | -------- | ------  | --------- |
 | C++      | c++11/gcc 13.2            | Lexer  | Array        | 15.37s   | 180ms   | 580ms     |
-| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29s      | 160ms  |           |
+| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29.01s   | 160ms   | 810ms     |
 | D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s??    | 250ms?? | 1.70s??   |
 | D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s??    | 220ms?? | 815ms??   |
 | Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 126.17s  | 880ms   | 2.19s     |
@@ -203,7 +203,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 29.50s   | 350ms   | 830ms     |
 | Python   | 3.12.2                    | Regex  | Array        | 76.30s   | 830ms   | 2.84s     |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min?? | 8.07s   | 173.40s   |
-| Ruby     | 3.3.2                     | Regex  | Array        | 156.45s  | 2.29s   | 64.18s    |
+| Ruby     | 3.3.2                     | Regex  | Array        | 156.45s  | 1.16s   | 4.73s     |
 | Zig      | 0.12.0                    | Lexer  | Array        | 8.60s    | 80ms    | 490ms     |
 
 Times are recorded as median of 11 iterations and ?? are times which haven't been confirmed by `/tools/benchmark.sh`
