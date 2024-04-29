@@ -1,10 +1,12 @@
 default : cpp java tools
 
-all : cpp java d_dmd d_ldc fortran zig
+all : cpp java crystal d_dmd d_ldc fortran zig
 
 cpp : JASSjr_index JASSjr_search
 
 java : JASSjr_index.class JASSjr_search.class
+
+crystal : JASSjr_index_crystal JASSjr_search_crystal
 
 d_dmd : JASSjr_index_d_dmd JASSjr_search_d_dmd
 
@@ -25,6 +27,12 @@ JASSjr_index.class : JASSjr_index.java
 
 JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
+
+JASSjr_index_crystal : JASSjr_index.cr
+	crystal build --release -o JASSjr_index_crystal JASSjr_index.cr
+
+JASSjr_search_crystal : JASSjr_search.cr
+	crystal build --release -o JASSjr_search_crystal JASSjr_search.cr
 
 JASSjr_index_d_dmd : JASSjr_index.d
 	dmd -O -of=JASSjr_index_d_dmd JASSjr_index.d
@@ -57,6 +65,7 @@ tools:
 clean:
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
+	- rm JASSjr_index_crystal JASSjr_search_crystal
 	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
 	- rm JASSjr_index_fortran JASSjr_search_fortran
 	- rm JASSjr_index_zig JASSjr_search_zig

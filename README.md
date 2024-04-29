@@ -167,6 +167,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.d | D source code to search engine |
 | JASSjr_index.php | PHP source code to indexer |
 | JASSjr_search.php | PHP source code to search engine |
+| JASSjr_index.cr | Crystal source code to indexer |
+| JASSjr_search.cr | Crystal source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -188,6 +190,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Language | Version                   | Parser | Accumulators | Indexing | Search |
 | -------- | -------                   |------- | ------------ | -------- | ------ |
 | C++      | c++11/gcc 13.2            | Lexer  | Array        | 15s      | 280ms  |
+| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29s      | 160ms  |
 | D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s      | 250ms  |
 | D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s      | 220ms  |
 | Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 125s     | 850ms  |
