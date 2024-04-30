@@ -124,7 +124,7 @@ fn main() -> std::io::Result<()> {
 
     //Store the primary keys
     {
-        let mut writer = BufWriter::new(File::create("docids1.bin")?);
+        let mut writer = BufWriter::new(File::create("docids.bin")?);
         for id in doc_ids {
            writer.write_all(id.as_bytes())?;
            writer.write_all(b"\n")?;
@@ -134,10 +134,11 @@ fn main() -> std::io::Result<()> {
 
     //Serialise the index to disk
     {
-        let mut postings_writer = BufWriter::new(File::create("postings1.bin")?);
-        let mut vocab_writer = BufWriter::new(File::create("vocab1.bin")?);
+        let mut postings_writer = BufWriter::new(File::create("postings.bin")?);
+        let mut vocab_writer = BufWriter::new(File::create("vocab.bin")?);
         for (term, postings_list) in &vocab {
             //Write the postings list to one file
+            let offset: i32 = i32::try_from(postings_writer.stream_position()?).unwrap();
             for posting in postings_list {
                 postings_writer.write_all(&posting.0.to_ne_bytes())?;
                 postings_writer.write_all(&posting.1.to_ne_bytes())?;
@@ -146,7 +147,7 @@ fn main() -> std::io::Result<()> {
             vocab_writer.write_all(&[u8::try_from(term.len()).unwrap()])?;
             vocab_writer.write_all(term.as_bytes())?;
             vocab_writer.write_all(b"\0")?;
-            vocab_writer.write_all(&i32::try_from(postings_writer.stream_position()?).unwrap().to_ne_bytes())?;
+            vocab_writer.write_all(&offset.to_ne_bytes())?;
             vocab_writer.write_all(&i32::try_from(&postings_list.len() * 2 * 4).unwrap().to_ne_bytes())?;
         }
         postings_writer.flush()?;
@@ -155,7 +156,7 @@ fn main() -> std::io::Result<()> {
 
     //Store the document lengths
     {
-        let mut writer = BufWriter::new(File::create("lengths1.bin")?);
+        let mut writer = BufWriter::new(File::create("lengths.bin")?);
         for length in &length_vector {
             writer.write_all(&length.to_ne_bytes())?;
         }
