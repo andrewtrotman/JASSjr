@@ -204,7 +204,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Nim      | 2.0.0                     | Regex  | Array        | 19.07s   | 350ms   | 1.09s     |
 | Perl     | v5.38.2                   | Regex  | Array        | 117.78s  | 950ms   | 3.63s     |
 | PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 29.50s   | 350ms   | 830ms     |
-| Python   | 3.12.2                    | Regex  | HashMap      | 76.30s   | 810ms   | 2.05s     |
+| Python   | 3.12.2                    | Regex  | HashMap      | 76.30s   | 800ms   | 1.85s     |
 | Raku     | v6.d/2023.11              | Regex  | Array        | 140min?? | 8.07s   | 173.40s   |
 | Ruby     | 3.3.2                     | Regex  | HashMap      | 156.45s  | 1.16s   | 4.73s     |
 | Zig      | 0.12.0                    | Lexer  | Array        | 8.60s    | 80ms    | 490ms     |

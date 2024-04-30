@@ -73,9 +73,9 @@ for query in sys.stdin:
             for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
                 # Process the postings list by simply adding the BM25 component for this document into the accumulators array
                 rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-                try:
+                if docid in accumulators:
                     accumulators[docid] = accumulators[docid] + rsv
-                except KeyError:
+                else:
                     accumulators[docid] = rsv
         except KeyError:
             pass
