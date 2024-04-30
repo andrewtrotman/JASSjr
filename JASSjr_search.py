@@ -52,7 +52,7 @@ for word, offset, size in decode_vocab(contents_vocab):
 # Search (one query per line)
 for query in sys.stdin:
     query_id = 0
-    accumulators = [(0, 0)] * len(doc_lengths) # array of rsv values
+    accumulators = {} # dict of rsv values
 
     # If the first token is a number then assume a TREC query number, and skip it
     terms = deque(query.split())
@@ -73,10 +73,15 @@ for query in sys.stdin:
             for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
                 # Process the postings list by simply adding the BM25 component for this document into the accumulators array
                 rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
-                current_rsv = accumulators[docid][0]
-                accumulators[docid] = (current_rsv + rsv, docid)
+                if docid in accumulators:
+                    accumulators[docid] = accumulators[docid] + rsv
+                else:
+                    accumulators[docid] = rsv
         except KeyError:
             pass
+
+    # Turn the accumulators back into an array to get a stable ordering
+    accumulators = [ (v, k) for k, v in accumulators.items() ]
 
     # Sort the results list. Tie break on the document ID.
     accumulators.sort(reverse=True)
