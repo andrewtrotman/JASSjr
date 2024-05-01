@@ -1,11 +1,12 @@
 #![allow(warnings)]
 
-use std::fs;
 use std::convert::TryFrom;
-use std::mem;
-use std::env;
 use std::collections::HashMap;
-use std::io::{self, BufRead};
+use std::io::{BufRead,BufReader};
+use std::io::SeekFrom;
+use std::io::Seek;
+use std::io::Read;
+use std::fs::File;
 
 const k1: f64 = 0.9; //BM25 k1 parameter
 const b: f64 = 0.4; //BM25 b parameter
@@ -27,8 +28,8 @@ fn main() -> std::io::Result<()> {
     //compute average length for BM25
     let documents_in_collection: i32 = length_vector.len() as i32;
     let mut average_document_length: f64 = 0.0;
-    for which in length_vector {
-        average_document_length += f64::try_from(which).unwrap();
+    for which in &length_vector {
+        average_document_length += *which as f64;
     }
     average_document_length /= documents_in_collection as f64;
 
@@ -37,11 +38,7 @@ fn main() -> std::io::Result<()> {
     let primary_key: Vec<&str> = primary_keys.split('\n').collect();
 
     //open the postings list file
-    let mut postingsFile = fs::File::open("postings.bin")?;
-
-    /* Remember that the vocab is formatted as:
-        one byte length, string, '\0', 4 byte where, 4 byte size
-    */
+    let mut postings_file = std::fs::File::open("postings.bin")?;
 
     //build the vocab in memory
     let mut dictionary: HashMap<String,VocabEntry> = HashMap::new();
@@ -71,7 +68,7 @@ fn main() -> std::io::Result<()> {
     rsv_pointers = (0..documents_in_collection).collect();
 
     //search (one query per line)
-    let stdin = io::stdin();
+    let stdin = std::io::stdin();
     for line in stdin.lock().lines() {
         //zero the accumulator array
         rsv = vec![0.0; documents_in_collection as usize];
@@ -85,17 +82,40 @@ fn main() -> std::io::Result<()> {
             }
 
             //does the term exist in the collection?
-            // let term_details: VocabEntry = dictionary.get(&term);
             match dictionary.get(term) {
                 Some(term_details) => {
                     //seek and read the postings list
+                    let mut current_list_as_bytes: Vec<u8> = Vec::with_capacity(term_details.size as usize);
+                    //TODO: it's not currently reading any bytes?????
+                    postings_file.seek(SeekFrom::Start(term_details.position as u64));
+                    postings_file.read_exact(&mut current_list_as_bytes)?;
+                    // println!("{} bytes read", n);
+                    let mut current_list: Vec<i32> = Vec::with_capacity(current_list_as_bytes.len()/4);
+                    for posting in current_list_as_bytes.chunks_exact(4) {
+                       current_list.push(i32::from_ne_bytes(<[u8;4]>::try_from(posting).unwrap()));
+                    }
+                    let postings: i32 = current_list_as_bytes.len() as i32 / 8;
 
-                    //compute the IDF component of BM25 as log(N/n)
-                    //if IDF == 0 then don't process this postings list as the BM25 contribution of
-                    //this term will be zero
+                    /*
+                      Compute the IDF component of BM25 as log(N/n).
+                      If IDF == 0 then don't process this postings list as the BM25 contribution of
+                      this term will be zero .
+                    */
+                    if documents_in_collection == postings {
+                        continue;
+                    }
+                    let idf: f64 = (documents_in_collection as f64 / postings as f64).log2();
 
-                    //process the postings list by simply adding the BM25 compontent for this document
-                    //into the accumulators array
+                    /*
+                      Process the postings list by simply adding the BM25 component for this document
+                      into the accumulators array
+                    */
+                    for posting in current_list.chunks_exact(2) {
+                        let d: f64 = posting[0] as f64;
+                        let tf: f64 = posting[1] as f64;
+                        println!("{} {}", d, tf);
+                        rsv[d as usize] += idf * ((tf * (k1 + 1.0)) / (tf + k1 * (1.0 - b + b * (length_vector[d as usize] as f64 / average_document_length))));
+                    }
                 }
                 None => {
                     continue;
@@ -104,11 +124,19 @@ fn main() -> std::io::Result<()> {
         }
 
         //sort the results list, tie break on docID
+        rsv_pointers.sort_by(|x,y| rsv[*y as usize].partial_cmp(&rsv[*x as usize]).unwrap());
 
-
-        //print the (at most) top 1000 documents in the results 
-        //list in TREC eval format which is:
-        //query-id Q0 document-id rank score run-name
+        /* 
+          Print the (at most) top 1000 documents in the results 
+          list in TREC eval format which is:
+          query-id Q0 document-id rank score run-name
+        */
+        for (i,r) in rsv_pointers.iter().enumerate() {
+            if rsv[*r as usize] == 0.0 || i == 1000 {
+                break;
+            }
+            println!("{} Q0 {} {} {:.4} JASSjr", query_id, primary_key[rsv_pointers[i as usize] as usize], i+1, rsv[*r as usize]);
+        }
     }
     
     Ok(())
