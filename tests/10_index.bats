@@ -91,6 +91,14 @@ test_index_command() {
 	test_index_command ./JASSjr_index.rb
 }
 
+@test "Rust" {
+	test_index_command ./JASSjr_index_rust
+}
+
+@test "Tcl" {
+	test_index_command ./JASSjr_index.tcl
+}
+
 @test "Zig" {
 	test_index_command ./JASSjr_index_zig
 }
