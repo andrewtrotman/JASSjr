@@ -105,6 +105,3 @@ while {-1 != [gets stdin query]} {
 		incr i
 	}
 }
-
-# Cleanup
-close $vocab_fh

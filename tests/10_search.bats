@@ -199,7 +199,11 @@ test_search_command() {
 	test_search_command ./JASSjr_search.rb
 }
 
-@test "TCL" {
+@test "Rust" {
+	test_search_command ./JASSjr_search_rust
+}
+
+@test "Tcl" {
 	test_search_command ./JASSjr_search.tcl
 }
 
