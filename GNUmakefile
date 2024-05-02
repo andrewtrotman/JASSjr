@@ -1,6 +1,6 @@
 default : cpp java tools
 
-all : cpp java crystal d_dmd d_ldc fortran zig
+all : cpp java crystal d_dmd d_ldc fortran rust zig
 
 cpp : JASSjr_index JASSjr_search
 
@@ -13,6 +13,8 @@ d_dmd : JASSjr_index_d_dmd JASSjr_search_d_dmd
 d_ldc : JASSjr_index_d_ldc JASSjr_search_d_ldc
 
 fortran : JASSjr_index_fortran JASSjr_search_fortran
+
+rust : JASSjr_index_rust JASSjr_search_rust
 
 zig : JASSjr_index_zig JASSjr_search_zig
 
@@ -52,6 +54,12 @@ JASSjr_index_fortran : JASSjr_index.f90
 JASSjr_search_fortran : JASSjr_search.f90
 	gfortran -std=f2003 -O3 -Wall -Wextra JASSjr_search.f90 -o JASSjr_search_fortran
 
+JASSjr_index_rust : JASSjr_index.rs
+	rustc -O -o JASSjr_index_rust JASSjr_index.rs
+
+JASSjr_search_rust : JASSjr_search.rs
+	rustc -O -o JASSjr_search_rust JASSjr_search.rs
+
 JASSjr_index_zig : JASSjr_index.zig
 	zig build-exe -O ReleaseFast --name JASSjr_index_zig JASSjr_index.zig
 
@@ -68,6 +76,7 @@ clean:
 	- rm JASSjr_index_crystal JASSjr_search_crystal
 	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
 	- rm JASSjr_index_fortran JASSjr_search_fortran
+	- rm JASSjr_index_rust JASSjr_search_rust
 	- rm JASSjr_index_zig JASSjr_search_zig
 	- make -C tools clean
 
