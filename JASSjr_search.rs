@@ -1,12 +1,8 @@
-#![allow(warnings)]
+#![allow(non_upper_case_globals)]
 
 use std::convert::TryFrom;
 use std::collections::HashMap;
-use std::io::{BufRead,BufReader};
-use std::io::SeekFrom;
-use std::io::Seek;
-use std::io::Read;
-use std::fs::File;
+use std::io::{BufRead,SeekFrom,Seek,Read};
 
 const k1: f64 = 0.9; //BM25 k1 parameter
 const b: f64 = 0.4; //BM25 b parameter
@@ -61,23 +57,26 @@ fn main() -> std::io::Result<()> {
     }
 
     //allocate buffers
-    let mut rsv: Vec<f64> = Vec::with_capacity(documents_in_collection as usize);
+    let mut rsv: Vec<f64> = vec![0.0; documents_in_collection as usize];
 
     //set up the rsv pointers
-    let mut rsv_pointers: Vec<i32> = Vec::with_capacity(documents_in_collection as usize);
-    rsv_pointers = (0..documents_in_collection).collect();
+    let mut rsv_pointers: Vec<i32> = (0..documents_in_collection).collect();
 
     //search (one query per line)
     let stdin = std::io::stdin();
     for line in stdin.lock().lines() {
-        //zero the accumulator array
-        rsv = vec![0.0; documents_in_collection as usize];
+        //zero the accumulator array, initialise the rsv pointers
+        for i in 0..documents_in_collection {
+            rsv[i as usize] = 0.0;
+            rsv_pointers[i as usize] = i;
+        }
         let mut first_term: bool = true;
         let mut query_id: i64 = 0;
         for term in line.unwrap().split_whitespace() {
             //if the first token is a number then assume a TREC query number, and skip it
             if first_term && term.parse::<i64>().is_ok() {
                 query_id = term.parse::<i64>().unwrap();
+                first_term = false;
                 continue;
             }
 
@@ -85,11 +84,9 @@ fn main() -> std::io::Result<()> {
             match dictionary.get(term) {
                 Some(term_details) => {
                     //seek and read the postings list
-                    let mut current_list_as_bytes: Vec<u8> = Vec::with_capacity(term_details.size as usize);
-                    //TODO: it's not currently reading any bytes?????
-                    postings_file.seek(SeekFrom::Start(term_details.position as u64));
+                    let mut current_list_as_bytes: Vec<u8> = vec![0;term_details.size as usize];
+                    let _ = postings_file.seek(SeekFrom::Start(term_details.position as u64));
                     postings_file.read_exact(&mut current_list_as_bytes)?;
-                    // println!("{} bytes read", n);
                     let mut current_list: Vec<i32> = Vec::with_capacity(current_list_as_bytes.len()/4);
                     for posting in current_list_as_bytes.chunks_exact(4) {
                        current_list.push(i32::from_ne_bytes(<[u8;4]>::try_from(posting).unwrap()));
@@ -113,7 +110,6 @@ fn main() -> std::io::Result<()> {
                     for posting in current_list.chunks_exact(2) {
                         let d: f64 = posting[0] as f64;
                         let tf: f64 = posting[1] as f64;
-                        println!("{} {}", d, tf);
                         rsv[d as usize] += idf * ((tf * (k1 + 1.0)) / (tf + k1 * (1.0 - b + b * (length_vector[d as usize] as f64 / average_document_length))));
                     }
                 }
