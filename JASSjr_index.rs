@@ -1,13 +1,25 @@
-use std::io::{BufRead, BufReader};
-use std::io::{BufWriter,Write};
-use std::io::Seek;
+/*
+	JASSjr_index.rs
+	---------------
+	Copyright (c) 2024 Katelyn Harlan
+	Minimalistic BM25 search engine.
+*/
+
+use std::io::{BufRead, BufReader, BufWriter, Write, Seek};
 use std::fs::File;
 use std::convert::TryFrom;
 use std::env;
 use std::collections::HashMap;
 
+/*
+  main()
+  ------
+  Simple indexer for TREC WSJ collection
+*/
 fn main() -> std::io::Result<()> {
-    //Make sure we have one parameter, the filename
+    /*
+      Make sure we have one parameter, the filename
+    */
     let args: Vec<_> = env::args().collect();
     if args.len() != 2 {
         println!("Usage: {} <infile.xml>", args[0]);
@@ -16,14 +28,16 @@ fn main() -> std::io::Result<()> {
 
     let mut vocab: HashMap<String,Vec<(i32,i32)>> = HashMap::new();
     let mut doc_ids: Vec<String> = Vec::new();
-    let mut length_vector: Vec<i32> = Vec::new();
+    let mut doc_lengths: Vec<i32> = Vec::new();
 
     let mut docid = -1;
     let mut document_length = 0;
-    let mut push_next = false;
+    let mut push_next = false; // is the next token the primary key?
 
     {
-        //Open the file to index
+        /*
+          Open the file to index
+        */
         let file = File::open(&args[1])?;
         let mut reader = BufReader::new(file);
         let mut buffer = String::new();
@@ -32,7 +46,9 @@ fn main() -> std::io::Result<()> {
         while reader.read_line(&mut buffer)? > 0 {
             let mut chars = buffer.chars();
             while let Some(c) = chars.next() {
-                //A token is either an XML tag '<'..'>' or a sequence of alphanumerics
+                /*
+                  A token is either an XML tag '<'..'>' or a sequence of alphanumerics
+                */
                 if !c.is_alphanumeric() {
                     //TREC <DOCNO> primary keys have a hyphen in them
                     if c == '-' && token.len() > 0 {
@@ -52,20 +68,28 @@ fn main() -> std::io::Result<()> {
                         token.push(c);
                     }
 
-                    //If we see a <DOC> tag then we're at the start of the next document
+                    /*
+                      If we see a <DOC> tag then we're at the start of the next document
+                    */
                     if token == "<DOC>" {
-                        //Save the previous document length
+                        /*
+                          Save the previous document length
+                        */
                         if docid != -1 {
-                            length_vector.push(document_length);
+                            doc_lengths.push(document_length);
                         }
-                        //Move on to the next document
+                        /*
+                          Move on to the next document
+                        */
                         docid +=1;
                         document_length = 0;
                         if docid % 1000 == 0 {
                             println!("{} documents indexed", docid);
                         }
                     }
-                    //If the last token we saw was a <DOCNO> then the next token is the primary key
+                    /*
+                      If the last token we saw was a <DOCNO> then the next token is the primary key
+                    */
                     if push_next {
                         doc_ids.push(token.clone());
                         push_next = false;
@@ -74,29 +98,39 @@ fn main() -> std::io::Result<()> {
                         push_next = true;
                     }
 
-                    //Don't index XML tags
+                    /*
+                      Don't index XML tags
+                    */
                     if !token.starts_with('<') && token.len() > 0 {
-                        //Lowercase the string
+                        /*
+                          Lowercase the string
+                        */
                         token = token.to_lowercase();
 
-                        //Truncate long tokens at 255
+                        /*
+                          Truncate long tokens at 255 characters (so that the length can be stored first and in a single byte)
+                        */
                         token.truncate(255);
                         
-                        //Add the posting to the index
+                        /*
+                          Add the posting to the in-memory index
+                        */
                         if vocab.contains_key(&token) {
                             let posting_list: &mut Vec<(i32,i32)> = vocab.get_mut(&token).unwrap();
                             let num_postings = posting_list.len() -1;
-                            if posting_list[num_postings].0 == docid {
+                            if posting_list[num_postings].0 == docid { //increase the tf
                                 posting_list[num_postings].1 += 1;
-                            } else {
+                            } else { //if the docno for this occurrence has changed then create a new <d,tf> pair
                                 posting_list.push((docid,1));
                             }
-                        }else {
+                        }else { //if the term isn't in the vocab yet
                             let posting_list = vec![(docid,1)];
                             vocab.insert(token.clone(), posting_list);
                         }
 
-                        //Compute the document length
+                        /*
+                          Compute the document length
+                        */
                         document_length +=1;
                     }
                     token.clear();
@@ -111,18 +145,26 @@ fn main() -> std::io::Result<()> {
         }
     }
 
-    //If we didn't index any documents then we're done
+    /*
+      If we didn't index any documents then we're done
+    */
     if docid == -1 {
         return Ok(());
     }
 
-    //Tell the user we've got to the end of parsing
+    /*
+      Tell the user we've got to the end of parsing
+    */
     println!("Indexed {} documents. Serialising...", docid+1);
 
-    //Save the final document length
-    length_vector.push(document_length);
+    /*
+      Save the final document length
+    */
+    doc_lengths.push(document_length);
 
-    //Store the primary keys
+    /*
+      Store the primary keys
+    */
     {
         let mut writer = BufWriter::new(File::create("docids.bin")?);
         for id in doc_ids {
@@ -132,18 +174,24 @@ fn main() -> std::io::Result<()> {
         writer.flush()?;
     }
 
-    //Serialise the index to disk
+    /*
+      Serialise the in-memory index to disk
+    */
     {
         let mut postings_writer = BufWriter::new(File::create("postings.bin")?);
         let mut vocab_writer = BufWriter::new(File::create("vocab.bin")?);
         for (term, postings_list) in &vocab {
-            //Write the postings list to one file
+            /*
+              Write the postings list to one file
+            */
             let offset: i32 = i32::try_from(postings_writer.stream_position()?).unwrap();
             for posting in postings_list {
                 postings_writer.write_all(&posting.0.to_ne_bytes())?;
                 postings_writer.write_all(&posting.1.to_ne_bytes())?;
             }
-            //Write the vocabulary to second file (one byte length, string, '\0', 4 byte where, 4 byte size)
+            /*
+              Write the vocabulary to second file (one byte length, string, '\0', 4 byte where, 4 byte size)
+            */
             vocab_writer.write_all(&[u8::try_from(term.len()).unwrap()])?;
             vocab_writer.write_all(term.as_bytes())?;
             vocab_writer.write_all(b"\0")?;
@@ -154,10 +202,12 @@ fn main() -> std::io::Result<()> {
         vocab_writer.flush()?;
     }
 
-    //Store the document lengths
+    /*
+      Store the document lengths
+    */
     {
         let mut writer = BufWriter::new(File::create("lengths.bin")?);
-        for length in &length_vector {
+        for length in &doc_lengths {
             writer.write_all(&length.to_ne_bytes())?;
         }
         writer.flush()?;

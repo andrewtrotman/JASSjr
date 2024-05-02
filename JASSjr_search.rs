@@ -1,43 +1,73 @@
+/*
+	JASSjr_search.rs
+	----------------
+	Copyright (c) 2024 Katelyn Harlan
+	Minimalistic BM25 search engine.
+*/
+
 #![allow(non_upper_case_globals)]
 
 use std::convert::TryFrom;
 use std::collections::HashMap;
 use std::io::{BufRead,SeekFrom,Seek,Read};
 
-const k1: f64 = 0.9; //BM25 k1 parameter
-const b: f64 = 0.4; //BM25 b parameter
+/*
+  Constants
+  ---------
+*/
+const k1: f64 = 0.9; // BM25 k1 parameter
+const b: f64 = 0.4; // BM25 b parameter
 
-//where on the disk and how large (in bytes) is the postings list?
+/*
+  Struct VocabEntry
+  -----------------
+*/
 struct VocabEntry {
+    //where on the disk and how large (in bytes) is the postings list?
     position: i32,
     size: i32,
 }
 
+/*
+  main()
+  ------
+  Simple search engine ranking on BM25.
+*/
 fn main() -> std::io::Result<()> {
-    //read the doc lengths
+    /*
+      Read the doc lengths
+    */
     let lengths_as_bytes = std::fs::read("lengths.bin").unwrap();
-    let mut length_vector: Vec<i32> = Vec::new();
+    let mut doc_lengths: Vec<i32> = Vec::new();
     for length in lengths_as_bytes.chunks_exact(4) {
-        length_vector.push(i32::from_ne_bytes(<[u8;4]>::try_from(length).unwrap()));
+        doc_lengths.push(i32::from_ne_bytes(<[u8;4]>::try_from(length).unwrap()));
     }
 
-    //compute average length for BM25
-    let documents_in_collection: i32 = length_vector.len() as i32;
+    /* 
+      Compute average length for BM25
+    */
+    let documents_in_collection: i32 = doc_lengths.len() as i32;
     let mut average_document_length: f64 = 0.0;
-    for which in &length_vector {
+    for which in &doc_lengths {
         average_document_length += *which as f64;
     }
     average_document_length /= documents_in_collection as f64;
 
-    //read the primary keys
+    /*
+      Read the primary keys
+    */
     let primary_keys: String = std::fs::read_to_string("docids.bin").unwrap();
     let primary_key: Vec<&str> = primary_keys.split('\n').collect();
 
-    //open the postings list file
+    /*
+      Open the postings list file
+    */
     let mut postings_file = std::fs::File::open("postings.bin")?;
 
-    //build the vocab in memory
-    let mut dictionary: HashMap<String,VocabEntry> = HashMap::new();
+    /*
+      Build the vocabulary in memory
+    */
+    let mut dictionary: HashMap<String,VocabEntry> = HashMap::new(); // the vocab
     let vocab_as_bytes = std::fs::read("vocab.bin")?;
     let mut offset = 0;
     while offset < vocab_as_bytes.capacity() {
@@ -56,34 +86,49 @@ fn main() -> std::io::Result<()> {
         dictionary.insert(term, VocabEntry {position: position, size: size});
     }
 
-    //allocate buffers
+    /*
+      Allocate buffers
+    */
     let mut rsv: Vec<f64> = vec![0.0; documents_in_collection as usize];
 
-    //set up the rsv pointers
-    let mut rsv_pointers: Vec<i32> = (0..documents_in_collection).collect();
+    /*
+      Set up the rsv pointers
+    */
+    let mut rsv_pointers: Vec<i32> = (0..documents_in_collection).rev().collect();
 
-    //search (one query per line)
+    /*
+      Search (one query per line)
+    */
     let stdin = std::io::stdin();
     for line in stdin.lock().lines() {
-        //zero the accumulator array, initialise the rsv pointers
+        /*
+          Zero the accumulator array.
+          Re-initialise the rsv pointers.
+        */
         for i in 0..documents_in_collection {
             rsv[i as usize] = 0.0;
-            rsv_pointers[i as usize] = i;
+            rsv_pointers[i as usize] = documents_in_collection - 1 - i;
         }
         let mut first_term: bool = true;
         let mut query_id: i64 = 0;
         for term in line.unwrap().split_whitespace() {
-            //if the first token is a number then assume a TREC query number, and skip it
+            /*
+              If the first token is a number then assume a TREC query number, and skip it
+            */
             if first_term && term.parse::<i64>().is_ok() {
                 query_id = term.parse::<i64>().unwrap();
                 first_term = false;
                 continue;
             }
 
-            //does the term exist in the collection?
+            /*
+              Does the term exist in the collection?
+            */
             match dictionary.get(term) {
                 Some(term_details) => {
-                    //seek and read the postings list
+                    /*
+                      Seek and read the postings list
+                    */
                     let mut current_list_as_bytes: Vec<u8> = vec![0;term_details.size as usize];
                     let _ = postings_file.seek(SeekFrom::Start(term_details.position as u64));
                     postings_file.read_exact(&mut current_list_as_bytes)?;
@@ -110,7 +155,7 @@ fn main() -> std::io::Result<()> {
                     for posting in current_list.chunks_exact(2) {
                         let d: f64 = posting[0] as f64;
                         let tf: f64 = posting[1] as f64;
-                        rsv[d as usize] += idf * ((tf * (k1 + 1.0)) / (tf + k1 * (1.0 - b + b * (length_vector[d as usize] as f64 / average_document_length))));
+                        rsv[d as usize] += idf * ((tf * (k1 + 1.0)) / (tf + k1 * (1.0 - b + b * (doc_lengths[d as usize] as f64 / average_document_length))));
                     }
                 }
                 None => {
@@ -119,7 +164,9 @@ fn main() -> std::io::Result<()> {
             }
         }
 
-        //sort the results list, tie break on docID
+        /*
+          Sort the results list
+        */
         rsv_pointers.sort_by(|x,y| rsv[*y as usize].partial_cmp(&rsv[*x as usize]).unwrap());
 
         /* 
