@@ -101,7 +101,7 @@ fn main() -> std::io::Result<()> {
                     if documents_in_collection == postings {
                         continue;
                     }
-                    let idf: f64 = (documents_in_collection as f64 / postings as f64).log2();
+                    let idf: f64 = (documents_in_collection as f64 / postings as f64).ln();
 
                     /*
                       Process the postings list by simply adding the BM25 component for this document
