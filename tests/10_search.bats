@@ -199,6 +199,10 @@ test_search_command() {
 	test_search_command ./JASSjr_search.rb
 }
 
+@test "TCL" {
+	test_search_command ./JASSjr_search.tcl
+}
+
 @test "Zig" {
 	test_search_command ./JASSjr_search_zig
 }
