@@ -1,6 +1,4 @@
-default : cpp java tools
-
-all : cpp java crystal d_dmd d_ldc fortran rust zig
+all : cpp java crystal d_dmd d_ldc fortran rust zig tools
 
 cpp : JASSjr_index JASSjr_search
 
@@ -19,10 +17,10 @@ rust : JASSjr_index_rust JASSjr_search_rust
 zig : JASSjr_index_zig JASSjr_search_zig
 
 JASSjr_index : JASSjr_index.cpp
-	g++ -std=c++11 -O3 -Wno-unused-result JASSjr_index.cpp -o JASSjr_index
+	$(CXX) -std=c++11 -O3 -Wno-unused-result JASSjr_index.cpp -o JASSjr_index
 
 JASSjr_search : JASSjr_search.cpp
-	g++ -std=c++11 -O3 -Wno-unused-result JASSjr_search.cpp -o JASSjr_search
+	$(CXX) -std=c++11 -O3 -Wno-unused-result JASSjr_search.cpp -o JASSjr_search
 
 JASSjr_index.class : JASSjr_index.java
 	javac JASSjr_index.java

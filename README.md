@@ -22,13 +22,13 @@ As an example ranking function this code implements the ATIRE version of BM25 wi
 * There are many variants of BM25, JASSjr uses the ATIRE BM25 function which ignores the k3 query component.  It is assumed that each term is unique and occurs only once (and so the k3 clause is set to 1.0).
 
 # Usage #
-To build for C++ and Java simply use
+To build for all installed languages run
 
-	make
+	make -k
 
-or for all compiled languages use
+To build for a specific language use make and the language name e.g.
 
-    make all
+	make cpp
 
 To index use
 
@@ -45,7 +45,7 @@ Queries a sequences of words.  If the first token is a number it is assumed to t
 JASSjr will produce (on stdout) a [trec_eval](https://github.com/usnistgov/trec_eval) compatible results list.
 
 ## Java ##
-The Java version is build in the same way, but run with 
+The Java version is built in the same way, but run with
 
 	java JASSjr_index <filename>
 
@@ -83,13 +83,15 @@ To search use
 Alternatively `go build` can be used to produce binaries. Though the names of these will conflict with the C++ versions
 
 ## Other ##
-The interpreted languages include a shebang and can be executed directly e.g.
+Many languages include a shebang and can be executed directly e.g.
 
     ./JASSjr_index.py <filename>
 
 and
 
     ./JASSjr_search.py
+
+for languages in which a binary is also produced this will typically run an unoptimised developer build. A full list can be obtained by running `git grep --no-recursive '^#!/usr/bin/env'`
 
 # Evaluation #
 * Indexing the TREC WSJ collection of 173,252 documents takes less than 20 seconds on my Mac (3.2 GHz Intel Core i5).
