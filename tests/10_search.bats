@@ -151,6 +151,10 @@ test_search_command() {
 	test_search_command ./JASSjr_search_d_ldc
 }
 
+@test "Dart" {
+	test_search_command ./JASSjr_search.dart
+}
+
 @test "Elixir" {
 	test_search_command ./JASSjr_search.exs
 }

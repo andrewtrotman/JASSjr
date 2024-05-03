@@ -43,6 +43,10 @@ test_index_command() {
 	test_index_command ./JASSjr_index_d_ldc
 }
 
+@test "Dart" {
+	test_index_command ./JASSjr_index.dart
+}
+
 @test "Elixir" {
 	test_index_command ./JASSjr_index.exs
 }
