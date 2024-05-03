@@ -37,7 +37,6 @@ def decode_vocab(buffer):
         yield word.decode(), where, size
 
 contents_vocab = read_file('vocab.bin')
-contents_postings = read_file('postings.bin')
 doc_lengths = array('i', read_file('lengths.bin')) # Read the document lengths
 doc_ids = read_lines('docids.bin') # Read the primary_keys
 
@@ -48,6 +47,9 @@ vocab = {}
 # Build the vocabulary in memory
 for word, offset, size in decode_vocab(contents_vocab):
     vocab[word] = (offset, size)
+
+# Open the postings list file
+postings_fh = open("postings.bin", "rb")
 
 # Search (one query per line)
 for query in sys.stdin:
@@ -63,14 +65,18 @@ for query in sys.stdin:
         # Does the term exist in the collection?
         try:
             offset, size = vocab[term]
-
             postings_length = size / 8
-            # Compute the IDF component of BM25 as log(N/n).
+
             # if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
-            idf = math.log(len(doc_lengths) / (postings_length))
+            if len(doc_lengths) == postings_length:
+                continue
+
+            # Compute the IDF component of BM25 as log(N/n).
+            idf = math.log(len(doc_lengths) / postings_length)
 
             # Seek and read the postings list
-            for docid, freq in struct.iter_unpack('ii', contents_postings[offset:offset+size]):
+            postings_fh.seek(offset)
+            for docid, freq in struct.iter_unpack('ii', postings_fh.read(size)):
                 # Process the postings list by simply adding the BM25 component for this document into the accumulators array
                 rsv = idf * ((freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (doc_lengths[docid] / average_length))))
                 if docid in accumulators:
