@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # JASSjr_search.py
-# Copyright (c) 2023 Vaughan Kitchen
+# Copyright (c) 2023, 2024 Vaughan Kitchen
 # Minimalistic BM25 search engine.
 
 from array import array

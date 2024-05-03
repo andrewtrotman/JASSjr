@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // JASSjr_search.js
-// Copyright (c) 2023 Vaughan Kitchen
+// Copyright (c) 2023, 2024 Vaughan Kitchen
 // Minimalistic BM25 search engine.
 
 var fs = require('fs');
@@ -15,7 +15,6 @@ var k1 = 0.9; // BM25 k1 parameter
 var b = 0.4; // BM25 b parameter
 
 var vocab_raw = fs.readFileSync('vocab.bin');
-var postings_raw = fs.readFileSync('postings.bin');
 var doc_lengths = fs.readFileSync('lengths.bin'); // Read the document lengths
 var ids = fs.readFileSync('docids.bin', 'utf8').split(os.EOL); // Read the primary_keys
 
@@ -36,9 +35,16 @@ for (var offset = 0; offset < vocab_raw.length;) {
 	var word = vocab_raw.subarray(offset, offset+length).toString();
 	offset += length+1; // null terminated
 
-	vocab[word] = offset;
+	var where = vocab_raw.subarray(offset, offset+4).readInt32LE();
+	var size = vocab_raw.subarray(offset+4, offset+8).readInt32LE();
 	offset += 8;
+
+	vocab[word] = [where, size];
 }
+
+// Open the postings list file
+var postings = new Int32Array(documents_in_collection * 2);
+var postings_fh = fs.openSync('postings.bin');
 
 // Search (one query per line)
 readline.question('', search);
@@ -55,22 +61,26 @@ function search(query) {
 
 	terms.forEach(function (term) {
 		// Does the term exist in the collection?
-		var offset = vocab[term];
-		if (offset === undefined)
+		var pair = vocab[term];
+		if (pair === undefined)
 			return;
 
-		var where = vocab_raw.subarray(offset, offset+4).readUInt32LE();
-		var size = vocab_raw.subarray(offset+4, offset+8).readUInt32LE();
-
+		var [where, size] = pair;
 		var documents_in_postings = size / 8;
-		// Compute the IDF component of BM25 as log(N/n).
+
 		// if IDF == 0 then don't process this postings list as the BM25 contribution of this term will be zero.
-		var idf = Math.log(documents_in_collection / documents_in_postings)
+		if (documents_in_collection == documents_in_postings)
+			return;
 
 		// Seek and read the postings list
-		for (var i = where; i < where+size; i += 8) {
-			var docid = postings_raw.subarray(i, i+4).readUInt32LE();
-			var freq = postings_raw.subarray(i+4, i+8).readUInt32LE();
+		fs.readSync(postings_fh, postings, 0, size, where);
+
+		// Compute the IDF component of BM25 as log(N/n).
+		var idf = Math.log(documents_in_collection / documents_in_postings)
+
+		for (var i = 0; i < documents_in_postings * 2; i += 2) {
+			var docid = postings[i];
+			var freq = postings[i+1];
 
 			var doc_length = doc_lengths.subarray(docid*4, docid*4+4).readUInt32LE();
 
