@@ -177,6 +177,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.rs | Rust source code to search engine |
 | JASSjr_index.tcl | Tcl source code to indexer |
 | JASSjr_search.tcl | Tcl source code to search engine |
+| JASSjr_index.dart | Dart source code to indexer |
+| JASSjr_search.dart | Dart source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -201,6 +203,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29.01s   | 160ms   | 810ms     |
 | D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s??    | 250ms?? | 1.70s??   |
 | D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s??    | 220ms?? | 815ms??   |
+| Dart     | 3.3.4                     | Regex  | Array        | 60.62s   | 530ms   | 2.82s     |
 | Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 126.17s  | 880ms   | 2.19s     |
 | Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23.83s   | 560ms   | 1.08s     |
 | Go       | 1.22.0                    | Lexer  | Array        | 18.42s   | 220ms   | 680ms     |
