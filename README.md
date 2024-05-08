@@ -1,7 +1,7 @@
 # JASSjr #
 JASSjr, the minimalistic BM25 search engine for indexing and searching the TREC WSJ collection.
 
-Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen \
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen, Katelyn Harlan \
 Released under the 2-clause BSD licence.
 
 Please fork our repo.  Please report any bugs.
@@ -232,5 +232,5 @@ Search is the time to startup, read the index file, and produce results for a si
 
 There is a small test suite which works by running the programs and checking the output powered by bats. Currently it can be run with `./tests/10_index.bats` and `./tests/10_search.bats`. You will need to install `bats` and the `bats-assert` packages to access it
 
-Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen
+Copyright (c) 2019, 2023, 2024 Andrew Trotman, Kat Lilly, Vaughan Kitchen, Katelyn Harlan
 
