@@ -32,10 +32,10 @@ done
 timings=$(echo -n "$timings" | sort -n)
 fastest=$(echo -n "$timings" | head -n 1)
 slowest=$(echo -n "$timings" | tail -n 1)
-midpoint=$(echo "($iters + 1) / 2" | bc)
+midpoint=$(( ($iters + 1) / 2 ))
 median=$(echo -n "$timings" | head -n "$midpoint" | tail -n 1)
 
 echo
 echo "Fastest: $fastest"
 echo "Slowest: $slowest"
-echo "Median: $median"
+echo "Median:  $median"

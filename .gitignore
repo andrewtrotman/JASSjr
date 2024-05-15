@@ -2,3 +2,7 @@
 *.mod
 *.bin
 *~
+
+# Compiled binaries.
+/JASSjr_index
+/JASSjr_search
