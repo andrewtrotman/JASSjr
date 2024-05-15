@@ -55,7 +55,7 @@ lexer.getNext()
 ------------
 One-character lookahead lexical analyser
 */
-func (l *lexer) getNext() *string {
+func (l *lexer) getNext() []byte {
 	/*
 		Skip over whitespace and punctuation (but not XML tags)
 	*/
@@ -69,7 +69,9 @@ func (l *lexer) getNext() *string {
 	start := l.current
 	if l.current >= len(l.buffer) {
 		return nil
-	} else if isAlnum(l.buffer[l.current]) {
+	}
+
+	if isAlnum(l.buffer[l.current]) {
 		for l.current < len(l.buffer) && (isAlnum(l.buffer[l.current]) || l.buffer[l.current] == '-') {
 			l.current++
 		}
@@ -79,10 +81,9 @@ func (l *lexer) getNext() *string {
 		}
 	}
 	/*
-		Copy and return the token
+		Return the token
 	*/
-	result := string(l.buffer[start:l.current])
-	return &result
+	return l.buffer[start:l.current]
 }
 
 /*
@@ -91,20 +92,19 @@ main()
 Simple indexer for TREC WSJ collection
 */
 func main() {
-	vocab := make(map[string][]posting)
-	docIds := make([]string, 0)
-	docLengths := make([]int32, 0)
-
-	var docId int32 = -1
-	var documentLength int32 = 0
-
-	/*
-		Make sure we have one parameter, the filename
-	*/
+	// Make sure we have one parameter, the filename
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: ", os.Args[0], " <infile.xml>")
 		os.Exit(0)
 	}
+
+	var (
+		vocab                = make(map[string][]posting)
+		docIds               = make([]string, 0, 128)
+		docLengths           = make([]int32, 0, 128)
+		docId          int32 = -1
+		documentLength int32 = 0
+	)
 
 	fh, err := os.Open(os.Args[1])
 	check(err)
@@ -115,7 +115,7 @@ func main() {
 	for scanner.Scan() {
 		lex := lexer{scanner.Bytes(), 0}
 		for token := lex.getNext(); token != nil; token = lex.getNext() {
-			token := *token
+			token := string(token)
 			if token == "<DOC>" {
 				/*
 					Save the previous document length
@@ -154,11 +154,6 @@ func main() {
 			}
 
 			/*
-				lower case the string
-			*/
-			token = strings.ToLower(token)
-
-			/*
 				truncate any long tokens at 255 charactes (so that the length can be stored first and in a single byte)
 			*/
 			if len(token) > 0xFF {
@@ -166,13 +161,18 @@ func main() {
 			}
 
 			/*
+				lower case the string
+			*/
+			token = strings.ToLower(token)
+
+			/*
 				add the posting to the in-memory index
 			*/
 			list, ok := vocab[token]
-			if !ok {
-				newList := make([]posting, 0)
+			if !ok { // term isn't in the vocab yet
+				newList := make([]posting, 0, 4)
 				newList = append(newList, posting{docId, 1})
-				vocab[token] = newList // if the term isn't in the vocab yet
+				vocab[token] = newList
 			} else if list[len(list)-1].d != docId {
 				vocab[token] = append(list, posting{docId, 1}) // if the docno for this occurence has changed then create a new <d,tf> pair
 			} else {

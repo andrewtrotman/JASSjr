@@ -103,13 +103,9 @@ func main() {
 	}
 
 	/*
-	  Allocate buffers
+	  Allocate buffers and set up the rsv pointers
 	*/
-	rsv := make([]float64, documentsInCollection) // array of rsv values
-
-	/*
-	  Set up the rsv pointers
-	*/
+	rsv := make([]float64, documentsInCollection)     // array of rsv values
 	rsvPointers := make([]int, documentsInCollection) // pointers to each member of rsv[] so that we can sort
 
 	/*
@@ -126,7 +122,7 @@ func main() {
 			rsv[i] = 0
 			rsvPointers[i] = len(rsvPointers) - 1 - i
 		}
-		var queryId int = 0
+		queryId := 0
 		for i, token := range strings.Fields(stdin.Text()) {
 			/*
 			  If the first token is a number then assume a TREC query number, and skip it
