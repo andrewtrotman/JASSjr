@@ -25,8 +25,9 @@ timings=''
 for i in $(seq 1 "$iters"); do
 	echo "Iteration $i"
 	# Use GNU time
-	seconds=$( { echo "$in" | /usr/bin/time -f '%e' "$@" > /dev/null ; } 2>&1)
-	timings="$timings$seconds\n"
+	seconds=$( { echo "$in" | /usr/bin/time "$@" > /dev/null ; } 2>&1 | awk '{ print $1 '})
+	timings="$timings$seconds
+"
 done
 
 timings=$(echo -n "$timings" | sort -n)
