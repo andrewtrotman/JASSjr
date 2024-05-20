@@ -24,8 +24,8 @@ echo "Warmup"
 timings=''
 for i in $(seq 1 "$iters"); do
 	echo "Iteration $i"
-	# Use GNU time
-	seconds=$( { echo "$in" | /usr/bin/time "$@" > /dev/null ; } 2>&1 | awk '{ print $1 '})
+	# Use system time command instead of shell builtin
+	seconds=$( { echo "$in" | /usr/bin/time -p "$@" > /dev/null ; } 2>&1 | head -n 1 | cut -d' ' -f2 )
 	timings="$timings$seconds
 "
 done
