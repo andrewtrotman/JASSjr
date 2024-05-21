@@ -195,32 +195,32 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 
 There are lies, damned lies, and benchmarks
 
-These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MHz DDR4 running Musl Void Linux 6.6.23 or newer.
+These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-13700 @ 5.20GHz with 32GiB 4400MT/s DDR5 running openSUSE Tumbleweed with Linux 6.8.9.
 
 | Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
-| -------- | -------                   |------- | ------------ | -------- | ------  | --------- |
-| C++      | c++11/gcc 13.2            | Lexer  | Array        | 15.37s   | 180ms   | 580ms     |
-| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 29.01s   | 160ms   | 810ms     |
-| D (dmd)  | v2.101.1                  | Lexer  | Array        | 49s??    | 250ms?? | 1.70s??   |
-| D (ldc)  | 1.31.0/v2.101.2/15.0.7    | Lexer  | Array        | 30s??    | 220ms?? | 815ms??   |
-| Dart     | 3.3.4                     | Regex  | Array        | 60.62s   | 530ms   | 2.82s     |
-| Elixir   | 1.15.7/erts-14.2.3        | Lexer  | HashMap      | 126.17s  | 880ms   | 2.19s     |
-| Fortran  | F2003/gfortran 13.2       | Lexer  | Array        | 23.83s   | 560ms   | 1.08s     |
-| Go       | 1.22.0                    | Lexer  | Array        | 18.42s   | 220ms   | 680ms     |
-| Java     | 1.8.0_332                 | Lexer  | Array        | 17.97s   | 320ms   | 1.18s     |
-| JS       | node v18.19.1             | Regex  | Array        | 34.37s   | 750ms   | 3.78s     |
-| Lua      | LuaJIT 2.1.0-beta3        | Regex  | HashMap      | 63.75s   | 360ms   | 1.19s     |
-| Nim      | 2.0.0                     | Regex  | Array        | 19.07s   | 350ms   | 1.09s     |
-| Perl     | v5.38.2                   | Regex  | Array        | 117.78s  | 950ms   | 3.63s     |
-| PHP      | 8.3.0/Zend v4.3.0         | Regex  | HashMap      | 29.50s   | 350ms   | 830ms     |
-| Python   | 3.12.2                    | Regex  | HashMap      | 76.30s   | 800ms   | 1.85s     |
-| Raku     | v6.d/2023.11              | Regex  | Array        | 140min?? | 8.07s   | 173.40s   |
-| Ruby     | 3.3.2                     | Regex  | HashMap      | 156.45s  | 1.16s   | 4.73s     |
-| Rust     | 1.77.1                    | Lexer  | Array        | 17.34s   | 190ms   | 700ms     |
-| Tcl      | 8.6.13                    | Regex  | HashMap      | 360.46s  | 2.48s   | 11.55s    |
-| Zig      | 0.12.0                    | Lexer  | Array        | 8.60s    | 80ms    | 490ms     |
+| -------- | -------                   | ------ | ------------ | -------- | ------  | --------- |
+| C++      | c++11/gcc 13.2.1          | Lexer  | Array        | 8.68s    | 100ms   | 500ms     |
+| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 17.15s   | 70ms    | 670ms     |
+| D (dmd)  | v2.108.1                  | Lexer  | Array        | 32.22s   | 130ms   | 1.16s     |
+| D (ldc)  | 1.32.0/15.0.7             | Lexer  | Array        | 19.25s   | 100ms   | 680ms     |
+| Dart     | 3.4.0                     | Regex  | Array        | 43.91s   | 330ms   | 1.80s     |
+| Elixir   | 1.16.2                    | Lexer  | HashMap      | 97.48s   | 850ms   | 1.91s     |
+| Fortran  | f2003/gfortran 13.2.1     | Lexer  | Array        | 13.01s   | 310ms   | 790ms     |
+| Go       | 1.21.10                   | Lexer  | Array        | 10.99s   | 270ms   | 670ms     |
+| Java     | 1.8.0_412                 | Lexer  | Array        | 13.68s   | 250ms   | 910ms     |
+| JS       | node v21.7.2              | Regex  | Array        | 25.86s   | 780ms   | 2.16s     |
+| Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 50.36s   | 340ms   | 910ms     |
+| Nim      | 2.0.4                     | Regex  | Array        | 11.66s   | 860ms   | 1.50s     |
+| Perl     | v5.38.2                   | Regex  | Array        | 81.77s   | 680ms   | 2.11s     |
+| PHP      | 8.3.7/Zend v4.3.7         | Regex  | HashMap      | 23.99s   | 180ms   | 520ms     |
+| Python   | 2.7.18                    | Regex  | HashMap      | 50.22s   | 470ms   | 1.08s     |
+| Raku     | v6.d/v2024.02             | Regex  | Array        | 140min   | 6.22s   | 130.22s   |
+| Ruby     | 3.3.1                     | Regex  | HashMap      | 150.7s   | 840ms   | 2.06s     |
+| Rust     | 1.77.2                    | Lexer  | Array        | 10.06s   | 120ms   | 640ms     |
+| Tcl      | 8.6.14                    | Regex  | HashMap      | 271.73s  | 1.82s   | 8.00s     |
+| Zig      | 0.12.0                    | Lexer  | Array        | 5.04s    | 70ms    | 480ms     |
 
-Times are recorded as median of 11 iterations and ?? are times which haven't been confirmed by `/tools/benchmark.sh`
+Times are recorded as median of 11 iterations
 
 Where Parser is one of
 * Lexer being a hand written single token look-ahead lexer
