@@ -170,9 +170,7 @@ func main() {
 			*/
 			list, ok := vocab[token]
 			if !ok { // term isn't in the vocab yet
-				newList := make([]posting, 0, 4)
-				newList = append(newList, posting{docId, 1})
-				vocab[token] = newList
+				vocab[token] = []posting{{docId, 1}}
 			} else if list[len(list)-1].d != docId {
 				vocab[token] = append(list, posting{docId, 1}) // if the docno for this occurence has changed then create a new <d,tf> pair
 			} else {
