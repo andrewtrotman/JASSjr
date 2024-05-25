@@ -1,3 +1,4 @@
+*.o
 *.class
 *.mod
 *.bin
@@ -5,4 +6,19 @@
 
 # Compiled binaries.
 /JASSjr_index
+/JASSjr_index_crystal
+/JASSjr_index_d_dmd
+/JASSjr_index_d_ldc
+/JASSjr_index_fortran
+/JASSjr_index_rust
+/JASSjr_index_zig
+
 /JASSjr_search
+/JASSjr_search_crystal
+/JASSjr_search_d_dmd
+/JASSjr_search_d_ldc
+/JASSjr_search_fortran
+/JASSjr_search_rust
+/JASSjr_search_zig
+
+/tools/show_document
