@@ -199,26 +199,26 @@ These are for example purposes only. Each implementation is intending to be idio
 
 | Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
 | -------- | -------                   | ------ | ------------ | -------- | ------  | --------- |
-| C++      | c++11/gcc 13.2.1          | Lexer  | Array        | 8.68s    | 100ms   | 500ms     |
-| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 17.15s   | 70ms    | 670ms     |
-| D (dmd)  | v2.108.1                  | Lexer  | Array        | 32.22s   | 130ms   | 1.16s     |
-| D (ldc)  | 1.32.0/15.0.7             | Lexer  | Array        | 19.25s   | 100ms   | 680ms     |
-| Dart     | 3.4.0                     | Regex  | Array        | 43.91s   | 330ms   | 1.80s     |
-| Elixir   | 1.16.2                    | Lexer  | HashMap      | 97.48s   | 850ms   | 1.91s     |
-| Fortran  | f2003/gfortran 13.2.1     | Lexer  | Array        | 13.01s   | 310ms   | 790ms     |
-| Go       | 1.21.10                   | Lexer  | Array        | 10.99s   | 270ms   | 670ms     |
-| Java     | 1.8.0_412                 | Lexer  | Array        | 13.68s   | 250ms   | 910ms     |
-| JS       | node v21.7.2              | Regex  | Array        | 25.86s   | 780ms   | 2.16s     |
-| Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 50.36s   | 340ms   | 910ms     |
-| Nim      | 2.0.4                     | Regex  | Array        | 11.66s   | 860ms   | 1.50s     |
-| Perl     | v5.38.2                   | Regex  | Array        | 81.77s   | 680ms   | 2.11s     |
-| PHP      | 8.3.7/Zend v4.3.7         | Regex  | HashMap      | 23.99s   | 180ms   | 520ms     |
-| Python   | 2.7.18                    | Regex  | HashMap      | 50.22s   | 470ms   | 1.08s     |
-| Raku     | v6.d/v2024.02             | Regex  | Array        | 140min   | 6.22s   | 130.22s   |
-| Ruby     | 3.3.1                     | Regex  | HashMap      | 150.7s   | 840ms   | 2.06s     |
-| Rust     | 1.77.2                    | Lexer  | Array        | 10.06s   | 120ms   | 640ms     |
-| Tcl      | 8.6.14                    | Regex  | HashMap      | 271.73s  | 1.82s   | 8.00s     |
-| Zig      | 0.12.0                    | Lexer  | Array        | 5.04s    | 70ms    | 480ms     |
+| C++      | c++11/gcc 13.3.0          | Lexer  | Array        | 6.79s    | 80ms    | 390ms     |
+| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 13.49s   | 50ms    | 520ms     |
+| D (dmd)  | v2.108.1                  | Lexer  | Array        | 24.80s   | 90ms    | 900ms     |
+| D (ldc)  | 1.32.0/15.0.7             | Lexer  | Array        | 14.87s   | 70ms    | 520ms     |
+| Dart     | 3.4.0                     | Regex  | Array        | 34.57s   | 260ms   | 1.40s     |
+| Elixir   | 1.16.3                    | Lexer  | HashMap      | 74.91s   | 570ms   | 1.40s     |
+| Fortran  | f2003/gfortran 13.3.0     | Lexer  | Array        | 10.03s   | 240ms   | 610ms     |
+| Go       | 1.21.11                   | Lexer  | Array        | 8.51s    | 150ms   | 460ms     |
+| Java     | 1.8.0_412                 | Lexer  | Array        | 11.06s   | 200ms   | 710ms     |
+| JS       | node v21.7.3              | Regex  | Array        | 20.23s   | 610ms   | 1.72s     |
+| Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 38.89s   | 260ms   | 710ms     |
+| Nim      | 2.0.4                     | Regex  | Array        | 9.00s    | 670ms   | 1.20s     |
+| Perl     | v5.38.2                   | Regex  | Array        | 61.39s   | 50ms    | 1.62s     |
+| PHP      | 8.3.8/Zend v4.3.8         | Regex  | HashMap      | 18.84s   | 150ms   | 410ms     |
+| Python   | 2.7.18                    | Regex  | HashMap      | 38.41s   | 370ms   | 830ms     |
+| Raku     | v6.d/v2024.04             | Regex  | Array        | 94min    | 4.96s   | 99.74s    |
+| Ruby     | 3.3.3                     | Regex  | HashMap      | 118.30s  | 660ms   | 1.65s     |
+| Rust     | 1.78.0                    | Lexer  | Array        | 7.73s    | 90ms    | 490ms     |
+| Tcl      | 8.6.14                    | Regex  | HashMap      | 210.71s  | 1.41s   | 6.18s     |
+| Zig      | 0.13.0                    | Lexer  | Array        | 3.95s    | 50ms    | 380ms     |
 
 Times are recorded as median of 11 iterations
 
