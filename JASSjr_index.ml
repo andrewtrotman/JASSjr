@@ -92,13 +92,13 @@ let () =
                 (* If we see a <DOC> tag then we're at the start of the next document *)
                 if token = "<DOC>" then begin
                   (* Save the previous document length *)
-                  doc_lengths := !document_length :: !doc_lengths;
+                  if !docid <> (-1) then doc_lengths := !document_length :: !doc_lengths;
 
                   (* Move on to the next document *)
                   docid := !docid + 1;
                   document_length := 0;
 
-                  if !docid mod 1000 = 0 then Printf.printf "%d documents indexed\n" !docid
+                  if !docid mod 1000 = 0 then Printf.printf "%d documents indexed\n%!" !docid
                 end;
 
                 (* if the last token we saw was a <DOCNO> then the next token is the primary key *)
@@ -117,7 +117,7 @@ let () =
                   let lowercase = truncate lowercase 255 in
 
                   (* add the posting to the in-memory index *)
-                  match Hashtbl.find_opt vocab lowercase with
+                  begin match Hashtbl.find_opt vocab lowercase with
                   (* if the term isn't in the vocab yet *)
                   | None ->
                       Hashtbl.add vocab lowercase [{ d = !docid; tf = 1 }]
@@ -126,7 +126,8 @@ let () =
                       posting.tf <- tf + 1
                   (* else create a new <d,tf> pair *)
                   | Some postings ->
-                      Hashtbl.replace vocab token ({ d = !docid; tf = 1 } :: postings);
+                      Hashtbl.replace vocab token ({ d = !docid; tf = 1 } :: postings)
+                  end;
 
                   (* Compute the document length *)
                   document_length := !document_length + 1
@@ -138,4 +139,60 @@ let () =
           next_token ()
       | None -> ()
     in
-    next_line ())
+    next_line ()
+  );
+
+  (* If we didn't index any documents then we're done. *)
+  if !docid = (-1) then exit 0;
+
+  (* Save the final document length *)
+  doc_lengths := !document_length :: !doc_lengths;
+
+  (* tell the user we've got to the end of parsing *)
+  Printf.printf "Indexed %d documents. Serialising...\n%!" (!docid + 1);
+
+  (* store the primary keys *)
+  Out_channel.with_open_bin "docids.bin" (fun oc ->
+    List.iter (fun docid ->
+      output_string oc docid;
+      output_char oc '\n'
+    ) (List.rev !doc_ids)
+  );
+
+  let buf = Bytes.create 4 in
+  let postings_fp = open_out_bin "postings.bin" in
+  let vocab_fp = open_out_bin "vocab.bin" in
+
+  (* serialise the in-memory index to disk *)
+  Hashtbl.iter (fun term postings ->
+    (* write the postings list to one file *)
+    let where = pos_out postings_fp in
+    let size = 8 * List.length postings in
+    List.iter (fun posting ->
+      Bytes.set_int32_ne buf 0 (Int32.of_int posting.d);
+      output_bytes postings_fp buf;
+      Bytes.set_int32_ne buf 0 (Int32.of_int posting.tf);
+      output_bytes postings_fp buf
+    ) (List.rev postings);
+
+    (* write the vocabulary to a second file (one byte length, string, '\0', 4 byte where, 4 byte size) *)
+    output_char vocab_fp (Char.chr (String.length term));
+    output_string vocab_fp term;
+    output_byte vocab_fp 0;
+    Bytes.set_int32_ne buf 0 (Int32.of_int where);
+    output_bytes vocab_fp buf;
+    Bytes.set_int32_ne buf 0 (Int32.of_int size);
+    output_bytes vocab_fp buf
+  ) vocab;
+
+  (* store the document lengths *)
+  Out_channel.with_open_bin "lengths.bin" (fun oc ->
+    List.iter (fun len ->
+      Bytes.set_int32_ne buf 0 (Int32.of_int len);
+      output_bytes oc buf
+    ) (List.rev !doc_lengths)
+  );
+
+  (* clean up *)
+  close_out postings_fp;
+  close_out vocab_fp
