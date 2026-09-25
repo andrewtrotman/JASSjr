@@ -126,7 +126,7 @@ let () =
                       posting.tf <- tf + 1
                   (* else create a new <d,tf> pair *)
                   | Some postings ->
-                      Hashtbl.replace vocab token ({ d = !docid; tf = 1 } :: postings)
+                      Hashtbl.replace vocab lowercase ({ d = !docid; tf = 1 } :: postings)
                   end;
 
                   (* Compute the document length *)
