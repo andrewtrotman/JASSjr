@@ -198,7 +198,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | C++        | clang 22.1.8          | Lexer  | Array        | 13.73s   | 0.17s  | 0.75s     |
 | C3         | 0.8.3/22.1.8          | Lexer  | Array        | _        | _      | _         |
 | Crystal    | 1.12.1/20.1.8         | Regex  | Array        | 31.46s   | 0.20s  | 0.92s     |
-| D          | v2.108.1              | Lexer  | Array        | _        | _      | _         |
+| D          | dmd v2.112.1          | Lexer  | Array        | 51.55s   | 0.31s  | 1.81s     |
 | Dart       | 3.13.4                | Regex  | Array        | 84.88s   | 0.56s  | 3.04s     |
 | Elixir     | 1.19.5/28             | Lexer  | HashMap      | 136.57s  | 1.19s  | 2.87s     |
 | Fortran    | f2003/gfortran 16.1.0 | Lexer  | Array        | 21.70s   | 0.51s  | 1.06s     |
@@ -221,7 +221,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Vala       | 0.56.19               | Lexer  | Array        | -        | -      | -         |
 | Zig        | 0.16.0                | Lexer  | Array        | 7.37s    | 0.10s  | 0.85s     |
 
-D and Raku don't have musl releases. The nim indexer uses the outdated and unavailable libpcre1
+Raku doesn't have a musl release. The nim indexer uses the outdated and unavailable libpcre1
 
 Times are recorded as median of 11 iterations
 

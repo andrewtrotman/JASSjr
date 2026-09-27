@@ -1,4 +1,4 @@
-all : cpp java crystal d_dmd d_ldc fortran hare odin rust vala zig tools
+all : cpp java crystal d fortran hare odin rust vala zig tools
 
 cpp : JASSjr_index JASSjr_search
 
@@ -10,9 +10,7 @@ crystal : JASSjr_index_crystal JASSjr_search_crystal
 
 chicken : JASSjr_index_chicken JASSjr_search_chicken
 
-d_dmd : JASSjr_index_d_dmd JASSjr_search_d_dmd
-
-d_ldc : JASSjr_index_d_ldc JASSjr_search_d_ldc
+d : JASSjr_index_d JASSjr_search_d
 
 fortran : JASSjr_index_fortran JASSjr_search_fortran
 
@@ -56,17 +54,11 @@ JASSjr_index_chicken : JASSjr_index.scm
 JASSjr_search_chicken : JASSjr_search.scm
 	csc -r7rs-syntax -O5 JASSjr_search.scm -o JASSjr_search_chicken
 
-JASSjr_index_d_dmd : JASSjr_index.d
-	dmd -O -of=JASSjr_index_d_dmd JASSjr_index.d
+JASSjr_index_d : JASSjr_index.d
+	dmd -O -of=JASSjr_index_d JASSjr_index.d
 
-JASSjr_search_d_dmd : JASSjr_search.d
-	dmd -O -of=JASSjr_search_d_dmd JASSjr_search.d
-
-JASSjr_index_d_ldc : JASSjr_index.d
-	ldc2 -O3 --of=JASSjr_index_d_ldc JASSjr_index.d
-
-JASSjr_search_d_ldc : JASSjr_search.d
-	ldc2 -O3 --of=JASSjr_search_d_ldc JASSjr_search.d
+JASSjr_search_d : JASSjr_search.d
+	dmd -O -of=JASSjr_search_d JASSjr_search.d
 
 JASSjr_index_fortran : JASSjr_index.f90
 	gfortran -std=f2003 -O3 -Wall -Wextra JASSjr_index.f90 -o JASSjr_index_fortran
@@ -113,7 +105,7 @@ clean:
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
 	- rm JASSjr_index_chicken JASSjr_search_chicken
 	- rm JASSjr_index_crystal JASSjr_search_crystal
-	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
+	- rm JASSjr_index_d JASSjr_search_d
 	- rm JASSjr_index_fortran JASSjr_search_fortran dynarray_integer_mod.mod dynarray_string_mod.mod lexer_mod.mod vocab_mod.mod
 	- rm JASSjr_index_rust JASSjr_search_rust
 	- rm JASSjr_index_zig JASSjr_search_zig
