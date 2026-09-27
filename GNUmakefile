@@ -45,10 +45,10 @@ JASSjr_search_c3 : JASSjr_search.c3
 	c3c -O5 -o JASSjr_search_c3 compile JASSjr_search.c3
 
 JASSjr_index_crystal : JASSjr_index.cr
-	crystal build --release -o JASSjr_index_crystal JASSjr_index.cr
+	CRYSTAL_LIBRARY_PATH=/usr/lib crystal build --release -o JASSjr_index_crystal JASSjr_index.cr
 
 JASSjr_search_crystal : JASSjr_search.cr
-	crystal build --release -o JASSjr_search_crystal JASSjr_search.cr
+	CRYSTAL_LIBRARY_PATH=/usr/lib crystal build --release -o JASSjr_search_crystal JASSjr_search.cr
 
 JASSjr_index_chicken : JASSjr_index.scm
 	csc -r7rs-syntax -O5 JASSjr_index.scm -o JASSjr_index_chicken

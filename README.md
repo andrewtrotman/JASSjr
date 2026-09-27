@@ -53,24 +53,6 @@ and
 
 	java JASSjr_search
 
-## Elixir ##
-The Elixir version can also be built manually to reduce startup times when searching
-
-	echo 'null' | elixirc JASSjr_search.exs > /dev/null
-
-and then run with
-
-	elixir -e 'SearchEngine.start'
-
-## Ruby ##
-It is recommended to run the Ruby implementation with yjit where available. As this is not currently the default run with
-
-	ruby --yjit JASSjr_index.rb <filename>
-
-and then run with
-
-	ruby --yjit JASSjr_search.rb
-
 ## Go ##
 To index use
 
@@ -209,37 +191,37 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 
 There are lies, damned lies, and benchmarks
 
-These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-13700 @ 5.20GHz with 32GiB 4400MT/s DDR5 running openSUSE Tumbleweed with Linux 6.8.9.
+These are for example purposes only. Each implementation is intending to be idiomatic in its source language rather than to eek out every last bit of performance. That being said if there are equal implementation choices the faster version is preferred when possible. Benchmarking was done on an Intel Core i7-7700k @ 4.20GHz with 64GiB 3000MT/s DDR4 running Chimera Linux
 
-| Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
-| -------- | -------                   | ------ | ------------ | -------- | ------  | --------- |
-| C++      | c++11/gcc 13.3.0          | Lexer  | Array        | 6.79s    | 80ms    | 390ms     |
-| C3       | 0.8.3/22.1.8              | Lexer  | Array        | _        | _       | _         |
-| Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 13.49s   | 50ms    | 520ms     |
-| D (dmd)  | v2.108.1                  | Lexer  | Array        | 24.80s   | 90ms    | 900ms     |
-| D (ldc)  | 1.32.0/15.0.7             | Lexer  | Array        | 14.87s   | 70ms    | 520ms     |
-| Dart     | 3.4.0                     | Regex  | Array        | 34.57s   | 260ms   | 1.40s     |
-| Elixir   | 1.16.3                    | Lexer  | HashMap      | 74.91s   | 570ms   | 1.40s     |
-| Erlang   | 16.2                      | Lexer  | HashMap      | _        | _       | _         |
-| Fortran  | f2003/gfortran 13.3.0     | Lexer  | Array        | 10.03s   | 240ms   | 610ms     |
-| Go       | 1.21.11                   | Lexer  | Array        | 8.51s    | 150ms   | 460ms     |
-| Hare     | 0.26.0.1                  | Lexer  | Array        | _        | _       | _         |
-| Java     | 1.8.0_412                 | Lexer  | Array        | 11.06s   | 200ms   | 710ms     |
-| JS       | node v21.7.3              | Regex  | Array        | 20.23s   | 610ms   | 1.72s     |
-| Julia    | 1.11.6                    | Regex  | Array        | _        | _       | _         |
-| Lua      | LuaJIT 2.1.1707061634     | Regex  | HashMap      | 38.89s   | 260ms   | 710ms     |
-| Nim      | 2.0.4                     | Regex  | Array        | 9.00s    | 670ms   | 1.20s     |
-| Odin     | dev-2026-08               | Lexer  | Array        | _        | _       | _         |
-| Perl     | v5.38.2                   | Regex  | Array        | 61.39s   | 50ms    | 1.62s     |
-| PHP      | 8.3.8/Zend v4.3.8         | Regex  | HashMap      | 18.84s   | 150ms   | 410ms     |
-| Python   | 2.7.18                    | Regex  | HashMap      | 38.41s   | 370ms   | 830ms     |
-| Raku     | v6.d/v2024.04             | Regex  | Array        | 94min    | 4.96s   | 99.74s    |
-| Ruby     | 3.3.3                     | Regex  | HashMap      | 118.30s  | 660ms   | 1.65s     |
-| Rust     | 1.78.0                    | Lexer  | Array        | 7.73s    | 90ms    | 490ms     |
-| Scheme   | csc 6.0.0                 | Regex  | Array        | _        | _       | _         |
-| Tcl      | 8.6.14                    | Regex  | HashMap      | 210.71s  | 1.41s   | 6.18s     |
-| Vala     | 0.56.19                   | Lexer  | Array        | -        | -       | -         |
-| Zig      | 0.16.0                    | Lexer  | Array        | 3.95s    | 50ms    | 380ms     |
+| Language   | Version               | Parser | Accumulators | Indexing | Search | Search 50 |
+| ---------- | --------------------- | ------ | ------------ | -------- | ------ | --------- |
+| C++        | clang 22.1.8          | Lexer  | Array        | 13.73s   | 0.17s  | 0.75s     |
+| C3         | 0.8.3/22.1.8          | Lexer  | Array        | _        | _      | _         |
+| Crystal    | 1.12.1/20.1.8         | Regex  | Array        | 31.46s   | 0.20s  | 0.92s     |
+| D          | v2.108.1              | Lexer  | Array        | _        | _      | _         |
+| Dart       | 3.13.4                | Regex  | Array        | 84.88s   | 0.56s  | 3.04s     |
+| Elixir     | 1.19.5/28             | Lexer  | HashMap      | 136.57s  | 1.19s  | 2.87s     |
+| Fortran    | f2003/gfortran 16.1.0 | Lexer  | Array        | 21.70s   | 0.51s  | 1.06s     |
+| Go         | 1.26.3                | Lexer  | Array        | 15.46s   | 0.17s  | 0.66s     |
+| Hare       | 0.26.0.1              | Lexer  | Array        | 384.68s  | 0.44s  | 2.16s     |
+| Java       | 25.0.2                | Lexer  | Array        | 16.54s   | 0.29s  | 1.18s     |
+| JavaScript | node v25.9.0          | Regex  | Array        | 34.96s   | 0.75s  | 2.76s     |
+| Julia      | 1.11.6                | Regex  | Array        | 59.63s   | 2.49s  | 44.60s    |
+| Lua        | LuaJIT 2.1.1737090214 | Regex  | HashMap      | 72.87s   | 0.46s  | 1.20s     |
+| Nim        | 2.2.12                | Regex  | Array        | _        | 0.36s  | 1.20s     |
+| Odin       | dev-2026-08           | Lexer  | Array        | 28.41s   | 0.18s  | 1.55s     |
+| Perl       | v5.42.0               | Regex  | Array        | 121.93s  | 0.87s  | 3.49s     |
+| PHP        | 8.3.33/Zend v4.3.33   | Regex  | HashMap      | 34.12s   | 0.39s  | 0.87s     |
+| Python     | 3.14.6                | Regex  | HashMap      | 73.47s   | 0.78s  | 1.81s     |
+| Raku       | v6.d/v2024.04         | Regex  | Array        | _        | _      | _         |
+| Ruby       | 3.4.7                 | Regex  | HashMap      | 139.54s  | 1.12s  | 4.96s     |
+| Rust       | 1.96.0                | Lexer  | Array        | 16.62s   | 0.14s  | 0.28s     |
+| Scheme     | csc 6.0.0             | Regex  | Array        | _        | _      | _         |
+| Tcl        | 8.6.16                | Regex  | HashMap      | 424.75s  | 2.92s  | 13.18s    |
+| Vala       | 0.56.19               | Lexer  | Array        | -        | -      | -         |
+| Zig        | 0.16.0                | Lexer  | Array        | 7.37s    | 0.10s  | 0.85s     |
+
+D and Raku don't have musl releases. The nim indexer uses the outdated and unavailable libpcre1
 
 Times are recorded as median of 11 iterations
 
