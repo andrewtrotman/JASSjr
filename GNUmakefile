@@ -1,8 +1,10 @@
-all : cpp java crystal chicken d_dmd d_ldc fortran hare odin rust zig tools
+all : cpp java c3 crystal chichen d_dmd d_ldc fortran hare odin rust zig tools
 
 cpp : JASSjr_index JASSjr_search
 
 java : JASSjr_index.class JASSjr_search.class
+
+c3 : JASSjr_index_c3 JASSjr_search_c3
 
 crystal : JASSjr_index_crystal JASSjr_search_crystal
 
@@ -33,6 +35,12 @@ JASSjr_index.class : JASSjr_index.java
 
 JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
+
+JASSjr_index_c3 : JASSjr_index.c3
+	c3c -O5 -o JASSjr_index_c3 compile JASSjr_index.c3
+
+JASSjr_search_c3 : JASSjr_search.c3
+	c3c -O5 -o JASSjr_search_c3 compile JASSjr_search.c3
 
 JASSjr_index_crystal : JASSjr_index.cr
 	crystal build --release -o JASSjr_index_crystal JASSjr_index.cr
