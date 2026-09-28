@@ -145,6 +145,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.cpp | C/C++ source code to search engine |
 | JASSjr_index.java | Java source code to indexer |
 | JASSjr_search.java | Java source code to search engine |
+| JASSjr_index.c3 | C3 source code to indexer |
+| JASSjr_search.c3 | C3 source code to search engine |
 | JASSjr_index.py | Python source code to indexer |
 | JASSjr_search.py | Python source code to search engine |
 | JASSjr_index.js | JavaScript source code to indexer |
@@ -206,6 +208,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Language | Version                   | Parser | Accumulators | Indexing | Search  | Search 50 |
 | -------- | -------                   | ------ | ------------ | -------- | ------  | --------- |
 | C++      | c++11/gcc 13.3.0          | Lexer  | Array        | 6.79s    | 80ms    | 390ms     |
+| C3       | 0.8.3/22.1.8              | Lexer  | Array        | _        | _       | _         |
 | Crystal  | 1.12.1/15.0.7             | Regex  | Array        | 13.49s   | 50ms    | 520ms     |
 | D (dmd)  | v2.108.1                  | Lexer  | Array        | 24.80s   | 90ms    | 900ms     |
 | D (ldc)  | 1.32.0/15.0.7             | Lexer  | Array        | 14.87s   | 70ms    | 520ms     |
