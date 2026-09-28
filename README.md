@@ -187,6 +187,8 @@ So JASSjr is not as fast as JASSv2, and not quite as good at ranking as JASSv2, 
 | JASSjr_search.tcl | Tcl source code to search engine |
 | JASSjr_index.dart | Dart source code to indexer |
 | JASSjr_search.dart | Dart source code to search engine |
+| JASSjr_index.scm | Chicken Scheme source code to indexer |
+| JASSjr_search.scm | Chicken Scheme source code to search engine |
 | GNUmakefile | GNU make makefile for macOS / Linux |
 | makefile | NMAKE makefile for Windows |
 | test_documents.xml | Example of how documents should be layed out for indexing | 
@@ -229,6 +231,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | Raku     | v6.d/v2024.04             | Regex  | Array        | 94min    | 4.96s   | 99.74s    |
 | Ruby     | 3.3.3                     | Regex  | HashMap      | 118.30s  | 660ms   | 1.65s     |
 | Rust     | 1.78.0                    | Lexer  | Array        | 7.73s    | 90ms    | 490ms     |
+| Scheme   | csc 6.0.0                 | Regex  | Array        | _        | _       | _         |
 | Tcl      | 8.6.14                    | Regex  | HashMap      | 210.71s  | 1.41s   | 6.18s     |
 | Zig      | 0.16.0                    | Lexer  | Array        | 3.95s    | 50ms    | 380ms     |
 
