@@ -4,7 +4,11 @@ cpp : JASSjr_index JASSjr_search
 
 java : JASSjr_index.class JASSjr_search.class
 
+c3 : JASSjr_index_c3 JASSjr_search_c3
+
 crystal : JASSjr_index_crystal JASSjr_search_crystal
+
+chicken : JASSjr_index_chicken JASSjr_search_chicken
 
 d_dmd : JASSjr_index_d_dmd JASSjr_search_d_dmd
 
@@ -34,11 +38,23 @@ JASSjr_index.class : JASSjr_index.java
 JASSjr_search.class : JASSjr_search.java
 	javac JASSjr_search.java
 
+JASSjr_index_c3 : JASSjr_index.c3
+	c3c -O5 -o JASSjr_index_c3 compile JASSjr_index.c3
+
+JASSjr_search_c3 : JASSjr_search.c3
+	c3c -O5 -o JASSjr_search_c3 compile JASSjr_search.c3
+
 JASSjr_index_crystal : JASSjr_index.cr
 	crystal build --release -o JASSjr_index_crystal JASSjr_index.cr
 
 JASSjr_search_crystal : JASSjr_search.cr
 	crystal build --release -o JASSjr_search_crystal JASSjr_search.cr
+
+JASSjr_index_chicken : JASSjr_index.scm
+	csc -r7rs-syntax -O5 JASSjr_index.scm -o JASSjr_index_chicken
+
+JASSjr_search_chicken : JASSjr_search.scm
+	csc -r7rs-syntax -O5 JASSjr_search.scm -o JASSjr_search_chicken
 
 JASSjr_index_d_dmd : JASSjr_index.d
 	dmd -O -of=JASSjr_index_d_dmd JASSjr_index.d
@@ -95,6 +111,7 @@ tools:
 clean:
 	- rm JASSjr_index JASSjr_search
 	- rm 'JASSjr_index.class' 'JASSjr_search.class' 'JASSjr_index$$Posting.class' 'JASSjr_index$$PostingsList.class' 'JASSjr_search$$CompareRsv.class' 'JASSjr_search$$VocabEntry.class'
+	- rm JASSjr_index_chicken JASSjr_search_chicken
 	- rm JASSjr_index_crystal JASSjr_search_crystal
 	- rm JASSjr_index_d_dmd JASSjr_search_d_dmd JASSjr_index_d_ldc JASSjr_search_d_ldc
 	- rm JASSjr_index_fortran JASSjr_search_fortran dynarray_integer_mod.mod dynarray_string_mod.mod lexer_mod.mod vocab_mod.mod
