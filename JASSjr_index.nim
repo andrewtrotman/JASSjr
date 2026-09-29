@@ -1,11 +1,10 @@
 #!/usr/bin/env -S nim r --hints:off -d:release
 
-# Copyright (c) 2024 Vaughan Kitchen
+# Copyright (c) 2024, 2026 Vaughan Kitchen
 # Minimalistic BM25 search engine.
 
 import std/cmdline
 import std/os
-import std/re
 import std/streams
 import std/strformat
 import std/strutils
@@ -20,16 +19,40 @@ var vocab = initTable[string, seq[int32]]() # the in-memory index
 var doc_ids: seq[string] # the primary keys
 var doc_lengths: seq[int32] # hold the length of each document
 
-# A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
-# TREC <DOCNO> primary keys have a hyphen in them
-let lexer = re"[a-zA-Z0-9][a-zA-Z0-9-]*|<[^>]*>"
+# One-character lookahead lexical analyser
+iterator lex(buffer: string): string =
+  var current = 0
+
+  while current < buffer.len:
+    # Skip over whitespace and punctuation (but not XML tags)
+    while current < buffer.len and not buffer[current].isAlphaNumeric and buffer[current] != '<':
+      inc current
+
+    # must be at end of line
+    if current >= buffer.len:
+      break
+
+    let start = current
+
+    # A token is either an XML tag '<'..'>' or a sequence of alpha-numerics.
+    if buffer[current].isAlphaNumeric:
+      # TREC <DOCNO> primary keys have a hyphen in them
+      while current < buffer.len and (buffer[current].isAlphaNumeric or buffer[current] == '-'):
+        inc current
+    elif buffer[current] == '<':
+      inc current
+      while current < buffer.len and buffer[current - 1] != '>':
+        inc current
+
+    # Copy and return the token
+    yield buffer[start ..< current]
 
 var docid: int32 = -1
 var document_length: int32 = 0
 var push_next = false # is the next token the primary key?
 
 for line in lines(commandLineParams()[0]):
-  for token in line.findall(lexer):
+  for token in lex(line):
     # If we see a <DOC> tag then we're at the start of the next document
     if token == "<DOC>":
       # Save the previous document length

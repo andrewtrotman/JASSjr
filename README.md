@@ -209,7 +209,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | JavaScript | node v25.9.0          | Regex  | Array        | 34.96s   | 0.75s  | 2.76s     |
 | Julia      | 1.11.6                | Regex  | Array        | 59.63s   | 2.49s  | 44.60s    |
 | Lua        | LuaJIT 2.1.1737090214 | Regex  | HashMap      | 72.87s   | 0.46s  | 1.20s     |
-| Nim        | 2.2.12                | Regex  | Array        | _        | 0.36s  | 1.20s     |
+| Nim        | 2.2.12                | Lexer  | Array        | 19.38s   | 0.36s  | 1.20s     |
 | Odin       | dev-2026-08           | Lexer  | Array        | 28.41s   | 0.18s  | 1.55s     |
 | Perl       | v5.42.0               | Regex  | Array        | 121.93s  | 0.87s  | 3.49s     |
 | PHP        | 8.3.33/Zend v4.3.33   | Regex  | HashMap      | 34.12s   | 0.39s  | 0.87s     |
@@ -221,8 +221,6 @@ These are for example purposes only. Each implementation is intending to be idio
 | Tcl        | 8.6.16                | Regex  | HashMap      | 424.75s  | 2.92s  | 13.18s    |
 | Vala       | 0.56.19               | Lexer  | Array        | 78.94s   | 0.56s  | 3.31s     |
 | Zig        | 0.16.0                | Lexer  | Array        | 7.37s    | 0.10s  | 0.85s     |
-
-The nim indexer currently uses the outdated and unavailable libpcre1
 
 Times are recorded as median of 11 iterations
 
