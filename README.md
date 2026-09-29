@@ -196,11 +196,12 @@ These are for example purposes only. Each implementation is intending to be idio
 | Language   | Version               | Parser | Accumulators | Indexing | Search | Search 50 |
 | ---------- | --------------------- | ------ | ------------ | -------- | ------ | --------- |
 | C++        | clang 22.1.8          | Lexer  | Array        | 13.73s   | 0.17s  | 0.75s     |
-| C3         | 0.8.3/22.1.8          | Lexer  | Array        | _        | _      | _         |
+| C3         | 0.8.3/22.1.8          | Lexer  | Array        | 11.83s   | 0.25s  | 4.15s     |
 | Crystal    | 1.12.1/20.1.8         | Regex  | Array        | 31.46s   | 0.20s  | 0.92s     |
 | D          | dmd v2.112.1          | Lexer  | Array        | 51.55s   | 0.31s  | 1.81s     |
 | Dart       | 3.13.4                | Regex  | Array        | 84.88s   | 0.56s  | 3.04s     |
 | Elixir     | 1.19.5/28             | Lexer  | HashMap      | 136.57s  | 1.19s  | 2.87s     |
+| Erlang     | 16.2                  | Lexer  | HashMap      | 210.57s  | 1.61s  | 3.46s     |
 | Fortran    | f2003/gfortran 16.1.0 | Lexer  | Array        | 21.70s   | 0.51s  | 1.06s     |
 | Go         | 1.26.3                | Lexer  | Array        | 15.46s   | 0.17s  | 0.66s     |
 | Hare       | 0.26.0.1              | Lexer  | Array        | 384.68s  | 0.44s  | 2.16s     |
@@ -213,12 +214,12 @@ These are for example purposes only. Each implementation is intending to be idio
 | Perl       | v5.42.0               | Regex  | Array        | 121.93s  | 0.87s  | 3.49s     |
 | PHP        | 8.3.33/Zend v4.3.33   | Regex  | HashMap      | 34.12s   | 0.39s  | 0.87s     |
 | Python     | 3.14.6                | Regex  | HashMap      | 73.47s   | 0.78s  | 1.81s     |
-| Raku       | v6.d/v2026.06         | Regex  | Array        | _        | 7.03s  | 141.64s   |
+| Raku       | v6.d/v2026.06         | Regex  | Array        | DNF      | 7.03s  | 141.64s   |
 | Ruby       | 3.4.7                 | Regex  | HashMap      | 139.54s  | 1.12s  | 4.96s     |
 | Rust       | 1.96.0                | Lexer  | Array        | 16.62s   | 0.14s  | 0.28s     |
-| Scheme     | csc 6.0.0             | Regex  | Array        | _        | _      | _         |
+| Scheme     | csc 6.0.0             | Regex  | Array        | 386.86s  | 1.37s  | 6.02s     |
 | Tcl        | 8.6.16                | Regex  | HashMap      | 424.75s  | 2.92s  | 13.18s    |
-| Vala       | 0.56.19               | Lexer  | Array        | -        | -      | -         |
+| Vala       | 0.56.19               | Lexer  | Array        | 78.94s   | 0.56s  | 3.31s     |
 | Zig        | 0.16.0                | Lexer  | Array        | 7.37s    | 0.10s  | 0.85s     |
 
 The nim indexer currently uses the outdated and unavailable libpcre1
