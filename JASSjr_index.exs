@@ -15,7 +15,7 @@ defmodule Index do
   # Add the posting to the in-memory index
   def append(index, term) do
       docid = index.docno - 1
-      %Index{index | length: index.length + 1, terms: Map.update(index.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
+      %{index | length: index.length + 1, terms: Map.update(index.terms, term, [ 1, docid ], fn [ tf | [ doc | tail ]] = docnos ->
         if doc != docid do
           # if the docno for this occurence has changed then create a new <d,tf> pair
           [ 1 | [ docid | docnos ]]
@@ -50,9 +50,9 @@ defmodule Indexer do
 
       # Move on to the next document
       index = if index.docno > 0 do
-        %Index{index | length: 0, doclengths: [ index.length | index.doclengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
+        %{index | length: 0, doclengths: [ index.length | index.doclengths], docno: index.docno + 1, docnos: [ docno | index.docnos]}
       else
-        %Index{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
+        %{index | docno: index.docno + 1, docnos: [ docno | index.docnos]}
       end
 
       # Include the primary key as a term to match the other indexers
@@ -103,7 +103,7 @@ defmodule Indexer do
   # serialise the in-memory index to disk
   def serialise(index) do
     # Save the final document length
-    index = %Index{index | doclengths: [ index.length | index.doclengths]}
+    index = %{index | doclengths: [ index.length | index.doclengths]}
     docnos = Enum.reverse(index.docnos)
 
     # store the primary keys
