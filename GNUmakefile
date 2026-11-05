@@ -16,7 +16,7 @@ fortran : JASSjr_index_fortran JASSjr_search_fortran
 
 hare : JASSjr_index_hare JASSjr_search_hare
 
-ocaml : JASSjr_index_ocaml
+ocaml : JASSjr_index_ocaml JASSjr_search_ocaml
 
 odin : JASSjr_index_odin JASSjr_search_odin
 
@@ -76,6 +76,9 @@ JASSjr_search_hare : JASSjr_search.ha
 
 JASSjr_index_ocaml : JASSjr_index.ml
 	ocamlopt -o JASSjr_index_ocaml JASSjr_index.ml
+
+JASSjr_search_ocaml : JASSjr_search.ml
+	ocamlopt -o JASSjr_search_ocaml JASSjr_search.ml
 
 JASSjr_index_odin : JASSjr_index.odin
 	odin build JASSjr_index.odin -file -o:speed -microarch:native -no-bounds-check -out:JASSjr_index_odin
