@@ -223,7 +223,7 @@ These are for example purposes only. Each implementation is intending to be idio
 | PHP        | 8.3.33/Zend v4.3.33   | Regex  | HashMap      | 34.12s    | 0.39s  | 0.87s     |
 | Python     | 3.14.6                | Regex  | HashMap      | 73.47s    | 0.78s  | 1.81s     |
 | R          | 4.6.2                 | Regex  | Array        | 24809.40s | 16.90s | 17.80s    |
-| Raku       | v6.d/v2026.06         | Regex  | Array        | DNF       | 7.03s  | 141.64s   |
+| Raku       | v6.d/v2026.06         | Regex  | Array        | 6508.88s  | 7.03s  | 141.64s   |
 | Ruby       | 3.4.7                 | Regex  | HashMap      | 139.54s   | 1.12s  | 4.96s     |
 | Rust       | 1.96.0                | Lexer  | Array        | 16.62s    | 0.14s  | 0.28s     |
 | Scheme     | csc 6.0.0             | Regex  | Array        | 386.86s   | 1.37s  | 6.02s     |
